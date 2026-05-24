@@ -26,24 +26,23 @@ export function YearSelector({
   const currentYear = new Date().getFullYear()
   const years = Array.from(
     { length: currentYear - FIRST_COMPARISON_YEAR + 1 },
-    (_, index) => FIRST_COMPARISON_YEAR + index
+    (_, i) => FIRST_COMPARISON_YEAR + i
   ).filter((year) => year !== referenceYear)
-  const selectedCount = selectedYears.length
-  let label = "Aucune annee selectionnee"
-
-  if (selectedCount === 1) {
-    label = String(selectedYears[0])
-  } else if (selectedCount > 1) {
-    label = `${selectedCount} annees selectionnees`
-  }
+  const count = selectedYears.length
+  const label =
+    count === 0
+      ? "Aucune année sélectionnée"
+      : count === 1
+        ? String(selectedYears[0])
+        : `${count} années sélectionnées`
 
   return (
-    <div className="grid gap-2">
-      <span className="text-sm font-medium">Annees comparees</span>
+    <div className="grid gap-1">
+      <span className="text-sm font-medium">Années comparées</span>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            aria-label="Selectionner les annees a comparer"
+            aria-label="Sélectionner les années à comparer"
             className="w-full justify-between"
             type="button"
             variant="outline"
@@ -52,10 +51,9 @@ export function YearSelector({
             <ChevronDown className="size-4 text-muted-foreground" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-64">
+        <DropdownMenuContent align="start" className="w-56">
           {years.map((year) => {
             const checked = selectedYears.includes(year)
-
             return (
               <DropdownMenuCheckboxItem
                 checked={checked}
@@ -64,9 +62,7 @@ export function YearSelector({
                 onCheckedChange={() => onToggleYear(year)}
               >
                 <span className="flex items-center gap-2">
-                  <Check
-                    className={checked ? "size-4 opacity-100" : "size-4 opacity-0"}
-                  />
+                  <Check className={checked ? "size-4 opacity-100" : "size-4 opacity-0"} />
                   {year}
                 </span>
               </DropdownMenuCheckboxItem>
