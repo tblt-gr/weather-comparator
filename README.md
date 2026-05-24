@@ -21,6 +21,12 @@
 
 One-page weather analytics app for comparing daily temperatures across years. Search for a city, choose a month and reference year, overlay previous years, inspect heatwave periods, compare values against 1991-2020 climate normals, then export the chart or source data.
 
+## Screenshots
+
+<p align="center">
+  <img src=".github/assets/screenshots/main.png" width="100%" alt="Hero and skills sections">
+</p>
+
 ## Features
 
 - **City search** - autocomplete powered by the Open-Meteo Geocoding API
