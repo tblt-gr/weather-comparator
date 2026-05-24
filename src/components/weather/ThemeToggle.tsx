@@ -34,16 +34,15 @@ export function ThemeToggle() {
   const isDark = theme === "dark"
 
   const toggleTheme = useCallback(() => {
-    const nextTheme: Theme = isDark ? "light" : "dark"
-    localStorage.setItem(THEME_STORAGE_KEY, nextTheme)
-    document.documentElement.classList.toggle("dark", nextTheme === "dark")
-    window.dispatchEvent(new StorageEvent("storage", { key: THEME_STORAGE_KEY, newValue: nextTheme }))
+    const next: Theme = isDark ? "light" : "dark"
+    localStorage.setItem(THEME_STORAGE_KEY, next)
+    document.documentElement.classList.toggle("dark", next === "dark")
+    window.dispatchEvent(new StorageEvent("storage", { key: THEME_STORAGE_KEY, newValue: next }))
   }, [isDark])
 
   return (
     <Button
       aria-label={isDark ? "Activer le mode clair" : "Activer le mode sombre"}
-      className="border-white/40 bg-white/45 shadow-lg shadow-cyan-950/5 backdrop-blur-xl hover:bg-white/65 dark:border-white/10 dark:bg-white/10 dark:shadow-cyan-400/10 dark:hover:bg-white/15"
       onClick={toggleTheme}
       size="icon"
       type="button"

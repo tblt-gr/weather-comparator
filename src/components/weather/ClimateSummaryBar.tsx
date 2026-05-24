@@ -23,55 +23,46 @@ export function ClimateSummaryBar({
   normals,
   heatwaves,
 }: ClimateSummaryBarProps) {
-  const referenceDataset = datasets.find(
-    (dataset) => dataset.year === referenceYear
-  )
+  const referenceDataset = datasets.find((d) => d.year === referenceYear)
   const average = averageDatasetTemperature(referenceDataset, temperatureMode)
   const normalValues =
     normals
-      ?.map((normal) => normal.value)
-      .filter((value): value is number => typeof value === "number") ?? []
+      ?.map((n) => n.value)
+      .filter((v): v is number => typeof v === "number") ?? []
   const normalAverage =
     normalValues.length > 0
-      ? normalValues.reduce((total, value) => total + value, 0) /
-        normalValues.length
+      ? normalValues.reduce((total, v) => total + v, 0) / normalValues.length
       : null
   const delta =
     average !== null && normalAverage !== null ? average - normalAverage : null
   const hotDays =
     referenceDataset?.values.filter(
-      (value) => typeof value.tmax === "number" && value.tmax > 30
+      (v) => typeof v.tmax === "number" && v.tmax > 30
     ).length ?? 0
   const tropicalNights =
     referenceDataset?.values.filter(
-      (value) => typeof value.tmin === "number" && value.tmin >= 20
+      (v) => typeof v.tmin === "number" && v.tmin >= 20
     ).length ?? 0
 
   return (
-    <div className="grid gap-2 overflow-x-auto sm:grid-cols-2 xl:grid-cols-5">
-      <SummaryItem
-        label={`Moyenne ${referenceYear}`}
-        value={formatTemperature(average)}
-      />
-      <SummaryItem
-        label="Normale 1991-2020"
-        value={formatTemperature(normalAverage)}
-      />
-      <SummaryItem
-        label="Ecart"
+    <div className="flex flex-wrap gap-2">
+      <StatCard label={`Moyenne ${referenceYear}`} value={formatTemp(average)} />
+      <StatCard label="Normale 1991–2020" value={formatTemp(normalAverage)} />
+      <StatCard
+        label="Écart"
         tone={delta === null ? "neutral" : delta >= 0 ? "warm" : "cold"}
-        value={delta === null ? "-" : `${delta >= 0 ? "+" : ""}${delta.toFixed(1)} degC`}
+        value={delta === null ? "—" : `${delta >= 0 ? "+" : ""}${delta.toFixed(1)} °C`}
       />
-      <SummaryItem label="Jours > 30 degC" value={String(hotDays)} />
-      <SummaryItem
-        label="Nuits tropicales"
-        value={`${tropicalNights} / Canicules ${heatwaves.length}`}
+      <StatCard label="Jours > 30 °C" value={String(hotDays)} />
+      <StatCard
+        label="Nuits tropicales · Canicules"
+        value={`${tropicalNights} · ${heatwaves.length}`}
       />
     </div>
   )
 }
 
-function SummaryItem({
+function StatCard({
   label,
   value,
   tone = "neutral",
@@ -80,21 +71,23 @@ function SummaryItem({
   value: string
   tone?: "neutral" | "warm" | "cold"
 }) {
-  const toneClass =
+  const valueClass =
     tone === "warm"
-      ? "text-orange-600 dark:text-orange-300"
+      ? "text-orange-600 dark:text-orange-400"
       : tone === "cold"
-        ? "text-sky-600 dark:text-sky-300"
+        ? "text-sky-600 dark:text-sky-400"
         : "text-foreground"
 
   return (
-    <div className="glass-card min-w-44 rounded-xl px-3 py-2">
-      <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <p className={`mt-1 text-lg font-semibold ${toneClass}`}>{value}</p>
+    <div className="glass-card min-w-36 rounded-xl px-3 py-2">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className={`mt-0.5 text-base font-semibold tabular-nums ${valueClass}`}>
+        {value}
+      </p>
     </div>
   )
 }
 
-function formatTemperature(value: number | null) {
-  return value === null ? "-" : `${value.toFixed(1)} degC`
+function formatTemp(value: number | null) {
+  return value === null ? "—" : `${value.toFixed(1)} °C`
 }

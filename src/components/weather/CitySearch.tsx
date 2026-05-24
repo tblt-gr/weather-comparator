@@ -31,7 +31,6 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
 
       try {
         const cities = await searchCities(query)
-
         if (!controller.signal.aborted) {
           setResults(cities)
           setIsOpen(true)
@@ -57,28 +56,26 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
     <div className="relative grid gap-1 text-sm font-medium">
       <span>Ville</span>
       <div className="relative">
-        <Search className="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           aria-autocomplete="list"
           aria-expanded={isOpen}
           aria-label="Rechercher une ville"
-          className="bg-white/45 pl-8 backdrop-blur-xl dark:bg-white/10"
-          onChange={(event) => setQuery(event.target.value)}
+          className="pl-8"
+          onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsOpen(results.length > 0)}
-          placeholder="Paris, Lyon..."
+          placeholder="Paris, Lyon…"
           value={query}
         />
       </div>
       {isOpen ? (
-        <div className="absolute top-full z-20 mt-1 max-h-72 w-full overflow-auto rounded-xl border border-white/40 bg-popover/90 p-1 text-popover-foreground shadow-2xl shadow-cyan-950/10 backdrop-blur-2xl dark:border-white/10 dark:shadow-black/30">
+        <div className="absolute top-full z-20 mt-1 max-h-72 w-full overflow-auto rounded-xl border border-border bg-popover p-1 text-popover-foreground shadow-lg shadow-black/8">
           {isLoading ? (
-            <div className="px-3 py-2 text-sm text-muted-foreground">
-              Recherche...
-            </div>
+            <div className="px-3 py-2 text-sm text-muted-foreground">Recherche…</div>
           ) : null}
           {!isLoading && results.length === 0 ? (
             <div className="px-3 py-2 text-sm text-muted-foreground">
-              Aucune ville trouvee.
+              Aucune ville trouvée.
             </div>
           ) : null}
           {results.map((result) => (
@@ -96,7 +93,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
               <span>
                 {result.name}, {result.country}
                 {result.admin1 ? (
-                  <span className="text-muted-foreground"> - {result.admin1}</span>
+                  <span className="text-muted-foreground"> — {result.admin1}</span>
                 ) : null}
               </span>
             </Button>

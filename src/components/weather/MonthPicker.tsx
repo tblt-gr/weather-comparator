@@ -10,17 +10,17 @@ import {
 
 const months = [
   "Janvier",
-  "Fevrier",
+  "Février",
   "Mars",
   "Avril",
   "Mai",
   "Juin",
   "Juillet",
-  "Aout",
+  "Août",
   "Septembre",
   "Octobre",
   "Novembre",
-  "Decembre",
+  "Décembre",
 ]
 
 type MonthPickerProps = {
@@ -38,11 +38,9 @@ export function MonthPicker({
 }: MonthPickerProps) {
   const currentYear = new Date().getFullYear()
   const currentMonth = new Date().getMonth() + 1
-  const years = Array.from({ length: 12 }, (_, index) => currentYear - index)
+  const years = Array.from({ length: 12 }, (_, i) => currentYear - i)
   const availableMonths =
-    referenceYear === currentYear
-      ? months.slice(0, currentMonth)
-      : months
+    referenceYear === currentYear ? months.slice(0, currentMonth) : months
 
   return (
     <div className="grid gap-2 sm:grid-cols-2">
@@ -50,14 +48,14 @@ export function MonthPicker({
         Mois
         <Select
           value={String(month)}
-          onValueChange={(value) => onMonthChange(Number(value))}
+          onValueChange={(v) => onMonthChange(Number(v))}
         >
-          <SelectTrigger aria-label="Selectionner un mois" className="w-full">
+          <SelectTrigger aria-label="Sélectionner un mois" className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {availableMonths.map((label, index) => (
-              <SelectItem key={label} value={String(index + 1)}>
+            {availableMonths.map((label, i) => (
+              <SelectItem key={label} value={String(i + 1)}>
                 {label}
               </SelectItem>
             ))}
@@ -66,15 +64,12 @@ export function MonthPicker({
       </label>
 
       <label className="grid gap-1 text-sm font-medium">
-        Annee
+        Année
         <Select
           value={String(referenceYear)}
-          onValueChange={(value) => onYearChange(Number(value))}
+          onValueChange={(v) => onYearChange(Number(v))}
         >
-          <SelectTrigger
-            aria-label="Selectionner une annee de reference"
-            className="w-full"
-          >
+          <SelectTrigger aria-label="Sélectionner une année de référence" className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
