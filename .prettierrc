@@ -1,0 +1,16 @@
+{
+  "arrowParens": "always",
+  "bracketSpacing": true,
+  "editor.formatOnSave": true,
+  "endOfLine": "lf",
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "proseWrap": "preserve",
+  "printWidth": 100,
+  "semi": true,
+  "singleQuote": false,
+  "tabWidth": 2,
+  "tailwindFunctions": ["cn", "cva"],
+  "tailwindStylesheet": "src/app/globals.css",
+  "trailingComma": "es5",
+  "useTabs": false
+}
