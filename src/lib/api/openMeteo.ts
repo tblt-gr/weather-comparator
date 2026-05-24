@@ -64,13 +64,23 @@ export async function fetchHistoricalWeather({
   month: number
   year: number
 }): Promise<OpenMeteoArchiveResponse> {
-  const startDate = formatDate(year, month, 1)
-  const endDate = formatDate(year, month, daysInMonth(year, month))
+  const range = getArchiveDateRange(year, month)
+
+  if (!range) {
+    return {
+      daily: {
+        time: [],
+        temperature_2m_max: [],
+        temperature_2m_min: [],
+      },
+    }
+  }
+
   const params = new URLSearchParams({
     latitude: String(city.latitude),
     longitude: String(city.longitude),
-    start_date: startDate,
-    end_date: endDate,
+    start_date: range.startDate,
+    end_date: range.endDate,
     daily: "temperature_2m_max,temperature_2m_min",
     timezone: "Europe/Paris",
   })
@@ -96,4 +106,29 @@ export function formatDate(year: number, month: number, day: number) {
     String(month).padStart(2, "0"),
     String(day).padStart(2, "0"),
   ].join("-")
+}
+
+export function getTodayDateString() {
+  const today = new Date()
+  return formatDate(
+    today.getFullYear(),
+    today.getMonth() + 1,
+    today.getDate()
+  )
+}
+
+export function getArchiveDateRange(year: number, month: number) {
+  const today = getTodayDateString()
+  const startDate = formatDate(year, month, 1)
+
+  if (startDate > today) {
+    return null
+  }
+
+  const requestedEndDate = formatDate(year, month, daysInMonth(year, month))
+
+  return {
+    startDate,
+    endDate: requestedEndDate < today ? requestedEndDate : today,
+  }
 }
