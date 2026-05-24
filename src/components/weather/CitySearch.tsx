@@ -9,12 +9,12 @@ import { searchCities } from "@/lib/api/openMeteo"
 import type { City } from "@/types/weather"
 
 type CitySearchProps = {
-  city: City
+  city: City | null
   onCityChange: (city: City) => void
 }
 
 export function CitySearch({ city, onCityChange }: CitySearchProps) {
-  const [query, setQuery] = useState(city.name)
+  const [query, setQuery] = useState(city?.name ?? "")
   const [results, setResults] = useState<City[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
@@ -22,7 +22,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
   useEffect(() => {
     const controller = new AbortController()
     const timeout = window.setTimeout(async () => {
-      if (query.trim().length < 2 || query === city.name) {
+      if (query.trim().length < 2 || query === city?.name) {
         setResults([])
         return
       }
@@ -51,7 +51,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
       controller.abort()
       window.clearTimeout(timeout)
     }
-  }, [city.name, query])
+  }, [city?.name, query])
 
   return (
     <div className="relative grid gap-1 text-sm font-medium">
@@ -65,7 +65,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
           className="pl-8"
           onChange={(event) => setQuery(event.target.value)}
           onFocus={() => setIsOpen(results.length > 0)}
-          placeholder="Besancon, Paris, Lyon..."
+          placeholder="Paris, Lyon..."
           value={query}
         />
       </div>

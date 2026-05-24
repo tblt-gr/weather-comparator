@@ -37,7 +37,12 @@ export function MonthPicker({
   onYearChange,
 }: MonthPickerProps) {
   const currentYear = new Date().getFullYear()
+  const currentMonth = new Date().getMonth() + 1
   const years = Array.from({ length: 12 }, (_, index) => currentYear - index)
+  const availableMonths =
+    referenceYear === currentYear
+      ? months.slice(0, currentMonth)
+      : months
 
   return (
     <div className="grid gap-2 sm:grid-cols-2">
@@ -51,7 +56,7 @@ export function MonthPicker({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {months.map((label, index) => (
+            {availableMonths.map((label, index) => (
               <SelectItem key={label} value={String(index + 1)}>
                 {label}
               </SelectItem>

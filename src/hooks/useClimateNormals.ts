@@ -15,22 +15,26 @@ export function useClimateNormals({
   month,
   temperatureMode,
 }: {
-  city: City
+  city: City | null
   enabled: boolean
   month: number
   temperatureMode: TemperatureMode
 }) {
   return useQuery({
-    enabled,
+    enabled: enabled && city !== null,
     queryKey: [
       "climate-normal",
-      city.id,
-      city.latitude,
-      city.longitude,
+      city?.id ?? "no-city",
+      city?.latitude ?? 0,
+      city?.longitude ?? 0,
       month,
       temperatureMode,
     ],
     queryFn: async () => {
+      if (city === null) {
+        return []
+      }
+
       const datasets = await Promise.all(
         normalYears.map(async (year) => {
           const response = await fetchHistoricalWeather({ city, month, year })

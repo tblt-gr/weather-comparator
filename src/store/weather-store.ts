@@ -6,25 +6,19 @@ import type { City, TemperatureMode } from "@/types/weather"
 
 const now = new Date()
 const currentYear = now.getFullYear()
-
-export const defaultCity: City = {
-  id: "besancon-fr",
-  name: "Besancon",
-  latitude: 47.2488,
-  longitude: 6.0182,
-  country: "France",
-  admin1: "Bourgogne-Franche-Comte",
-}
+const currentMonth = now.getMonth() + 1
+const CITY_STORAGE_KEY = "weather-compare.city"
+const FIRST_COMPARISON_YEAR = 2000
 
 type WeatherState = {
-  city: City
+  city: City | null
   month: number
   referenceYear: number
   selectedYears: number[]
   temperatureMode: TemperatureMode
   hiddenYears: number[]
   showNormals: boolean
-  setCity: (city: City) => void
+  setCity: (city: City | null) => void
   setMonth: (month: number) => void
   setReferenceYear: (year: number) => void
   toggleYear: (year: number) => void
@@ -34,28 +28,92 @@ type WeatherState = {
 }
 
 function defaultYears(referenceYear: number) {
-  return [referenceYear, referenceYear - 1, referenceYear - 2, referenceYear - 3]
+  if (referenceYear > FIRST_COMPARISON_YEAR) {
+    return [referenceYear - 1]
+  }
+
+  if (referenceYear < currentYear) {
+    return [referenceYear + 1]
+  }
+
+  return []
+}
+
+function persistCity(city: City | null) {
+  if (typeof window === "undefined") {
+    return
+  }
+
+  if (city === null) {
+    window.localStorage.removeItem(CITY_STORAGE_KEY)
+    return
+  }
+
+  window.localStorage.setItem(CITY_STORAGE_KEY, JSON.stringify(city))
+}
+
+export function loadPersistedCity() {
+  if (typeof window === "undefined") {
+    return null
+  }
+
+  const rawCity = window.localStorage.getItem(CITY_STORAGE_KEY)
+
+  if (!rawCity) {
+    return null
+  }
+
+  try {
+    return JSON.parse(rawCity) as City
+  } catch {
+    return null
+  }
 }
 
 export const useWeatherStore = create<WeatherState>((set) => ({
-  city: defaultCity,
+  city: null,
   month: now.getMonth() + 1,
   referenceYear: currentYear,
   selectedYears: defaultYears(currentYear),
   temperatureMode: "tmax",
   hiddenYears: [],
-  showNormals: false,
-  setCity: (city) => set({ city }),
-  setMonth: (month) => set({ month }),
+  showNormals: true,
+  setCity: (city) => {
+    persistCity(city)
+    set({ city })
+  },
+  setMonth: (month) =>
+    set((state) => ({
+      month:
+        state.referenceYear === currentYear && month > currentMonth
+          ? currentMonth
+          : month,
+    })),
   setReferenceYear: (referenceYear) =>
-    set({
-      referenceYear,
-      selectedYears: defaultYears(referenceYear),
-      hiddenYears: [],
+    set((state) => {
+      const selectedYears = state.selectedYears.filter(
+        (selectedYear) => selectedYear !== referenceYear
+      )
+
+      return {
+        referenceYear,
+        month:
+          referenceYear === currentYear && state.month > currentMonth
+            ? currentMonth
+            : state.month,
+        selectedYears:
+          selectedYears.length > 0 ? selectedYears : defaultYears(referenceYear),
+        hiddenYears: [],
+      }
     }),
   toggleYear: (year) =>
     set((state) => {
+      if (year === state.referenceYear) {
+        return state
+      }
+
       const exists = state.selectedYears.includes(year)
+
       return {
         selectedYears: exists
           ? state.selectedYears.filter((selectedYear) => selectedYear !== year)
