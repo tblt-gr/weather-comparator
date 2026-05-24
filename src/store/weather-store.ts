@@ -8,7 +8,6 @@ const now = new Date()
 const currentYear = now.getFullYear()
 const currentMonth = now.getMonth() + 1
 const CITY_STORAGE_KEY = "weather-compare.city"
-const FIRST_COMPARISON_YEAR = 2000
 
 type WeatherState = {
   city: City | null
@@ -25,18 +24,6 @@ type WeatherState = {
   setTemperatureMode: (mode: TemperatureMode) => void
   toggleHiddenYear: (year: number) => void
   setShowNormals: (showNormals: boolean) => void
-}
-
-function defaultYears(referenceYear: number) {
-  if (referenceYear > FIRST_COMPARISON_YEAR) {
-    return [referenceYear - 1]
-  }
-
-  if (referenceYear < currentYear) {
-    return [referenceYear + 1]
-  }
-
-  return []
 }
 
 function persistCity(city: City | null) {
@@ -74,7 +61,7 @@ export const useWeatherStore = create<WeatherState>((set) => ({
   city: null,
   month: now.getMonth() + 1,
   referenceYear: currentYear,
-  selectedYears: defaultYears(currentYear),
+  selectedYears: [],
   temperatureMode: "tmax",
   hiddenYears: [],
   showNormals: true,
@@ -101,8 +88,7 @@ export const useWeatherStore = create<WeatherState>((set) => ({
           referenceYear === currentYear && state.month > currentMonth
             ? currentMonth
             : state.month,
-        selectedYears:
-          selectedYears.length > 0 ? selectedYears : defaultYears(referenceYear),
+        selectedYears,
         hiddenYears: [],
       }
     }),
