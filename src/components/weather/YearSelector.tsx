@@ -26,7 +26,7 @@ export function YearSelector({
   const currentYear = new Date().getFullYear()
   const years = Array.from(
     { length: currentYear - FIRST_COMPARISON_YEAR + 1 },
-    (_, i) => FIRST_COMPARISON_YEAR + i
+    (_, i) => currentYear - i
   ).filter((year) => year !== referenceYear)
   const count = selectedYears.length
   const label =
