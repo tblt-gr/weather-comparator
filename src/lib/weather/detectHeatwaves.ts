@@ -1,0 +1,53 @@
+import type { HeatwavePeriod, WeatherYearDataset } from "@/types/weather"
+
+export function detectHeatwaves(
+  datasets: WeatherYearDataset[],
+  threshold = 30,
+  minimumDuration = 3
+): HeatwavePeriod[] {
+  const heatwaves: HeatwavePeriod[] = []
+
+  datasets.forEach((dataset) => {
+    let sequence: { date: string; day: number; tmax: number }[] = []
+
+    dataset.values.forEach((value) => {
+      if (typeof value.tmax === "number" && value.tmax >= threshold) {
+        sequence.push({
+          date: value.date,
+          day: value.day,
+          tmax: value.tmax,
+        })
+        return
+      }
+
+      pushHeatwave(dataset.year, sequence, minimumDuration, heatwaves)
+      sequence = []
+    })
+
+    pushHeatwave(dataset.year, sequence, minimumDuration, heatwaves)
+  })
+
+  return heatwaves
+}
+
+function pushHeatwave(
+  year: number,
+  sequence: { date: string; day: number; tmax: number }[],
+  minimumDuration: number,
+  heatwaves: HeatwavePeriod[]
+) {
+  if (sequence.length < minimumDuration) {
+    return
+  }
+
+  heatwaves.push({
+    year,
+    start: sequence[0].date,
+    end: sequence[sequence.length - 1].date,
+    startDay: sequence[0].day,
+    endDay: sequence[sequence.length - 1].day,
+    duration: sequence.length,
+    averageMax:
+      sequence.reduce((total, value) => total + value.tmax, 0) / sequence.length,
+  })
+}
