@@ -1,6 +1,16 @@
 "use client"
 
-import { Checkbox } from "@/components/ui/checkbox"
+import { Check, ChevronDown } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+const FIRST_COMPARISON_YEAR = 2000
 
 type YearSelectorProps = {
   referenceYear: number
@@ -13,26 +23,57 @@ export function YearSelector({
   selectedYears,
   onToggleYear,
 }: YearSelectorProps) {
-  const years = Array.from({ length: 10 }, (_, index) => referenceYear - index)
+  const currentYear = new Date().getFullYear()
+  const years = Array.from(
+    { length: currentYear - FIRST_COMPARISON_YEAR + 1 },
+    (_, index) => FIRST_COMPARISON_YEAR + index
+  ).filter((year) => year !== referenceYear)
+  const selectedCount = selectedYears.length
+  let label = "Aucune annee selectionnee"
+
+  if (selectedCount === 1) {
+    label = String(selectedYears[0])
+  } else if (selectedCount > 1) {
+    label = `${selectedCount} annees selectionnees`
+  }
 
   return (
-    <fieldset className="grid gap-2">
-      <legend className="text-sm font-medium">Annees comparees</legend>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-        {years.map((year) => (
-          <label
-            className="flex h-9 items-center gap-2 rounded-lg border px-3 text-sm"
-            key={year}
+    <div className="grid gap-2">
+      <span className="text-sm font-medium">Annees comparees</span>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            aria-label="Selectionner les annees a comparer"
+            className="w-full justify-between"
+            type="button"
+            variant="outline"
           >
-            <Checkbox
-              aria-label={`Afficher ${year}`}
-              checked={selectedYears.includes(year)}
-              onCheckedChange={() => onToggleYear(year)}
-            />
-            {year}
-          </label>
-        ))}
-      </div>
-    </fieldset>
+            <span className="truncate">{label}</span>
+            <ChevronDown className="size-4 text-muted-foreground" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-64">
+          {years.map((year) => {
+            const checked = selectedYears.includes(year)
+
+            return (
+              <DropdownMenuCheckboxItem
+                checked={checked}
+                className="justify-between"
+                key={year}
+                onCheckedChange={() => onToggleYear(year)}
+              >
+                <span className="flex items-center gap-2">
+                  <Check
+                    className={checked ? "size-4 opacity-100" : "size-4 opacity-0"}
+                  />
+                  {year}
+                </span>
+              </DropdownMenuCheckboxItem>
+            )
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   )
 }
