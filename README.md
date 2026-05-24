@@ -1,4 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Weather Compare
+
+A modern weather visualization app built with Next.js to compare historical temperatures across multiple years.
+
+The application allows users to explore daily weather trends for any city using interactive charts and climate indicators.
+
+## Features
+
+- City search with autocomplete
+- Multi-year comparison (current year + previous years)
+- Display:
+  - maximum temperatures
+  - minimum temperatures
+- Interactive multi-line charts
+- 30-year climate normals
+- Heatwave detection
+- Climate summary:
+  - monthly averages
+  - anomaly vs seasonal normals
+  - days above 30°C
+  - tropical nights
+- PNG chart export
+- CSV data export
+- Responsive mobile & desktop UI
+
+## Tech Stack
+
+### Frontend
+- Next.js 15
+- React
+- TypeScript
+- TailwindCSS
+- shadcn/ui
+
+### Data & State
+- TanStack Query
+- Zustand
+
+### Charts
+- Recharts
+
+### Weather APIs
+- Open-Meteo Historical API
+- Open-Meteo Climate API
+- Open-Meteo Geocoding API
+
+## Example Use Case
+
+Compare June maximum temperatures between:
+- 2025
+- 2024
+- 2023
+- 2022
+
+Visualize:
+- heatwaves,
+- climate anomalies,
+- seasonal deviations,
+- long-term trends.
+
+## Roadmap
+
+- Precipitation support
+- Humidity / heat index
+- Frost / cold wave detection
+- Advanced climate analytics
+- PDF export
+- Shareable charts
+- PWA / offline support
 
 ## Getting Started
 
@@ -16,21 +84,12 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Weather Data Sources
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- https://open-meteo.com/
+- https://open-meteo.com/en/docs/historical-weather-api
+- https://open-meteo.com/en/docs/climate-api
 
-## Learn More
+## License
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
