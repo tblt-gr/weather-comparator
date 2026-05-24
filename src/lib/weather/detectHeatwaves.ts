@@ -2,7 +2,8 @@ import type { HeatwavePeriod, WeatherYearDataset } from "@/types/weather"
 
 export function detectHeatwaves(
   datasets: WeatherYearDataset[],
-  threshold = 30,
+  thresholdMax = 33,
+  thresholdMin = 18,
   minimumDuration = 3
 ): HeatwavePeriod[] {
   const heatwaves: HeatwavePeriod[] = []
@@ -11,7 +12,12 @@ export function detectHeatwaves(
     let sequence: { date: string; day: number; tmax: number }[] = []
 
     dataset.values.forEach((value) => {
-      if (typeof value.tmax === "number" && value.tmax >= threshold) {
+      if (
+        typeof value.tmax === "number" &&
+        typeof value.tmin === "number" &&
+        value.tmax >= thresholdMax &&
+        value.tmin >= thresholdMin
+      ) {
         sequence.push({
           date: value.date,
           day: value.day,
