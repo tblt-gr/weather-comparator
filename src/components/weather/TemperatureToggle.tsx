@@ -12,7 +12,7 @@ export function TemperatureToggle({ value, onChange }: TemperatureToggleProps) {
   return (
     <div
       aria-label="Type de temperature"
-      className="grid grid-cols-2 gap-1 rounded-lg border bg-background p-1"
+      className="grid grid-cols-2 gap-1 rounded-xl border border-white/40 bg-white/45 p-1 shadow-lg shadow-cyan-950/5 backdrop-blur-xl dark:border-white/10 dark:bg-white/10 dark:shadow-cyan-400/10"
       role="group"
     >
       <Button

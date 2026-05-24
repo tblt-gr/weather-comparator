@@ -32,7 +32,7 @@ export function ChartLegend({
           >
             <span
               aria-hidden="true"
-              className="size-3 rounded-sm"
+              className="size-3 rounded-full shadow-sm"
               style={{ backgroundColor: colors[year] }}
             />
             {year}

@@ -54,7 +54,9 @@ async function downloadPng(chartRef: RefObject<HTMLDivElement | null>) {
   }
 
   const url = await toPng(chartRef.current, {
-    backgroundColor: "#ffffff",
+    backgroundColor: getComputedStyle(document.documentElement)
+      .getPropertyValue("--background")
+      .trim(),
     pixelRatio: 2,
   })
   triggerDownload(url, "weather-compare.png")
