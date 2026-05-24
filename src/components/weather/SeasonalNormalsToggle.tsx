@@ -12,7 +12,7 @@ export function SeasonalNormalsToggle({
   onCheckedChange,
 }: SeasonalNormalsToggleProps) {
   return (
-    <label className="flex h-9 items-center gap-2 rounded-lg border px-3 text-sm font-medium">
+    <label className="flex h-9 items-center gap-2 rounded-xl border border-white/40 bg-white/35 px-3 text-sm font-medium shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/10">
       <Checkbox
         aria-label="Afficher la normale climatique"
         checked={checked}

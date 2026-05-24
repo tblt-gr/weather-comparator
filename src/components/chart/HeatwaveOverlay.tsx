@@ -12,9 +12,11 @@ export function HeatwaveOverlay({ heatwaves }: HeatwaveOverlayProps) {
   }
 
   return (
-    <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-sm">
-      <p className="font-medium text-orange-950">Canicules detectees</p>
-      <ul className="mt-2 grid gap-1 text-orange-900 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="rounded-xl border border-orange-300/40 bg-orange-100/45 p-3 text-sm shadow-lg shadow-orange-900/5 backdrop-blur-xl dark:border-orange-300/20 dark:bg-orange-400/10 dark:shadow-orange-300/5">
+      <p className="font-medium text-orange-950 dark:text-orange-100">
+        Canicules detectees
+      </p>
+      <ul className="mt-2 grid gap-1 text-orange-900 dark:text-orange-200 sm:grid-cols-2 lg:grid-cols-3">
         {heatwaves.map((heatwave) => (
           <li key={`${heatwave.year}-${heatwave.start}`}>
             {heatwave.year}: jour {heatwave.startDay} - {heatwave.endDay} (

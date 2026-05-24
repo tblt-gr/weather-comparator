@@ -45,13 +45,13 @@ One-page weather analytics app for comparing daily temperatures across years. Se
 | Data       | TanStack Query 5, Open-Meteo APIs               |
 | State      | Zustand 5, localStorage persistence             |
 | Export     | html-to-image, PapaParse                        |
-| Tooling    | npm, ESLint 9, Prettier 3                       |
+| Tooling    | pnpm, ESLint 9, Prettier 3                      |
 
 ## Quick Start
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 App runs at `http://localhost:3000`.
@@ -95,11 +95,11 @@ src/
 
 | Command             | Description                    |
 | ------------------- | ------------------------------ |
-| `npm run dev`       | Start the development server   |
-| `npm run build`     | Build for production           |
-| `npm run start`     | Serve the production build     |
-| `npm run lint`      | Run ESLint                     |
-| `npm run typecheck` | Type-check with TypeScript     |
+| `pnpm dev`          | Start the development server   |
+| `pnpm build`        | Build for production           |
+| `pnpm start`        | Serve the production build     |
+| `pnpm lint`         | Run ESLint                     |
+| `pnpm typecheck`    | Type-check with TypeScript     |
 
 ## Data Sources
 

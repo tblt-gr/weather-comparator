@@ -11,6 +11,7 @@ import { ExportButtons } from "@/components/weather/ExportButtons"
 import { MonthPicker } from "@/components/weather/MonthPicker"
 import { SeasonalNormalsToggle } from "@/components/weather/SeasonalNormalsToggle"
 import { TemperatureToggle } from "@/components/weather/TemperatureToggle"
+import { ThemeToggle } from "@/components/weather/ThemeToggle"
 import { YearSelector } from "@/components/weather/YearSelector"
 import { useClimateNormals } from "@/hooks/useClimateNormals"
 import { useWeatherData } from "@/hooks/useWeatherData"
@@ -77,32 +78,35 @@ function WeatherDashboardContent() {
   const hasData = weather.data.length > 0
 
   return (
-    <main className="min-h-screen bg-stone-50 text-stone-950">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
-        <header className="flex flex-col gap-2 border-b pb-5">
-          <p className="text-sm font-medium uppercase tracking-wide text-emerald-700">
-            Meteo historique
-          </p>
-          <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <h1 className="text-3xl font-semibold">
+    <main className="app-ambient min-h-screen overflow-hidden text-foreground">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8">
+        <header className="glass-panel rounded-2xl px-4 py-4 sm:px-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              <p className="text-xs font-semibold uppercase text-primary">
+                Meteo historique
+              </p>
+              <h1 className="mt-2 text-3xl font-semibold tracking-normal sm:text-4xl">
                 Comparaison des temperatures quotidiennes
               </h1>
-              <p className="mt-2 max-w-3xl text-sm text-stone-600">
+              <p className="mt-2 text-sm text-muted-foreground">
                 {city ? `${city.name}, ${city.country}` : "Aucune ville"}
                 {" - selectionnez un mois, des annees et le type de temperature a comparer."}
               </p>
             </div>
-            <TemperatureToggle
-              onChange={setTemperatureMode}
-              value={temperatureMode}
-            />
+            <div className="flex items-center gap-2">
+              <TemperatureToggle
+                onChange={setTemperatureMode}
+                value={temperatureMode}
+              />
+              <ThemeToggle />
+            </div>
           </div>
         </header>
 
         <section
           aria-label="Filtres de comparaison"
-          className="grid gap-4 rounded-lg border bg-white p-4 shadow-sm lg:grid-cols-[minmax(260px,360px)_minmax(280px,420px)_1fr_auto]"
+          className="glass-panel grid gap-4 rounded-2xl p-4 lg:grid-cols-[minmax(260px,360px)_minmax(280px,420px)_1fr_auto]"
         >
           <CitySearch key={city?.id ?? "empty"} city={city} onCityChange={setCity} />
           <MonthPicker
@@ -124,9 +128,9 @@ function WeatherDashboardContent() {
           </div>
         </section>
 
-        <section className="grid gap-4 rounded-lg border bg-white p-4 shadow-sm">
+        <section className="glass-panel grid gap-4 rounded-2xl p-4">
           {!hasCity ? (
-            <div className="flex min-h-[360px] items-center justify-center rounded-lg border border-dashed bg-stone-50 text-sm text-stone-500">
+            <div className="glass-card flex min-h-[360px] items-center justify-center rounded-xl border-dashed text-sm text-muted-foreground">
               Selectionnez une ville pour afficher les donnees.
             </div>
           ) : (
@@ -142,12 +146,12 @@ function WeatherDashboardContent() {
                 <ExportButtons chartRef={chartRef} datasets={visibleDatasets} />
               </div>
               {weather.isLoading ? (
-                <div className="flex min-h-[420px] animate-pulse items-center justify-center rounded-lg bg-stone-100 text-sm text-stone-500">
+                <div className="glass-card flex min-h-[420px] animate-pulse items-center justify-center rounded-xl text-sm text-muted-foreground">
                   Chargement des donnees meteo...
                 </div>
               ) : null}
               {weather.isError ? (
-                <div className="flex min-h-[360px] items-center justify-center text-sm text-red-700">
+                <div className="flex min-h-[360px] items-center justify-center text-sm text-destructive">
                   Impossible de charger les donnees meteo.
                 </div>
               ) : null}
@@ -166,12 +170,12 @@ function WeatherDashboardContent() {
                 </div>
               ) : null}
               {!weather.isLoading && !weather.isError && !hasData ? (
-                <div className="flex min-h-[360px] items-center justify-center rounded-lg border border-dashed bg-stone-50 text-sm text-stone-500">
+                <div className="glass-card flex min-h-[360px] items-center justify-center rounded-xl border-dashed text-sm text-muted-foreground">
                   Aucune donnee disponible pour cette periode.
                 </div>
               ) : null}
               {showNormals && normals.isFetching ? (
-                <p className="text-sm text-stone-500">
+                <p className="text-sm text-muted-foreground">
                   Calcul de la normale climatique 1991-2020...
                 </p>
               ) : null}

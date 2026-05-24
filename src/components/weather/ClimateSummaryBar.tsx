@@ -82,14 +82,14 @@ function SummaryItem({
 }) {
   const toneClass =
     tone === "warm"
-      ? "text-orange-700"
+      ? "text-orange-600 dark:text-orange-300"
       : tone === "cold"
-        ? "text-sky-700"
-        : "text-stone-950"
+        ? "text-sky-600 dark:text-sky-300"
+        : "text-foreground"
 
   return (
-    <div className="min-w-44 rounded-lg border bg-stone-50 px-3 py-2">
-      <p className="text-xs font-medium text-stone-600">{label}</p>
+    <div className="glass-card min-w-44 rounded-xl px-3 py-2">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
       <p className={`mt-1 text-lg font-semibold ${toneClass}`}>{value}</p>
     </div>
   )
