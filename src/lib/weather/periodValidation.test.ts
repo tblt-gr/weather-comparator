@@ -1,0 +1,52 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import { normalizeDatePeriod } from "./periodValidation";
+
+test("keeps the start date when the end date is edited before it", () => {
+  assert.deepEqual(
+    normalizeDatePeriod(
+      {
+        startDate: "2026-05-10",
+        endDate: "2026-05-09",
+      },
+      "endDate"
+    ),
+    {
+      startDate: "2026-05-10",
+      endDate: "2026-05-11",
+    }
+  );
+});
+
+test("pushes the end date forward when the start date reaches it", () => {
+  assert.deepEqual(
+    normalizeDatePeriod(
+      {
+        startDate: "2026-05-25",
+        endDate: "2026-05-25",
+      },
+      "startDate"
+    ),
+    {
+      startDate: "2026-05-25",
+      endDate: "2026-05-26",
+    }
+  );
+});
+
+test("preserves valid ranges as-is", () => {
+  assert.deepEqual(
+    normalizeDatePeriod(
+      {
+        startDate: "2026-05-01",
+        endDate: "2026-05-25",
+      },
+      "endDate"
+    ),
+    {
+      startDate: "2026-05-01",
+      endDate: "2026-05-25",
+    }
+  );
+});

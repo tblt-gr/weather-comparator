@@ -2,6 +2,11 @@
 
 import { Input } from "@/components/ui/input";
 import type { DatePeriod } from "@/lib/weather/dateRange";
+import {
+  getMaximumStartDate,
+  getMinimumEndDate,
+  normalizeDatePeriod,
+} from "@/lib/weather/periodValidation";
 
 type PeriodPickerProps = {
   period: DatePeriod;
@@ -15,7 +20,10 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
         Début
         <Input
           aria-label="Sélectionner la date de début"
-          onChange={(event) => onPeriodChange({ ...period, startDate: event.target.value })}
+          max={getMaximumStartDate(period.endDate)}
+          onChange={(event) =>
+            onPeriodChange(normalizeDatePeriod({ ...period, startDate: event.target.value }, "startDate"))
+          }
           type="date"
           value={period.startDate}
         />
@@ -25,7 +33,10 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
         Fin
         <Input
           aria-label="Sélectionner la date de fin"
-          onChange={(event) => onPeriodChange({ ...period, endDate: event.target.value })}
+          min={getMinimumEndDate(period.startDate)}
+          onChange={(event) =>
+            onPeriodChange(normalizeDatePeriod({ ...period, endDate: event.target.value }, "endDate"))
+          }
           type="date"
           value={period.endDate}
         />

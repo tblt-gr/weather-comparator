@@ -65,13 +65,7 @@ export const useWeatherStore = create<WeatherState>((set) => ({
     persistCity(city);
     set({ city });
   },
-  setPeriod: (period) =>
-    set({
-      period:
-        period.startDate <= period.endDate
-          ? period
-          : { startDate: period.endDate, endDate: period.startDate },
-    }),
+  setPeriod: (period) => set({ period }),
   toggleComparisonOffset: (offsetYears) =>
     set((state) => {
       const exists = state.comparisonOffsets.includes(offsetYears);
