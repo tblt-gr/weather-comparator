@@ -93,16 +93,22 @@ export function WeatherChart({
             <LineChart
               data={rows}
               height={420}
-              margin={{ left: 8, right: 24, top: 16 }}
+              margin={{ bottom: 56, left: 8, right: 24, top: 16 }}
               width={Math.max(chartWidth, 760)}
             >
               <CartesianGrid stroke="var(--border)" strokeDasharray="4 4" strokeOpacity={0.72} />
               <XAxis
+                angle={-45}
                 axisLine={false}
                 dataKey="day"
+                height={76}
                 stroke="var(--muted-foreground)"
+                textAnchor="end"
+                tickFormatter={(value) =>
+                  formatChartDateTick(rows.find((row) => row.day === value)?.label ?? value)
+                }
                 tickLine={false}
-                label={{ value: "Jour de la période", dy: 16, position: "insideBottom" }}
+                tickMargin={14}
               />
               <YAxis
                 axisLine={false}
@@ -122,7 +128,7 @@ export function WeatherChart({
                       <p className="mb-2 font-medium">
                         Jour {label}
                         {typeof payload[0]?.payload?.label === "string"
-                          ? ` · ${payload[0].payload.label}`
+                          ? ` · ${formatChartDateTick(payload[0].payload.label)}`
                           : ""}
                       </p>
                       <div className="grid gap-1">
@@ -231,5 +237,18 @@ function getPeriodLabel(datasets: WeatherYearDataset[], day: number) {
     .flatMap((dataset) => dataset.values)
     .find((value) => value.day === day)?.date;
 
-  return date?.slice(5) ?? "";
+  return date ?? "";
+}
+
+export function formatChartDateTick(value: string | number) {
+  const text = String(value);
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
+
+  if (!match) {
+    return text;
+  }
+
+  const [, year, month, day] = match;
+
+  return `${day}/${month}/${year.slice(2)}`;
 }
