@@ -60,7 +60,7 @@ export const useWeatherStore = create<WeatherState>((set) => ({
   comparisonOffsets: [],
   temperatureMode: "tmax",
   hiddenSeries: [],
-  showNormals: true,
+  showNormals: false,
   setCity: (city) => {
     persistCity(city);
     set({ city });
