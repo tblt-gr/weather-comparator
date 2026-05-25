@@ -9,7 +9,7 @@ import { WeatherChart } from "@/components/chart/WeatherChart"
 import { CitySearch } from "@/components/weather/CitySearch"
 import { ClimateSummaryBar } from "@/components/weather/ClimateSummaryBar"
 import { ExportButtons } from "@/components/weather/ExportButtons"
-import { MonthPicker } from "@/components/weather/MonthPicker"
+import { PeriodPicker } from "@/components/weather/PeriodPicker"
 import { SeasonalNormalsToggle } from "@/components/weather/SeasonalNormalsToggle"
 import { TemperatureToggle } from "@/components/weather/TemperatureToggle"
 import { ThemeToggle } from "@/components/weather/ThemeToggle"
@@ -32,14 +32,14 @@ export function WeatherDashboard() {
 function WeatherDashboardContent() {
   const {
     city,
-    month,
+    period,
     referenceYear,
     selectedYears,
     temperatureMode,
     hiddenYears,
     showNormals,
     setCity,
-    setMonth,
+    setPeriod,
     setReferenceYear,
     toggleYear,
     setTemperatureMode,
@@ -56,13 +56,13 @@ function WeatherDashboardContent() {
 
   const weather = useWeatherData({
     city,
-    month,
+    period,
     years: [referenceYear, ...selectedYears],
   })
   const normals = useClimateNormals({
     city,
     enabled: showNormals,
-    month,
+    period,
     temperatureMode,
   })
   const chartRef = useRef<HTMLDivElement | null>(null)
@@ -113,12 +113,12 @@ function WeatherDashboardContent() {
         {/* Filters */}
         <section
           aria-label="Filtres de comparaison"
-          className="glass-panel grid gap-4 rounded-2xl p-4 lg:grid-cols-[minmax(240px,340px)_minmax(260px,400px)_1fr_auto]"
+          className="glass-panel grid gap-4 rounded-2xl p-4 lg:grid-cols-[minmax(240px,340px)_minmax(360px,520px)_1fr_auto]"
         >
           <CitySearch key={city?.id ?? "empty"} city={city} onCityChange={setCity} />
-          <MonthPicker
-            month={month}
-            onMonthChange={setMonth}
+          <PeriodPicker
+            period={period}
+            onPeriodChange={setPeriod}
             onYearChange={setReferenceYear}
             referenceYear={referenceYear}
           />

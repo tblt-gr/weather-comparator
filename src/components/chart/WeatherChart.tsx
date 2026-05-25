@@ -45,8 +45,9 @@ type WeatherChartProps = {
 
 type ChartRow = {
   day: number
+  label: string
   normal?: number | null
-  [year: string]: number | null | undefined
+  [year: string]: number | string | null | undefined
 }
 
 export function WeatherChart({
@@ -120,7 +121,7 @@ export function WeatherChart({
                 dataKey="day"
                 stroke="var(--muted-foreground)"
                 tickLine={false}
-                label={{ value: "Jour du mois", dy: 16, position: "insideBottom" }}
+                label={{ value: "Jour de la période", dy: 16, position: "insideBottom" }}
               />
               <YAxis
                 axisLine={false}
@@ -137,7 +138,12 @@ export function WeatherChart({
 
                   return (
                     <div className="rounded-xl border border-white/40 bg-popover/90 p-3 text-sm text-popover-foreground shadow-2xl shadow-cyan-950/10 backdrop-blur-2xl dark:border-white/10 dark:shadow-black/30">
-                      <p className="mb-2 font-medium">Jour {label}</p>
+                      <p className="mb-2 font-medium">
+                        Jour {label}
+                        {typeof payload[0]?.payload?.label === "string"
+                          ? ` · ${payload[0].payload.label}`
+                          : ""}
+                      </p>
                       <div className="grid gap-1">
                         {payload.map((entry) => (
                           <div
@@ -225,6 +231,7 @@ function buildChartRows(
     const day = index + 1
     const row: ChartRow = {
       day,
+      label: getPeriodLabel(datasets, day),
       normal: normalByDay.get(day) ?? null,
     }
 
@@ -236,4 +243,12 @@ function buildChartRows(
 
     return row
   })
+}
+
+function getPeriodLabel(datasets: WeatherYearDataset[], day: number) {
+  const date = datasets
+    .flatMap((dataset) => dataset.values)
+    .find((value) => value.day === day)?.date
+
+  return date?.slice(5) ?? ""
 }

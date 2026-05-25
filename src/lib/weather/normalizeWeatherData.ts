@@ -1,14 +1,14 @@
-import { daysInMonth, formatDate } from "@/lib/api/openMeteo"
 import type { OpenMeteoArchiveResponse } from "@/lib/api/openMeteo"
+import { type DatePeriod, eachDateInRange } from "@/lib/weather/dateRange"
 import type { DailyTemperature, WeatherYearDataset } from "@/types/weather"
 
 export function normalizeWeatherData({
+  range,
   response,
-  month,
   year,
 }: {
+  range: DatePeriod
   response: OpenMeteoArchiveResponse
-  month: number
   year: number
 }): WeatherYearDataset {
   const byDate = new Map<string, DailyTemperature>()
@@ -17,29 +17,20 @@ export function normalizeWeatherData({
   const tmin = response.daily?.temperature_2m_min ?? []
 
   dates.forEach((date, index) => {
-    const day = Number(date.slice(8, 10))
     byDate.set(date, {
       date,
-      day,
+      day: 0,
       year,
       tmax: tmax[index] ?? null,
       tmin: tmin[index] ?? null,
     })
   })
 
-  const values = Array.from({ length: daysInMonth(year, month) }, (_, index) => {
+  const values = eachDateInRange(range).map((date, index) => {
     const day = index + 1
-    const date = formatDate(year, month, day)
+    const value = byDate.get(date)
 
-    return (
-      byDate.get(date) ?? {
-        date,
-        day,
-        year,
-        tmax: null,
-        tmin: null,
-      }
-    )
+    return value ? { ...value, day } : { date, day, year, tmax: null, tmin: null }
   })
 
   return { year, values }

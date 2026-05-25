@@ -2,20 +2,18 @@
 
 import { useQueries } from "@tanstack/react-query"
 
-import {
-  fetchHistoricalWeather,
-  getArchiveDateRange,
-} from "@/lib/api/openMeteo"
+import { fetchHistoricalWeather } from "@/lib/api/openMeteo"
+import { getComparableDateRange, type DatePeriod } from "@/lib/weather/dateRange"
 import { normalizeWeatherData } from "@/lib/weather/normalizeWeatherData"
 import type { City, WeatherYearDataset } from "@/types/weather"
 
 export function useWeatherData({
   city,
-  month,
+  period,
   years,
 }: {
   city: City | null
-  month: number
+  period: DatePeriod
   years: number[]
 }) {
   const queries = useQueries({
@@ -28,13 +26,20 @@ export function useWeatherData({
               city.id,
               city.latitude,
               city.longitude,
-              month,
+              period.startDate,
+              period.endDate,
               year,
             ],
-            enabled: getArchiveDateRange(year, month) !== null,
+            enabled: getComparableDateRange({ period, year }) !== null,
             queryFn: async () => {
-              const response = await fetchHistoricalWeather({ city, month, year })
-              return normalizeWeatherData({ response, month, year })
+              const range = getComparableDateRange({ period, year })
+
+              if (range === null) {
+                return { year, values: [] }
+              }
+
+              const response = await fetchHistoricalWeather({ city, period, year })
+              return normalizeWeatherData({ range, response, year })
             },
             staleTime: 1000 * 60 * 60 * 24,
           })),

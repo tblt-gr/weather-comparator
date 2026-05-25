@@ -4,7 +4,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Weather Compare",
-  description: "Comparaison meteo historique par ville, mois et annee.",
+  description: "Comparaison meteo historique par ville, periode et annee.",
 };
 
 export default function RootLayout({

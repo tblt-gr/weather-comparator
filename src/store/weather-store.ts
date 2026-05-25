@@ -2,23 +2,26 @@
 
 import { create } from "zustand"
 
+import {
+  type DatePeriod,
+  getDefaultComparisonPeriod,
+} from "@/lib/weather/dateRange"
 import type { City, TemperatureMode } from "@/types/weather"
 
 const now = new Date()
 const currentYear = now.getFullYear()
-const currentMonth = now.getMonth() + 1
 const CITY_STORAGE_KEY = "weather-compare.city"
 
 type WeatherState = {
   city: City | null
-  month: number
+  period: DatePeriod
   referenceYear: number
   selectedYears: number[]
   temperatureMode: TemperatureMode
   hiddenYears: number[]
   showNormals: boolean
   setCity: (city: City | null) => void
-  setMonth: (month: number) => void
+  setPeriod: (period: DatePeriod) => void
   setReferenceYear: (year: number) => void
   toggleYear: (year: number) => void
   setTemperatureMode: (mode: TemperatureMode) => void
@@ -59,7 +62,7 @@ export function loadPersistedCity() {
 
 export const useWeatherStore = create<WeatherState>((set) => ({
   city: null,
-  month: now.getMonth() + 1,
+  period: getDefaultComparisonPeriod(now),
   referenceYear: currentYear,
   selectedYears: [],
   temperatureMode: "tmax",
@@ -69,13 +72,13 @@ export const useWeatherStore = create<WeatherState>((set) => ({
     persistCity(city)
     set({ city })
   },
-  setMonth: (month) =>
-    set((state) => ({
-      month:
-        state.referenceYear === currentYear && month > currentMonth
-          ? currentMonth
-          : month,
-    })),
+  setPeriod: (period) =>
+    set({
+      period:
+        period.startDate <= period.endDate
+          ? period
+          : { startDate: period.endDate, endDate: period.startDate },
+    }),
   setReferenceYear: (referenceYear) =>
     set((state) => {
       const selectedYears = state.selectedYears.filter(
@@ -84,10 +87,6 @@ export const useWeatherStore = create<WeatherState>((set) => ({
 
       return {
         referenceYear,
-        month:
-          referenceYear === currentYear && state.month > currentMonth
-            ? currentMonth
-            : state.month,
         selectedYears,
         hiddenYears: [],
       }

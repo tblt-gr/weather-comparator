@@ -1,3 +1,7 @@
+import {
+  type DatePeriod,
+  getComparableDateRange,
+} from "@/lib/weather/dateRange"
 import type { City } from "@/types/weather"
 
 type GeocodingResult = {
@@ -57,14 +61,14 @@ export async function searchCities(query: string): Promise<City[]> {
 
 export async function fetchHistoricalWeather({
   city,
-  month,
+  period,
   year,
 }: {
   city: City
-  month: number
+  period: DatePeriod
   year: number
 }): Promise<OpenMeteoArchiveResponse> {
-  const range = getArchiveDateRange(year, month)
+  const range = getComparableDateRange({ period, year })
 
   if (!range) {
     return {
@@ -94,41 +98,4 @@ export async function fetchHistoricalWeather({
   }
 
   return (await response.json()) as OpenMeteoArchiveResponse
-}
-
-export function daysInMonth(year: number, month: number) {
-  return new Date(year, month, 0).getDate()
-}
-
-export function formatDate(year: number, month: number, day: number) {
-  return [
-    year,
-    String(month).padStart(2, "0"),
-    String(day).padStart(2, "0"),
-  ].join("-")
-}
-
-export function getTodayDateString() {
-  const today = new Date()
-  return formatDate(
-    today.getFullYear(),
-    today.getMonth() + 1,
-    today.getDate()
-  )
-}
-
-export function getArchiveDateRange(year: number, month: number) {
-  const today = getTodayDateString()
-  const startDate = formatDate(year, month, 1)
-
-  if (startDate > today) {
-    return null
-  }
-
-  const requestedEndDate = formatDate(year, month, daysInMonth(year, month))
-
-  return {
-    startDate,
-    endDate: requestedEndDate < today ? requestedEndDate : today,
-  }
 }

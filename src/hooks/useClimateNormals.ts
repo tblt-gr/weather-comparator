@@ -3,8 +3,9 @@
 import { useQuery } from "@tanstack/react-query"
 
 import { fetchHistoricalWeather } from "@/lib/api/openMeteo"
-import { normalizeWeatherData } from "@/lib/weather/normalizeWeatherData"
 import { calculateClimateNormals } from "@/lib/weather/calculateClimateNormals"
+import { getComparableDateRange, type DatePeriod } from "@/lib/weather/dateRange"
+import { normalizeWeatherData } from "@/lib/weather/normalizeWeatherData"
 import type { City, TemperatureMode } from "@/types/weather"
 
 const normalYears = Array.from({ length: 30 }, (_, index) => 1991 + index)
@@ -12,12 +13,12 @@ const normalYears = Array.from({ length: 30 }, (_, index) => 1991 + index)
 export function useClimateNormals({
   city,
   enabled,
-  month,
+  period,
   temperatureMode,
 }: {
   city: City | null
   enabled: boolean
-  month: number
+  period: DatePeriod
   temperatureMode: TemperatureMode
 }) {
   return useQuery({
@@ -27,7 +28,8 @@ export function useClimateNormals({
       city?.id ?? "no-city",
       city?.latitude ?? 0,
       city?.longitude ?? 0,
-      month,
+      period.startDate,
+      period.endDate,
       temperatureMode,
     ],
     queryFn: async () => {
@@ -37,8 +39,14 @@ export function useClimateNormals({
 
       const datasets = await Promise.all(
         normalYears.map(async (year) => {
-          const response = await fetchHistoricalWeather({ city, month, year })
-          return normalizeWeatherData({ response, month, year })
+          const range = getComparableDateRange({ period, year })
+
+          if (range === null) {
+            return { year, values: [] }
+          }
+
+          const response = await fetchHistoricalWeather({ city, period, year })
+          return normalizeWeatherData({ range, response, year })
         })
       )
 
