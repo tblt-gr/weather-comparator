@@ -91,7 +91,9 @@ export async function fetchHistoricalWeather({
   );
 
   if (!response.ok) {
-    throw new Error("Weather fetch failed");
+    const body = await response.json().catch(() => ({}));
+    const reason = (body as { reason?: string }).reason;
+    throw new Error(reason ?? "Weather fetch failed");
   }
 
   return (await response.json()) as OpenMeteoArchiveResponse;

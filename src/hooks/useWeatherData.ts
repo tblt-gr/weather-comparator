@@ -62,10 +62,15 @@ export function useWeatherData({
     .filter((dataset): dataset is WeatherYearDataset => Boolean(dataset))
     .sort((a, b) => a.offsetYears - b.offsetYears);
 
+  const firstError = queries.find((q) => q.error)?.error;
+  const errorMessage =
+    firstError instanceof Error ? firstError.message : firstError ? String(firstError) : null;
+
   return {
     data,
     isLoading: queries.some((query) => query.isLoading),
     isFetching: queries.some((query) => query.isFetching),
     isError: queries.some((query) => query.isError),
+    error: errorMessage,
   };
 }

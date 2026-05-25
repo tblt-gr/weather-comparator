@@ -142,7 +142,7 @@ function WeatherDashboardContent() {
 
               {weather.isError ? (
                 <div className="flex min-h-[360px] items-center justify-center text-sm text-destructive">
-                  Impossible de charger les données météo.
+                  {weather.error ?? "Impossible de charger les données météo."}
                 </div>
               ) : null}
 
