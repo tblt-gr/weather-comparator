@@ -77,25 +77,12 @@ No API key is required. Weather Compare uses public Open-Meteo endpoints:
 
 ```
 src/
-├── app/
-│   ├── globals.css          # Global styles and theme tokens
-│   ├── layout.tsx           # Root app layout
-│   └── page.tsx             # Dashboard entry point
-├── components/
-│   ├── chart/               # Weather chart, legend, heatwave overlay
-│   ├── ui/                  # shadcn/ui primitives
-│   └── weather/             # Dashboard filters, toggles, summary, exports
-├── hooks/
-│   ├── useClimateNormals.ts # Climate baseline query
-│   └── useWeatherData.ts    # Historical weather query
-├── lib/
-│   ├── api/openMeteo.ts     # Open-Meteo clients and date helpers
-│   ├── utils.ts             # Shared UI utilities
-│   └── weather/             # Normalization, heatwaves, CSV export
-├── store/
-│   └── weather-store.ts     # Dashboard state and city persistence
-└── types/
-    └── weather.ts           # Weather and city types
+├── app/          # Next.js app routes and global styling
+├── components/   # UI, chart, and weather dashboard components
+├── hooks/        # Data-fetching hooks
+├── lib/          # API clients, weather logic, and shared utilities
+├── store/        # Client-side dashboard state
+└── types/        # Shared TypeScript types
 ```
 
 ## Scripts
