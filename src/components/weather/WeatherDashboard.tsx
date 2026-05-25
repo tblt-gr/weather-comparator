@@ -74,7 +74,7 @@ function WeatherDashboardContent() {
 
   return (
     <main className="app-ambient min-h-screen text-foreground">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full flex-col gap-4 px-4 py-6 sm:px-6 lg:px-8">
         {/* Header */}
         <header className="glass-panel overflow-hidden rounded-2xl">
           <div className="h-[3px] bg-gradient-to-r from-primary/40 via-primary to-primary/20" />
