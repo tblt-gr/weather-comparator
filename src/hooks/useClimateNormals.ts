@@ -2,14 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchHistoricalWeather } from "@/lib/api/openMeteo";
-import { calculateClimateNormals } from "@/lib/weather/calculateClimateNormals";
-import { type DatePeriod, getComparableDateRangeByOffset } from "@/lib/weather/dateRange";
-import { normalizeWeatherData } from "@/lib/weather/normalizeWeatherData";
+import { fetchClimateNormalsRange } from "@/lib/api/openMeteo";
+import { buildClimateDatasetsFromRange, calculateClimateNormals } from "@/lib/weather/calculateClimateNormals";
+import { type DatePeriod } from "@/lib/weather/dateRange";
 import { isValidDatePeriod } from "@/lib/weather/periodValidation";
 import type { City, TemperatureMode } from "@/types/weather";
-
-const normalYears = Array.from({ length: 30 }, (_, index) => 1991 + index);
 
 export function useClimateNormals({
   city,
@@ -31,41 +28,14 @@ export function useClimateNormals({
       city?.longitude ?? 0,
       period.startDate,
       period.endDate,
-      temperatureMode,
     ],
     queryFn: async () => {
-      if (city === null) {
-        return [];
-      }
+      if (city === null) return [];
 
-      const datasets = await Promise.all(
-        normalYears.map(async (year) => {
-          const offsetYears = Number(period.startDate.slice(0, 4)) - year;
-          const range = getComparableDateRangeByOffset({
-            offsetYears,
-            period,
-          });
-
-          if (range === null) {
-            return {
-              id: `minus-${offsetYears}`,
-              label: "",
-              offsetYears,
-              values: [],
-            };
-          }
-
-          const response = await fetchHistoricalWeather({
-            city,
-            offsetYears,
-            period,
-          });
-          return normalizeWeatherData({ offsetYears, range, response });
-        })
-      );
-
-      return calculateClimateNormals(datasets, temperatureMode);
+      const response = await fetchClimateNormalsRange({ city, period });
+      return buildClimateDatasetsFromRange(response, period);
     },
+    select: (datasets) => calculateClimateNormals(datasets, temperatureMode),
     staleTime: 1000 * 60 * 60 * 24 * 30,
   });
 }
