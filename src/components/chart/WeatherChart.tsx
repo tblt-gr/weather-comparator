@@ -67,7 +67,6 @@ export function WeatherChart({
   const rows = buildChartRows(datasets, temperatureMode, normals);
   const monthBoundaryDays = getMonthBoundaryDays(rows);
   const visibleDatasets = datasets.filter((dataset) => !hiddenSeries.includes(dataset.id));
-  const temperatureDomain = getTemperatureDomain(rows);
 
   useEffect(() => {
     const element = chartShellRef.current;
@@ -172,12 +171,6 @@ export function WeatherChart({
                 }}
               />
               {heatwaves.map((heatwave) => {
-                const laneBounds = getHeatwaveLaneBounds(
-                  heatwave.datasetId,
-                  visibleDatasets,
-                  temperatureDomain
-                );
-
                 return (
                   <ReferenceArea
                     fill={getHeatwaveFill(heatwave.kind)}
@@ -188,8 +181,6 @@ export function WeatherChart({
                     strokeOpacity={heatwave.kind === "canicule" ? 0.65 : 0.45}
                     x1={heatwave.startDay}
                     x2={heatwave.endDay}
-                    y1={laneBounds?.y1}
-                    y2={laneBounds?.y2}
                   />
                 );
               })}
@@ -294,48 +285,4 @@ export function formatChartDateTick(value: string | number) {
 
 export function getHeatwaveFill(kind: HeatwavePeriod["kind"]) {
   return kind === "canicule" ? "oklch(0.62 0.24 28)" : "oklch(0.74 0.18 62)";
-}
-
-export function getHeatwaveLaneBounds(
-  datasetId: string,
-  datasets: Pick<WeatherYearDataset, "id">[],
-  domain: { min: number; max: number }
-) {
-  const index = datasets.findIndex((dataset) => dataset.id === datasetId);
-
-  if (index === -1 || datasets.length === 0) {
-    return undefined;
-  }
-
-  const range = Math.max(1, domain.max - domain.min);
-  const laneHeight = range / datasets.length;
-  const y2 = domain.max - index * laneHeight;
-  const y1 = y2 - laneHeight * 0.72;
-
-  return {
-    y1: roundChartValue(y1),
-    y2: roundChartValue(y2),
-  };
-}
-
-function getTemperatureDomain(rows: ChartRow[]) {
-  const values = rows.flatMap((row) =>
-    Object.entries(row)
-      .filter(([key]) => key !== "day" && key !== "label")
-      .map(([, value]) => value)
-      .filter((value): value is number => typeof value === "number")
-  );
-
-  if (values.length === 0) {
-    return { min: 0, max: 1 };
-  }
-
-  return {
-    min: Math.floor(Math.min(...values) - 1),
-    max: Math.ceil(Math.max(...values) + 1),
-  };
-}
-
-function roundChartValue(value: number) {
-  return Math.round(value * 10) / 10;
 }

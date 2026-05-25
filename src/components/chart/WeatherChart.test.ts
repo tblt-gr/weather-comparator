@@ -4,7 +4,6 @@ import test from "node:test";
 import {
   formatChartDateTick,
   getHeatwaveFill,
-  getHeatwaveLaneBounds,
   getMonthBoundaryDays,
 } from "./WeatherChart";
 
@@ -34,13 +33,4 @@ test("extracts month boundary days from chart rows", () => {
 test("uses red for canicules and orange for heatwaves", () => {
   assert.equal(getHeatwaveFill("canicule"), "oklch(0.62 0.24 28)");
   assert.equal(getHeatwaveFill("vague_de_chaleur"), "oklch(0.74 0.18 62)");
-});
-
-test("places each dataset in its own heatwave lane", () => {
-  const lane = getHeatwaveLaneBounds("2025", [{ id: "2026" }, { id: "2025" }], {
-    min: 10,
-    max: 40,
-  });
-
-  assert.deepEqual(lane, { y1: 14.2, y2: 25 });
 });

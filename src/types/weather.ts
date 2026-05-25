@@ -29,9 +29,12 @@ export type ClimateNormal = {
   value: number | null;
 };
 
+export type HeatwaveKind = "vague_de_chaleur" | "canicule";
+
 export type HeatwavePeriod = {
   datasetId: string;
   datasetLabel: string;
+  kind: HeatwaveKind;
   start: string;
   end: string;
   startDay: number;

@@ -2,26 +2,25 @@ import type { HeatwavePeriod, WeatherYearDataset } from "@/types/weather";
 
 export function detectHeatwaves(
   datasets: WeatherYearDataset[],
-  thresholdMax = 33,
-  thresholdMin = 18,
+  thresholdHeatwave = 30,
+  thresholdCanicule = 33,
   minimumDuration = 3
 ): HeatwavePeriod[] {
   const heatwaves: HeatwavePeriod[] = [];
 
   datasets.forEach((dataset) => {
-    let sequence: { date: string; day: number; tmax: number }[] = [];
+    let sequence: { date: string; day: number; tmax: number; isCanicule: boolean }[] = [];
 
     dataset.values.forEach((value) => {
       if (
         typeof value.tmax === "number" &&
-        typeof value.tmin === "number" &&
-        value.tmax >= thresholdMax &&
-        value.tmin >= thresholdMin
+        value.tmax >= thresholdHeatwave
       ) {
         sequence.push({
           date: value.date,
           day: value.day,
           tmax: value.tmax,
+          isCanicule: value.tmax >= thresholdCanicule,
         });
         return;
       }
@@ -39,7 +38,7 @@ export function detectHeatwaves(
 function pushHeatwave(
   datasetId: string,
   datasetLabel: string,
-  sequence: { date: string; day: number; tmax: number }[],
+  sequence: { date: string; day: number; tmax: number; isCanicule: boolean }[],
   minimumDuration: number,
   heatwaves: HeatwavePeriod[]
 ) {
@@ -50,6 +49,7 @@ function pushHeatwave(
   heatwaves.push({
     datasetId,
     datasetLabel,
+    kind: sequence.some((value) => value.isCanicule) ? "canicule" : "vague_de_chaleur",
     start: sequence[0].date,
     end: sequence[sequence.length - 1].date,
     startDay: sequence[0].day,

@@ -34,6 +34,8 @@ export function ClimateSummaryBar({
     referenceDataset?.values.filter((v) => typeof v.tmax === "number" && v.tmax > 30).length ?? 0;
   const tropicalNights =
     referenceDataset?.values.filter((v) => typeof v.tmin === "number" && v.tmin >= 20).length ?? 0;
+  const vagueHeatwaves = heatwaves.filter((heatwave) => heatwave.kind === "vague_de_chaleur");
+  const canicules = heatwaves.filter((heatwave) => heatwave.kind === "canicule");
 
   return (
     <div className="flex flex-wrap gap-2">
@@ -45,10 +47,9 @@ export function ClimateSummaryBar({
         value={delta === null ? "—" : `${delta >= 0 ? "+" : ""}${delta.toFixed(1)} °C`}
       />
       <StatCard label="Jours > 30 °C" value={String(hotDays)} />
-      <StatCard
-        label="Nuits tropicales · Canicules"
-        value={`${tropicalNights} · ${heatwaves.length}`}
-      />
+      <StatCard label="Nuits tropicales" value={String(tropicalNights)} />
+      <StatCard label="Vagues de chaleur" value={String(vagueHeatwaves.length)} />
+      <StatCard label="Canicules" tone="warm" value={String(canicules.length)} />
     </div>
   );
 }
