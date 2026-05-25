@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import type { DatePeriod } from "@/lib/weather/dateRange";
@@ -15,11 +15,13 @@ type PeriodPickerProps = {
 
 export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
   const [localPeriod, setLocalPeriod] = useState(period);
+  const [prevPeriod, setPrevPeriod] = useState(period);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
+  if (prevPeriod.startDate !== period.startDate || prevPeriod.endDate !== period.endDate) {
+    setPrevPeriod(period);
     setLocalPeriod(period);
-  }, [period.startDate, period.endDate]);
+  }
 
   function handleChange(newPeriod: DatePeriod) {
     setLocalPeriod(newPeriod);

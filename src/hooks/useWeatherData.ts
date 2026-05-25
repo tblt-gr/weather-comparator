@@ -5,6 +5,7 @@ import { useQueries } from "@tanstack/react-query";
 import { fetchHistoricalWeather } from "@/lib/api/openMeteo";
 import { type DatePeriod, getComparableDateRangeByOffset } from "@/lib/weather/dateRange";
 import { normalizeWeatherData } from "@/lib/weather/normalizeWeatherData";
+import { isValidDatePeriod } from "@/lib/weather/periodValidation";
 import type { City, WeatherYearDataset } from "@/types/weather";
 
 export function useWeatherData({
@@ -30,7 +31,7 @@ export function useWeatherData({
               period.endDate,
               offsetYears,
             ],
-            enabled: getComparableDateRangeByOffset({ offsetYears, period }) !== null,
+            enabled: isValidDatePeriod(period) && getComparableDateRangeByOffset({ offsetYears, period }) !== null,
             queryFn: async () => {
               const range = getComparableDateRangeByOffset({
                 offsetYears,

@@ -6,6 +6,7 @@ import { fetchHistoricalWeather } from "@/lib/api/openMeteo";
 import { calculateClimateNormals } from "@/lib/weather/calculateClimateNormals";
 import { type DatePeriod, getComparableDateRangeByOffset } from "@/lib/weather/dateRange";
 import { normalizeWeatherData } from "@/lib/weather/normalizeWeatherData";
+import { isValidDatePeriod } from "@/lib/weather/periodValidation";
 import type { City, TemperatureMode } from "@/types/weather";
 
 const normalYears = Array.from({ length: 30 }, (_, index) => 1991 + index);
@@ -22,7 +23,7 @@ export function useClimateNormals({
   temperatureMode: TemperatureMode;
 }) {
   return useQuery({
-    enabled: enabled && city !== null,
+    enabled: enabled && city !== null && isValidDatePeriod(period),
     queryKey: [
       "climate-normal",
       city?.id ?? "no-city",

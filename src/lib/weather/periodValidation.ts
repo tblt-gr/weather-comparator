@@ -1,5 +1,14 @@
 import { type DatePeriod, formatLocalDate } from "./dateRange";
 
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+export function isValidDatePeriod(period: DatePeriod): boolean {
+  const { startDate, endDate } = period;
+  if (!DATE_PATTERN.test(startDate) || !DATE_PATTERN.test(endDate)) return false;
+  if (isNaN(new Date(startDate).getTime()) || isNaN(new Date(endDate).getTime())) return false;
+  return startDate < endDate;
+}
+
 export function normalizeDatePeriod(
   period: DatePeriod,
   changedField: keyof DatePeriod
@@ -21,13 +30,6 @@ export function normalizeDatePeriod(
   };
 }
 
-export function getMaximumStartDate(endDate: string) {
-  return shiftDate(endDate, -1);
-}
-
-export function getMinimumEndDate(startDate: string) {
-  return shiftDate(startDate, 1);
-}
 
 function shiftDate(date: string, days: number) {
   const nextDate = new Date(`${date}T00:00:00.000Z`);
