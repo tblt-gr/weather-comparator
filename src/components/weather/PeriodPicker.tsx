@@ -1,12 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { DatePeriod } from "@/lib/weather/dateRange";
 import { normalizeDatePeriod } from "@/lib/weather/periodValidation";
-
-const DEBOUNCE_MS = 800;
 
 type PeriodPickerProps = {
   period: DatePeriod;
@@ -16,17 +15,17 @@ type PeriodPickerProps = {
 export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
   const [localPeriod, setLocalPeriod] = useState(period);
   const [prevPeriod, setPrevPeriod] = useState(period);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   if (prevPeriod.startDate !== period.startDate || prevPeriod.endDate !== period.endDate) {
     setPrevPeriod(period);
     setLocalPeriod(period);
   }
 
+  const hasPendingChange =
+    localPeriod.startDate !== period.startDate || localPeriod.endDate !== period.endDate;
+
   function handleChange(newPeriod: DatePeriod) {
     setLocalPeriod(newPeriod);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => onPeriodChange(newPeriod), DEBOUNCE_MS);
   }
 
   return (
@@ -54,6 +53,20 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
           value={localPeriod.endDate}
         />
       </label>
+
+      {hasPendingChange && (
+        <div className="sm:col-span-2">
+          <Button
+            aria-label="Appliquer la période sélectionnée"
+            className="w-full"
+            onClick={() => onPeriodChange(localPeriod)}
+            size="sm"
+            type="button"
+          >
+            Appliquer
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
