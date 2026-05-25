@@ -98,3 +98,39 @@ export async function fetchHistoricalWeather({
 
   return (await response.json()) as OpenMeteoArchiveResponse;
 }
+
+export async function fetchClimateNormalsRange({
+  city,
+  period,
+}: {
+  city: City;
+  period: DatePeriod;
+}): Promise<OpenMeteoArchiveResponse> {
+  const startMonthDay = period.startDate.slice(5);
+  const endMonthDay = period.endDate.slice(5);
+  const isCrossYear = endMonthDay < startMonthDay;
+
+  const startDate = `1991-${startMonthDay}`;
+  const endDate = `${isCrossYear ? 2021 : 2020}-${endMonthDay}`;
+
+  const params = new URLSearchParams({
+    latitude: String(city.latitude),
+    longitude: String(city.longitude),
+    start_date: startDate,
+    end_date: endDate,
+    daily: "temperature_2m_max,temperature_2m_min",
+    timezone: "Europe/Paris",
+  });
+
+  const response = await fetch(
+    `https://archive-api.open-meteo.com/v1/archive?${params.toString()}`
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    const reason = (body as { reason?: string }).reason;
+    throw new Error(reason ?? "Climate normals fetch failed");
+  }
+
+  return (await response.json()) as OpenMeteoArchiveResponse;
+}
