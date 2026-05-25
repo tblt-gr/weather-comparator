@@ -9,8 +9,16 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_TELEMETRY_DISABLED: 1
+
 jobs:
   lint:
+    name: Lint and typecheck
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -26,15 +34,34 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --prefer-offline
 
       - name: Lint
         run: pnpm lint
-        env:
-          NEXT_TELEMETRY_DISABLED: 1
 
       - name: Typecheck
         run: pnpm typecheck
+
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Set node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Test
+        run: pnpm test
 
   build:
     runs-on: ubuntu-24.04
@@ -52,7 +79,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --prefer-offline
 
       - name: Restore Next.js cache
         uses: actions/cache@v4
@@ -65,5 +92,3 @@ jobs:
 
       - name: Build
         run: pnpm build
-        env:
-          NEXT_TELEMETRY_DISABLED: 1

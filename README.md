@@ -106,7 +106,25 @@ src/
 | `pnpm build`        | Build for production           |
 | `pnpm start`        | Serve the production build     |
 | `pnpm lint`         | Run ESLint                     |
+| `pnpm test`         | Run the automated tests        |
 | `pnpm typecheck`    | Type-check with TypeScript     |
+
+## Tests
+
+Run the test suite locally with:
+
+```bash
+pnpm test
+```
+
+Before opening a pull request, run the same checks as CI:
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
 
 ## Data Sources
 
