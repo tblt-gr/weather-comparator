@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CartesianGrid, Line, LineChart, ReferenceArea, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ReferenceArea,
+  ReferenceLine,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 import { ChartLegend } from "@/components/chart/ChartLegend";
 import type {
@@ -56,7 +65,9 @@ export function WeatherChart({
     datasets.map((dataset, index) => [dataset.id, palette[index % palette.length]])
   ) as Record<string, string>;
   const rows = buildChartRows(datasets, temperatureMode, normals);
+  const monthBoundaryDays = getMonthBoundaryDays(rows);
   const visibleDatasets = datasets.filter((dataset) => !hiddenSeries.includes(dataset.id));
+  const temperatureDomain = getTemperatureDomain(rows);
 
   useEffect(() => {
     const element = chartShellRef.current;
@@ -97,6 +108,16 @@ export function WeatherChart({
               width={Math.max(chartWidth, 760)}
             >
               <CartesianGrid stroke="var(--border)" strokeDasharray="4 4" strokeOpacity={0.72} />
+              {monthBoundaryDays.map((day) => (
+                <ReferenceLine
+                  ifOverflow="extendDomain"
+                  key={day}
+                  stroke="var(--border)"
+                  strokeOpacity={0.95}
+                  strokeWidth={1.5}
+                  x={day}
+                />
+              ))}
               <XAxis
                 angle={-45}
                 axisLine={false}
@@ -150,16 +171,28 @@ export function WeatherChart({
                   );
                 }}
               />
-              {heatwaves.map((heatwave) => (
-                <ReferenceArea
-                  fill="oklch(0.76 0.16 52)"
-                  fillOpacity={0.18}
-                  ifOverflow="extendDomain"
-                  key={`${heatwave.datasetId}-${heatwave.start}`}
-                  x1={heatwave.startDay}
-                  x2={heatwave.endDay}
-                />
-              ))}
+              {heatwaves.map((heatwave) => {
+                const laneBounds = getHeatwaveLaneBounds(
+                  heatwave.datasetId,
+                  visibleDatasets,
+                  temperatureDomain
+                );
+
+                return (
+                  <ReferenceArea
+                    fill={getHeatwaveFill(heatwave.kind)}
+                    fillOpacity={heatwave.kind === "canicule" ? 0.28 : 0.2}
+                    ifOverflow="extendDomain"
+                    key={`${heatwave.datasetId}-${heatwave.start}`}
+                    stroke={getHeatwaveFill(heatwave.kind)}
+                    strokeOpacity={heatwave.kind === "canicule" ? 0.65 : 0.45}
+                    x1={heatwave.startDay}
+                    x2={heatwave.endDay}
+                    y1={laneBounds?.y1}
+                    y2={laneBounds?.y2}
+                  />
+                );
+              })}
               {visibleDatasets.map((dataset) => (
                 <Line
                   connectNulls={false}
@@ -232,6 +265,12 @@ function buildChartRows(
   });
 }
 
+export function getMonthBoundaryDays(rows: ChartRow[]) {
+  return rows
+    .filter((row) => typeof row.label === "string" && row.label.slice(8, 10) === "01")
+    .map((row) => row.day);
+}
+
 function getPeriodLabel(datasets: WeatherYearDataset[], day: number) {
   const date = datasets
     .flatMap((dataset) => dataset.values)
@@ -251,4 +290,52 @@ export function formatChartDateTick(value: string | number) {
   const [, year, month, day] = match;
 
   return `${day}/${month}/${year.slice(2)}`;
+}
+
+export function getHeatwaveFill(kind: HeatwavePeriod["kind"]) {
+  return kind === "canicule" ? "oklch(0.62 0.24 28)" : "oklch(0.74 0.18 62)";
+}
+
+export function getHeatwaveLaneBounds(
+  datasetId: string,
+  datasets: Pick<WeatherYearDataset, "id">[],
+  domain: { min: number; max: number }
+) {
+  const index = datasets.findIndex((dataset) => dataset.id === datasetId);
+
+  if (index === -1 || datasets.length === 0) {
+    return undefined;
+  }
+
+  const range = Math.max(1, domain.max - domain.min);
+  const laneHeight = range / datasets.length;
+  const y2 = domain.max - index * laneHeight;
+  const y1 = y2 - laneHeight * 0.72;
+
+  return {
+    y1: roundChartValue(y1),
+    y2: roundChartValue(y2),
+  };
+}
+
+function getTemperatureDomain(rows: ChartRow[]) {
+  const values = rows.flatMap((row) =>
+    Object.entries(row)
+      .filter(([key]) => key !== "day" && key !== "label")
+      .map(([, value]) => value)
+      .filter((value): value is number => typeof value === "number")
+  );
+
+  if (values.length === 0) {
+    return { min: 0, max: 1 };
+  }
+
+  return {
+    min: Math.floor(Math.min(...values) - 1),
+    max: Math.ceil(Math.max(...values) + 1),
+  };
+}
+
+function roundChartValue(value: number) {
+  return Math.round(value * 10) / 10;
 }
