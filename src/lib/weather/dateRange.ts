@@ -5,6 +5,8 @@ export type DatePeriod = {
 
 export type ComparableDateRange = DatePeriod;
 
+export const OPEN_METEO_HISTORICAL_START_DATE = "1940-01-01";
+
 const dateFormatter = new Intl.DateTimeFormat("en-CA", {
   day: "2-digit",
   month: "2-digit",
@@ -56,7 +58,7 @@ export function getComparableDateRangeByOffset({
   const startDate = shiftDateYears(period.startDate, -offsetYears);
   const endDate = shiftDateYears(period.endDate, -offsetYears);
 
-  if (startDate > today) {
+  if (startDate > today || startDate < OPEN_METEO_HISTORICAL_START_DATE) {
     return null;
   }
 
@@ -64,6 +66,25 @@ export function getComparableDateRangeByOffset({
     startDate,
     endDate: endDate < today ? endDate : today,
   };
+}
+
+export function getAvailableComparisonOffsets(
+  period: DatePeriod,
+  today = formatLocalDate(new Date())
+) {
+  const offsets: number[] = [];
+  const maxOffsetYears = Math.max(
+    0,
+    Number(period.startDate.slice(0, 4)) - Number(OPEN_METEO_HISTORICAL_START_DATE.slice(0, 4))
+  );
+
+  for (let offsetYears = 1; offsetYears <= maxOffsetYears; offsetYears += 1) {
+    if (getComparableDateRangeByOffset({ offsetYears, period, today }) !== null) {
+      offsets.push(offsetYears);
+    }
+  }
+
+  return offsets;
 }
 
 export function getPeriodLabel(range: DatePeriod) {

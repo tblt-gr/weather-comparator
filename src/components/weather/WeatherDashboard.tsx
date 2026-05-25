@@ -114,6 +114,7 @@ function WeatherDashboardContent() {
           <PeriodPicker period={period} onPeriodChange={setPeriod} />
           <YearSelector
             onToggleOffset={toggleComparisonOffset}
+            period={period}
             selectedOffsets={comparisonOffsets}
           />
           <div className="flex items-end">

@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getComparableDateRange, getComparableDateRangeByOffset } from "./dateRange";
+import {
+  getAvailableComparisonOffsets,
+  getComparableDateRange,
+  getComparableDateRangeByOffset,
+} from "./dateRange";
 
 test("clamps the current year comparison range to today", () => {
   const range = getComparableDateRange({
@@ -49,4 +53,29 @@ test("shifts multi-year periods by comparison offset", () => {
     startDate: "2023-11-15",
     endDate: "2024-02-10",
   });
+});
+
+test("limits comparison offsets to Open-Meteo historical data availability", () => {
+  assert.deepEqual(
+    getAvailableComparisonOffsets(
+      {
+        endDate: "2026-05-25",
+        startDate: "2026-05-01",
+      },
+      "2026-05-25"
+    ).slice(-3),
+    [84, 85, 86]
+  );
+
+  assert.equal(
+    getComparableDateRangeByOffset({
+      offsetYears: 87,
+      period: {
+        startDate: "2026-05-01",
+        endDate: "2026-05-25",
+      },
+      today: "2026-05-25",
+    }),
+    null
+  );
 });

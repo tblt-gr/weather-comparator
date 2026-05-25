@@ -9,21 +9,25 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-const offsets = Array.from({ length: 10 }, (_, index) => index + 1);
+import { type DatePeriod, getAvailableComparisonOffsets } from "@/lib/weather/dateRange";
 
 type YearSelectorProps = {
+  period: DatePeriod;
   selectedOffsets: number[];
   onToggleOffset: (offsetYears: number) => void;
 };
 
-export function YearSelector({ selectedOffsets, onToggleOffset }: YearSelectorProps) {
-  const count = selectedOffsets.length;
+export function YearSelector({ period, selectedOffsets, onToggleOffset }: YearSelectorProps) {
+  const offsets = getAvailableComparisonOffsets(period);
+  const visibleSelectedOffsets = selectedOffsets.filter((offsetYears) =>
+    offsets.includes(offsetYears)
+  );
+  const count = visibleSelectedOffsets.length;
   const label =
     count === 0
       ? "Aucune période sélectionnée"
       : count === 1
-        ? formatOffset(selectedOffsets[0])
+        ? formatOffset(visibleSelectedOffsets[0])
         : `${count} périodes sélectionnées`;
 
   return (
@@ -41,7 +45,7 @@ export function YearSelector({ selectedOffsets, onToggleOffset }: YearSelectorPr
             <ChevronDown className="size-4 text-muted-foreground" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-64">
+        <DropdownMenuContent align="start" className="max-h-80 w-64 overflow-y-auto">
           {offsets.map((offsetYears) => {
             const checked = selectedOffsets.includes(offsetYears);
             return (
