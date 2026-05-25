@@ -27,7 +27,7 @@ export function YearSelector({ period, selectedOffsets, onToggleOffset }: YearSe
     count === 0
       ? "Aucune période sélectionnée"
       : count === 1
-        ? formatOffset(visibleSelectedOffsets[0])
+        ? formatComparisonOffsetLabel(period, visibleSelectedOffsets[0])
         : `${count} périodes sélectionnées`;
 
   return (
@@ -57,7 +57,7 @@ export function YearSelector({ period, selectedOffsets, onToggleOffset }: YearSe
               >
                 <span className="flex items-center gap-2">
                   <Check className={checked ? "size-4 opacity-100" : "size-4 opacity-0"} />
-                  {formatOffset(offsetYears)}
+                  {formatComparisonOffsetLabel(period, offsetYears)}
                 </span>
               </DropdownMenuCheckboxItem>
             );
@@ -68,6 +68,11 @@ export function YearSelector({ period, selectedOffsets, onToggleOffset }: YearSe
   );
 }
 
-function formatOffset(offsetYears: number) {
-  return offsetYears === 1 ? "-1 an" : `-${offsetYears} ans`;
+export function formatComparisonOffsetLabel(period: DatePeriod, offsetYears: number) {
+  const startYear = Number(period.startDate.slice(0, 4)) - offsetYears;
+  const endYear = Number(period.endDate.slice(0, 4)) - offsetYears;
+  const yearLabel = startYear === endYear ? String(startYear) : `${startYear}-${endYear}`;
+  const offsetLabel = offsetYears === 1 ? "-1 an" : `-${offsetYears} ans`;
+
+  return `${offsetLabel} (${yearLabel})`;
 }
