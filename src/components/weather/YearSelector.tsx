@@ -1,48 +1,38 @@
-"use client"
+"use client";
 
-import { Check, ChevronDown } from "lucide-react"
+import { Check, ChevronDown } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
-const FIRST_COMPARISON_YEAR = 2000
+const offsets = Array.from({ length: 10 }, (_, index) => index + 1);
 
 type YearSelectorProps = {
-  referenceYear: number
-  selectedYears: number[]
-  onToggleYear: (year: number) => void
-}
+  selectedOffsets: number[];
+  onToggleOffset: (offsetYears: number) => void;
+};
 
-export function YearSelector({
-  referenceYear,
-  selectedYears,
-  onToggleYear,
-}: YearSelectorProps) {
-  const currentYear = new Date().getFullYear()
-  const years = Array.from(
-    { length: currentYear - FIRST_COMPARISON_YEAR + 1 },
-    (_, i) => currentYear - i
-  ).filter((year) => year !== referenceYear)
-  const count = selectedYears.length
+export function YearSelector({ selectedOffsets, onToggleOffset }: YearSelectorProps) {
+  const count = selectedOffsets.length;
   const label =
     count === 0
-      ? "Aucune année sélectionnée"
+      ? "Aucune période sélectionnée"
       : count === 1
-        ? String(selectedYears[0])
-        : `${count} années sélectionnées`
+        ? formatOffset(selectedOffsets[0])
+        : `${count} périodes sélectionnées`;
 
   return (
     <div className="grid gap-1">
-      <span className="text-sm font-medium">Années comparées</span>
+      <span className="text-sm font-medium">Périodes comparées</span>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            aria-label="Sélectionner les années à comparer"
+            aria-label="Sélectionner les périodes à comparer"
             className="w-full justify-between"
             type="button"
             variant="outline"
@@ -51,25 +41,29 @@ export function YearSelector({
             <ChevronDown className="size-4 text-muted-foreground" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56">
-          {years.map((year) => {
-            const checked = selectedYears.includes(year)
+        <DropdownMenuContent align="start" className="w-64">
+          {offsets.map((offsetYears) => {
+            const checked = selectedOffsets.includes(offsetYears);
             return (
               <DropdownMenuCheckboxItem
                 checked={checked}
                 className="justify-between"
-                key={year}
-                onCheckedChange={() => onToggleYear(year)}
+                key={offsetYears}
+                onCheckedChange={() => onToggleOffset(offsetYears)}
               >
                 <span className="flex items-center gap-2">
                   <Check className={checked ? "size-4 opacity-100" : "size-4 opacity-0"} />
-                  {year}
+                  {formatOffset(offsetYears)}
                 </span>
               </DropdownMenuCheckboxItem>
-            )
+            );
           })}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
-  )
+  );
+}
+
+function formatOffset(offsetYears: number) {
+  return offsetYears === 1 ? "-1 an" : `-${offsetYears} ans`;
 }

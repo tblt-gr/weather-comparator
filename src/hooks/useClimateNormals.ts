@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { useQuery } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query";
 
-import { fetchHistoricalWeather } from "@/lib/api/openMeteo"
-import { calculateClimateNormals } from "@/lib/weather/calculateClimateNormals"
-import { getComparableDateRange, type DatePeriod } from "@/lib/weather/dateRange"
-import { normalizeWeatherData } from "@/lib/weather/normalizeWeatherData"
-import type { City, TemperatureMode } from "@/types/weather"
+import { fetchHistoricalWeather } from "@/lib/api/openMeteo";
+import { calculateClimateNormals } from "@/lib/weather/calculateClimateNormals";
+import { type DatePeriod, getComparableDateRangeByOffset } from "@/lib/weather/dateRange";
+import { normalizeWeatherData } from "@/lib/weather/normalizeWeatherData";
+import type { City, TemperatureMode } from "@/types/weather";
 
-const normalYears = Array.from({ length: 30 }, (_, index) => 1991 + index)
+const normalYears = Array.from({ length: 30 }, (_, index) => 1991 + index);
 
 export function useClimateNormals({
   city,
@@ -16,10 +16,10 @@ export function useClimateNormals({
   period,
   temperatureMode,
 }: {
-  city: City | null
-  enabled: boolean
-  period: DatePeriod
-  temperatureMode: TemperatureMode
+  city: City | null;
+  enabled: boolean;
+  period: DatePeriod;
+  temperatureMode: TemperatureMode;
 }) {
   return useQuery({
     enabled: enabled && city !== null,
@@ -34,24 +34,37 @@ export function useClimateNormals({
     ],
     queryFn: async () => {
       if (city === null) {
-        return []
+        return [];
       }
 
       const datasets = await Promise.all(
         normalYears.map(async (year) => {
-          const range = getComparableDateRange({ period, year })
+          const offsetYears = Number(period.startDate.slice(0, 4)) - year;
+          const range = getComparableDateRangeByOffset({
+            offsetYears,
+            period,
+          });
 
           if (range === null) {
-            return { year, values: [] }
+            return {
+              id: `minus-${offsetYears}`,
+              label: "",
+              offsetYears,
+              values: [],
+            };
           }
 
-          const response = await fetchHistoricalWeather({ city, period, year })
-          return normalizeWeatherData({ range, response, year })
+          const response = await fetchHistoricalWeather({
+            city,
+            offsetYears,
+            period,
+          });
+          return normalizeWeatherData({ offsetYears, range, response });
         })
-      )
+      );
 
-      return calculateClimateNormals(datasets, temperatureMode)
+      return calculateClimateNormals(datasets, temperatureMode);
     },
     staleTime: 1000 * 60 * 60 * 24 * 30,
-  })
+  });
 }

@@ -1,35 +1,32 @@
-import {
-  type DatePeriod,
-  getComparableDateRange,
-} from "@/lib/weather/dateRange"
-import type { City } from "@/types/weather"
+import { type DatePeriod, getComparableDateRangeByOffset } from "@/lib/weather/dateRange";
+import type { City } from "@/types/weather";
 
 type GeocodingResult = {
-  id: number
-  name: string
-  latitude: number
-  longitude: number
-  country: string
-  admin1?: string
-}
+  id: number;
+  name: string;
+  latitude: number;
+  longitude: number;
+  country: string;
+  admin1?: string;
+};
 
 type GeocodingResponse = {
-  results?: GeocodingResult[]
-}
+  results?: GeocodingResult[];
+};
 
 export type OpenMeteoArchiveResponse = {
   daily?: {
-    time?: string[]
-    temperature_2m_max?: (number | null)[]
-    temperature_2m_min?: (number | null)[]
-  }
-}
+    time?: string[];
+    temperature_2m_max?: (number | null)[];
+    temperature_2m_min?: (number | null)[];
+  };
+};
 
 export async function searchCities(query: string): Promise<City[]> {
-  const trimmedQuery = query.trim()
+  const trimmedQuery = query.trim();
 
   if (trimmedQuery.length < 2) {
-    return []
+    return [];
   }
 
   const params = new URLSearchParams({
@@ -37,17 +34,17 @@ export async function searchCities(query: string): Promise<City[]> {
     count: "8",
     language: "fr",
     format: "json",
-  })
+  });
 
   const response = await fetch(
     `https://geocoding-api.open-meteo.com/v1/search?${params.toString()}`
-  )
+  );
 
   if (!response.ok) {
-    throw new Error("City search failed")
+    throw new Error("City search failed");
   }
 
-  const payload = (await response.json()) as GeocodingResponse
+  const payload = (await response.json()) as GeocodingResponse;
 
   return (payload.results ?? []).map((result) => ({
     id: String(result.id),
@@ -56,19 +53,19 @@ export async function searchCities(query: string): Promise<City[]> {
     longitude: result.longitude,
     country: result.country,
     admin1: result.admin1,
-  }))
+  }));
 }
 
 export async function fetchHistoricalWeather({
   city,
+  offsetYears,
   period,
-  year,
 }: {
-  city: City
-  period: DatePeriod
-  year: number
+  city: City;
+  offsetYears: number;
+  period: DatePeriod;
 }): Promise<OpenMeteoArchiveResponse> {
-  const range = getComparableDateRange({ period, year })
+  const range = getComparableDateRangeByOffset({ offsetYears, period });
 
   if (!range) {
     return {
@@ -77,7 +74,7 @@ export async function fetchHistoricalWeather({
         temperature_2m_max: [],
         temperature_2m_min: [],
       },
-    }
+    };
   }
 
   const params = new URLSearchParams({
@@ -87,15 +84,15 @@ export async function fetchHistoricalWeather({
     end_date: range.endDate,
     daily: "temperature_2m_max,temperature_2m_min",
     timezone: "Europe/Paris",
-  })
+  });
 
   const response = await fetch(
     `https://archive-api.open-meteo.com/v1/archive?${params.toString()}`
-  )
+  );
 
   if (!response.ok) {
-    throw new Error("Weather fetch failed")
+    throw new Error("Weather fetch failed");
   }
 
-  return (await response.json()) as OpenMeteoArchiveResponse
+  return (await response.json()) as OpenMeteoArchiveResponse;
 }

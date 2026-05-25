@@ -1,4 +1,4 @@
-import type { HeatwavePeriod, WeatherYearDataset } from "@/types/weather"
+import type { HeatwavePeriod, WeatherYearDataset } from "@/types/weather";
 
 export function detectHeatwaves(
   datasets: WeatherYearDataset[],
@@ -6,10 +6,10 @@ export function detectHeatwaves(
   thresholdMin = 18,
   minimumDuration = 3
 ): HeatwavePeriod[] {
-  const heatwaves: HeatwavePeriod[] = []
+  const heatwaves: HeatwavePeriod[] = [];
 
   datasets.forEach((dataset) => {
-    let sequence: { date: string; day: number; tmax: number }[] = []
+    let sequence: { date: string; day: number; tmax: number }[] = [];
 
     dataset.values.forEach((value) => {
       if (
@@ -22,38 +22,39 @@ export function detectHeatwaves(
           date: value.date,
           day: value.day,
           tmax: value.tmax,
-        })
-        return
+        });
+        return;
       }
 
-      pushHeatwave(dataset.year, sequence, minimumDuration, heatwaves)
-      sequence = []
-    })
+      pushHeatwave(dataset.id, dataset.label, sequence, minimumDuration, heatwaves);
+      sequence = [];
+    });
 
-    pushHeatwave(dataset.year, sequence, minimumDuration, heatwaves)
-  })
+    pushHeatwave(dataset.id, dataset.label, sequence, minimumDuration, heatwaves);
+  });
 
-  return heatwaves
+  return heatwaves;
 }
 
 function pushHeatwave(
-  year: number,
+  datasetId: string,
+  datasetLabel: string,
   sequence: { date: string; day: number; tmax: number }[],
   minimumDuration: number,
   heatwaves: HeatwavePeriod[]
 ) {
   if (sequence.length < minimumDuration) {
-    return
+    return;
   }
 
   heatwaves.push({
-    year,
+    datasetId,
+    datasetLabel,
     start: sequence[0].date,
     end: sequence[sequence.length - 1].date,
     startDay: sequence[0].day,
     endDay: sequence[sequence.length - 1].day,
     duration: sequence.length,
-    averageMax:
-      sequence.reduce((total, value) => total + value.tmax, 0) / sequence.length,
-  })
+    averageMax: sequence.reduce((total, value) => total + value.tmax, 0) / sequence.length,
+  });
 }

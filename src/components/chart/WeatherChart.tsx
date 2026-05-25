@@ -1,23 +1,15 @@
-"use client"
+"use client";
 
-import { useEffect, useRef, useState } from "react"
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ReferenceArea,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts"
+import { useEffect, useRef, useState } from "react";
+import { CartesianGrid, Line, LineChart, ReferenceArea, Tooltip, XAxis, YAxis } from "recharts";
 
-import { ChartLegend } from "@/components/chart/ChartLegend"
+import { ChartLegend } from "@/components/chart/ChartLegend";
 import type {
   ClimateNormal,
   HeatwavePeriod,
   TemperatureMode,
   WeatherYearDataset,
-} from "@/types/weather"
+} from "@/types/weather";
 
 const palette = [
   "var(--chart-1)",
@@ -30,74 +22,67 @@ const palette = [
   "oklch(0.66 0.18 285)",
   "oklch(0.72 0.17 78)",
   "oklch(0.66 0.16 18)",
-]
+];
 
 type WeatherChartProps = {
-  datasets: WeatherYearDataset[]
-  temperatureMode: TemperatureMode
-  hiddenYears: number[]
-  referenceYear: number
-  normals?: ClimateNormal[]
-  heatwaves?: HeatwavePeriod[]
-  showNormals: boolean
-  onToggleYear: (year: number) => void
-}
+  datasets: WeatherYearDataset[];
+  temperatureMode: TemperatureMode;
+  hiddenSeries: string[];
+  normals?: ClimateNormal[];
+  heatwaves?: HeatwavePeriod[];
+  showNormals: boolean;
+  onToggleSeries: (seriesId: string) => void;
+};
 
 type ChartRow = {
-  day: number
-  label: string
-  normal?: number | null
-  [year: string]: number | string | null | undefined
-}
+  day: number;
+  label: string;
+  normal?: number | null;
+  [year: string]: number | string | null | undefined;
+};
 
 export function WeatherChart({
   datasets,
   temperatureMode,
-  hiddenYears,
-  referenceYear,
+  hiddenSeries,
   normals,
   heatwaves = [],
   showNormals,
-  onToggleYear,
+  onToggleSeries,
 }: WeatherChartProps) {
-  const chartShellRef = useRef<HTMLDivElement | null>(null)
-  const [chartWidth, setChartWidth] = useState(0)
+  const chartShellRef = useRef<HTMLDivElement | null>(null);
+  const [chartWidth, setChartWidth] = useState(0);
   const colors = Object.fromEntries(
-    datasets.map((dataset, index) => [
-      dataset.year,
-      palette[index % palette.length],
-    ])
-  ) as Record<number, string>
-  const rows = buildChartRows(datasets, temperatureMode, normals)
-  const visibleDatasets = datasets.filter(
-    (dataset) => !hiddenYears.includes(dataset.year)
-  )
+    datasets.map((dataset, index) => [dataset.id, palette[index % palette.length]])
+  ) as Record<string, string>;
+  const rows = buildChartRows(datasets, temperatureMode, normals);
+  const visibleDatasets = datasets.filter((dataset) => !hiddenSeries.includes(dataset.id));
 
   useEffect(() => {
-    const element = chartShellRef.current
+    const element = chartShellRef.current;
 
     if (!element) {
-      return
+      return;
     }
 
     const updateWidth = () => {
-      setChartWidth(element.clientWidth)
-    }
+      setChartWidth(element.clientWidth);
+    };
 
-    updateWidth()
+    updateWidth();
 
-    const observer = new ResizeObserver(updateWidth)
-    observer.observe(element)
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(element);
 
-    return () => observer.disconnect()
-  }, [])
+    return () => observer.disconnect();
+  }, []);
 
   if (datasets.length === 0) {
     return (
       <div className="flex min-h-[360px] items-center justify-center text-sm text-muted-foreground">
         Aucune donnee disponible pour cette periode.
       </div>
-    )
+    );
   }
 
   return (
@@ -111,11 +96,7 @@ export function WeatherChart({
               margin={{ left: 8, right: 24, top: 16 }}
               width={Math.max(chartWidth, 760)}
             >
-              <CartesianGrid
-                stroke="var(--border)"
-                strokeDasharray="4 4"
-                strokeOpacity={0.72}
-              />
+              <CartesianGrid stroke="var(--border)" strokeDasharray="4 4" strokeOpacity={0.72} />
               <XAxis
                 axisLine={false}
                 dataKey="day"
@@ -133,7 +114,7 @@ export function WeatherChart({
               <Tooltip
                 content={({ active, label, payload }) => {
                   if (!active || !payload?.length) {
-                    return null
+                    return null;
                   }
 
                   return (
@@ -150,9 +131,7 @@ export function WeatherChart({
                             className="flex items-center justify-between gap-6"
                             key={String(entry.dataKey ?? entry.name)}
                           >
-                            <span style={{ color: entry.color }}>
-                              {entry.name}
-                            </span>
+                            <span style={{ color: entry.color }}>{entry.name}</span>
                             <span className="font-medium">
                               {typeof entry.value === "number"
                                 ? `${entry.value.toFixed(1)} degC`
@@ -162,7 +141,7 @@ export function WeatherChart({
                         ))}
                       </div>
                     </div>
-                  )
+                  );
                 }}
               />
               {heatwaves.map((heatwave) => (
@@ -170,7 +149,7 @@ export function WeatherChart({
                   fill="oklch(0.76 0.16 52)"
                   fillOpacity={0.18}
                   ifOverflow="extendDomain"
-                  key={`${heatwave.year}-${heatwave.start}`}
+                  key={`${heatwave.datasetId}-${heatwave.start}`}
                   x1={heatwave.startDay}
                   x2={heatwave.endDay}
                 />
@@ -178,13 +157,13 @@ export function WeatherChart({
               {visibleDatasets.map((dataset) => (
                 <Line
                   connectNulls={false}
-                  dataKey={String(dataset.year)}
+                  dataKey={dataset.id}
                   dot={false}
-                  key={dataset.year}
-                  name={String(dataset.year)}
-                  stroke={colors[dataset.year]}
-                  strokeOpacity={dataset.year === referenceYear ? 1 : 0.7}
-                  strokeWidth={dataset.year === referenceYear ? 3 : 2}
+                  key={dataset.id}
+                  name={dataset.label}
+                  stroke={colors[dataset.id]}
+                  strokeOpacity={dataset.offsetYears === 0 ? 1 : 0.7}
+                  strokeWidth={dataset.offsetYears === 0 ? 3 : 2}
                   type="monotone"
                 />
               ))}
@@ -211,12 +190,15 @@ export function WeatherChart({
 
       <ChartLegend
         colors={colors}
-        hiddenYears={hiddenYears}
-        onToggleYear={onToggleYear}
-        years={datasets.map((dataset) => dataset.year)}
+        hiddenSeries={hiddenSeries}
+        onToggleSeries={onToggleSeries}
+        series={datasets.map((dataset) => ({
+          id: dataset.id,
+          label: dataset.label,
+        }))}
       />
     </div>
-  )
+  );
 }
 
 function buildChartRows(
@@ -224,31 +206,30 @@ function buildChartRows(
   temperatureMode: TemperatureMode,
   normals?: ClimateNormal[]
 ) {
-  const maxDays = Math.max(0, ...datasets.map((dataset) => dataset.values.length))
-  const normalByDay = new Map(normals?.map((normal) => [normal.day, normal.value]))
+  const maxDays = Math.max(0, ...datasets.map((dataset) => dataset.values.length));
+  const normalByDay = new Map(normals?.map((normal) => [normal.day, normal.value]));
 
   return Array.from({ length: maxDays }, (_, index) => {
-    const day = index + 1
+    const day = index + 1;
     const row: ChartRow = {
       day,
       label: getPeriodLabel(datasets, day),
       normal: normalByDay.get(day) ?? null,
-    }
+    };
 
     datasets.forEach((dataset) => {
-      row[String(dataset.year)] =
-        dataset.values.find((value) => value.day === day)?.[temperatureMode] ??
-        null
-    })
+      row[dataset.id] =
+        dataset.values.find((value) => value.day === day)?.[temperatureMode] ?? null;
+    });
 
-    return row
-  })
+    return row;
+  });
 }
 
 function getPeriodLabel(datasets: WeatherYearDataset[], day: number) {
   const date = datasets
     .flatMap((dataset) => dataset.values)
-    .find((value) => value.day === day)?.date
+    .find((value) => value.day === day)?.date;
 
-  return date?.slice(5) ?? ""
+  return date?.slice(5) ?? "";
 }

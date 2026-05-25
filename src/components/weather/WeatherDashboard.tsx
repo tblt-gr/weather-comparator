@@ -1,88 +1,82 @@
-"use client"
+"use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { Thermometer } from "lucide-react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Thermometer } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import { HeatwaveOverlay } from "@/components/chart/HeatwaveOverlay"
-import { WeatherChart } from "@/components/chart/WeatherChart"
-import { CitySearch } from "@/components/weather/CitySearch"
-import { ClimateSummaryBar } from "@/components/weather/ClimateSummaryBar"
-import { ExportButtons } from "@/components/weather/ExportButtons"
-import { PeriodPicker } from "@/components/weather/PeriodPicker"
-import { SeasonalNormalsToggle } from "@/components/weather/SeasonalNormalsToggle"
-import { TemperatureToggle } from "@/components/weather/TemperatureToggle"
-import { ThemeToggle } from "@/components/weather/ThemeToggle"
-import { YearSelector } from "@/components/weather/YearSelector"
-import { useClimateNormals } from "@/hooks/useClimateNormals"
-import { useWeatherData } from "@/hooks/useWeatherData"
-import { detectHeatwaves } from "@/lib/weather/detectHeatwaves"
-import { loadPersistedCity, useWeatherStore } from "@/store/weather-store"
+import { HeatwaveOverlay } from "@/components/chart/HeatwaveOverlay";
+import { WeatherChart } from "@/components/chart/WeatherChart";
+import { CitySearch } from "@/components/weather/CitySearch";
+import { ClimateSummaryBar } from "@/components/weather/ClimateSummaryBar";
+import { ExportButtons } from "@/components/weather/ExportButtons";
+import { PeriodPicker } from "@/components/weather/PeriodPicker";
+import { SeasonalNormalsToggle } from "@/components/weather/SeasonalNormalsToggle";
+import { TemperatureToggle } from "@/components/weather/TemperatureToggle";
+import { ThemeToggle } from "@/components/weather/ThemeToggle";
+import { YearSelector } from "@/components/weather/YearSelector";
+import { useClimateNormals } from "@/hooks/useClimateNormals";
+import { useWeatherData } from "@/hooks/useWeatherData";
+import { detectHeatwaves } from "@/lib/weather/detectHeatwaves";
+import { loadPersistedCity, useWeatherStore } from "@/store/weather-store";
 
 export function WeatherDashboard() {
-  const [queryClient] = useState(() => new QueryClient())
+  const [queryClient] = useState(() => new QueryClient());
 
   return (
     <QueryClientProvider client={queryClient}>
       <WeatherDashboardContent />
     </QueryClientProvider>
-  )
+  );
 }
 
 function WeatherDashboardContent() {
   const {
     city,
     period,
-    referenceYear,
-    selectedYears,
+    comparisonOffsets,
     temperatureMode,
-    hiddenYears,
+    hiddenSeries,
     showNormals,
     setCity,
     setPeriod,
-    setReferenceYear,
-    toggleYear,
+    toggleComparisonOffset,
     setTemperatureMode,
-    toggleHiddenYear,
+    toggleHiddenSeries,
     setShowNormals,
-  } = useWeatherStore()
+  } = useWeatherStore();
 
   useEffect(() => {
-    const persistedCity = loadPersistedCity()
+    const persistedCity = loadPersistedCity();
     if (persistedCity && city === null) {
-      setCity(persistedCity)
+      setCity(persistedCity);
     }
-  }, [city, setCity])
+  }, [city, setCity]);
 
   const weather = useWeatherData({
     city,
+    offsets: [0, ...comparisonOffsets],
     period,
-    years: [referenceYear, ...selectedYears],
-  })
+  });
   const normals = useClimateNormals({
     city,
     enabled: showNormals,
     period,
     temperatureMode,
-  })
-  const chartRef = useRef<HTMLDivElement | null>(null)
+  });
+  const chartRef = useRef<HTMLDivElement | null>(null);
   const visibleDatasets = useMemo(
-    () => weather.data.filter((dataset) => !hiddenYears.includes(dataset.year)),
-    [hiddenYears, weather.data]
-  )
-  const heatwaves = useMemo(
-    () => detectHeatwaves(visibleDatasets),
-    [visibleDatasets]
-  )
-  const hasCity = city !== null
-  const hasData = weather.data.length > 0
+    () => weather.data.filter((dataset) => !hiddenSeries.includes(dataset.id)),
+    [hiddenSeries, weather.data]
+  );
+  const heatwaves = useMemo(() => detectHeatwaves(visibleDatasets), [visibleDatasets]);
+  const hasCity = city !== null;
+  const hasData = weather.data.length > 0;
 
   return (
     <main className="app-ambient min-h-screen text-foreground">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-6 sm:px-6 lg:px-8">
-
         {/* Header */}
-        <header className="glass-panel rounded-2xl overflow-hidden">
+        <header className="glass-panel overflow-hidden rounded-2xl">
           <div className="h-[3px] bg-gradient-to-r from-primary/40 via-primary to-primary/20" />
           <div className="flex flex-col gap-3 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-start gap-3">
@@ -90,14 +84,15 @@ function WeatherDashboardContent() {
                 <Thermometer className="size-5" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold leading-tight tracking-tight">
+                <h1 className="text-lg leading-tight font-semibold tracking-tight">
                   Météo Compare
                 </h1>
                 <p className="mt-0.5 text-sm text-muted-foreground">
                   Comparaison des températures quotidiennes
                   {city ? (
                     <span className="font-medium text-foreground">
-                      {" · "}{city.name}, {city.country}
+                      {" · "}
+                      {city.name}, {city.country}
                     </span>
                   ) : null}
                 </p>
@@ -116,16 +111,10 @@ function WeatherDashboardContent() {
           className="glass-panel grid gap-4 rounded-2xl p-4 lg:grid-cols-[minmax(240px,340px)_minmax(360px,520px)_1fr_auto]"
         >
           <CitySearch key={city?.id ?? "empty"} city={city} onCityChange={setCity} />
-          <PeriodPicker
-            period={period}
-            onPeriodChange={setPeriod}
-            onYearChange={setReferenceYear}
-            referenceYear={referenceYear}
-          />
+          <PeriodPicker period={period} onPeriodChange={setPeriod} />
           <YearSelector
-            onToggleYear={toggleYear}
-            referenceYear={referenceYear}
-            selectedYears={selectedYears}
+            onToggleOffset={toggleComparisonOffset}
+            selectedOffsets={comparisonOffsets}
           />
           <div className="flex items-end">
             <SeasonalNormalsToggle checked={showNormals} onCheckedChange={setShowNormals} />
@@ -143,15 +132,12 @@ function WeatherDashboardContent() {
                   datasets={weather.data}
                   heatwaves={heatwaves}
                   normals={normals.data}
-                  referenceYear={referenceYear}
                   temperatureMode={temperatureMode}
                 />
                 <ExportButtons chartRef={chartRef} datasets={visibleDatasets} />
               </div>
 
-              {weather.isLoading ? (
-                <LoadingState />
-              ) : null}
+              {weather.isLoading ? <LoadingState /> : null}
 
               {weather.isError ? (
                 <div className="flex min-h-[360px] items-center justify-center text-sm text-destructive">
@@ -164,10 +150,9 @@ function WeatherDashboardContent() {
                   <WeatherChart
                     datasets={weather.data}
                     heatwaves={heatwaves}
-                    hiddenYears={hiddenYears}
+                    hiddenSeries={hiddenSeries}
                     normals={normals.data}
-                    onToggleYear={toggleHiddenYear}
-                    referenceYear={referenceYear}
+                    onToggleSeries={toggleHiddenSeries}
                     showNormals={showNormals}
                     temperatureMode={temperatureMode}
                   />
@@ -190,7 +175,7 @@ function WeatherDashboardContent() {
         </section>
       </div>
     </main>
-  )
+  );
 }
 
 function EmptyState({ message }: { message: string }) {
@@ -198,7 +183,7 @@ function EmptyState({ message }: { message: string }) {
     <div className="glass-card flex min-h-[360px] items-center justify-center rounded-xl border-dashed text-sm text-muted-foreground">
       {message}
     </div>
-  )
+  );
 }
 
 function LoadingState() {
@@ -215,5 +200,5 @@ function LoadingState() {
       </div>
       <p className="text-sm text-muted-foreground">Chargement des données météo…</p>
     </div>
-  )
+  );
 }

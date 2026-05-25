@@ -1,31 +1,26 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
 type ChartLegendProps = {
-  years: number[]
-  hiddenYears: number[]
-  colors: Record<number, string>
-  onToggleYear: (year: number) => void
-}
+  series: { id: string; label: string }[];
+  hiddenSeries: string[];
+  colors: Record<string, string>;
+  onToggleSeries: (seriesId: string) => void;
+};
 
-export function ChartLegend({
-  years,
-  hiddenYears,
-  colors,
-  onToggleYear,
-}: ChartLegendProps) {
+export function ChartLegend({ series, hiddenSeries, colors, onToggleSeries }: ChartLegendProps) {
   return (
     <div className="flex flex-wrap gap-2">
-      {years.map((year) => {
-        const isHidden = hiddenYears.includes(year)
+      {series.map((item) => {
+        const isHidden = hiddenSeries.includes(item.id);
 
         return (
           <Button
             aria-pressed={!isHidden}
             className={isHidden ? "opacity-50" : undefined}
-            key={year}
-            onClick={() => onToggleYear(year)}
+            key={item.id}
+            onClick={() => onToggleSeries(item.id)}
             size="sm"
             type="button"
             variant="outline"
@@ -33,12 +28,12 @@ export function ChartLegend({
             <span
               aria-hidden="true"
               className="size-3 rounded-full shadow-sm"
-              style={{ backgroundColor: colors[year] }}
+              style={{ backgroundColor: colors[item.id] }}
             />
-            {year}
+            {item.label}
           </Button>
-        )
+        );
       })}
     </div>
-  )
+  );
 }
