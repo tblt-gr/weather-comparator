@@ -1,44 +1,44 @@
-"use client"
+"use client";
 
-import { Moon, Sun } from "lucide-react"
-import { useCallback, useSyncExternalStore } from "react"
+import { Moon, Sun } from "lucide-react";
+import { useCallback, useSyncExternalStore } from "react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
-const THEME_STORAGE_KEY = "weather-compare.theme"
+const THEME_STORAGE_KEY = "weather-compare.theme";
 
-type Theme = "light" | "dark"
+type Theme = "light" | "dark";
 
 function subscribe(callback: () => void) {
-  const mq = window.matchMedia("(prefers-color-scheme: dark)")
-  mq.addEventListener("change", callback)
-  window.addEventListener("storage", callback)
+  const mq = window.matchMedia("(prefers-color-scheme: dark)");
+  mq.addEventListener("change", callback);
+  window.addEventListener("storage", callback);
   return () => {
-    mq.removeEventListener("change", callback)
-    window.removeEventListener("storage", callback)
-  }
+    mq.removeEventListener("change", callback);
+    window.removeEventListener("storage", callback);
+  };
 }
 
 function getSnapshot(): Theme {
-  const stored = localStorage.getItem(THEME_STORAGE_KEY)
-  if (stored === "light" || stored === "dark") return stored
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+  const stored = localStorage.getItem(THEME_STORAGE_KEY);
+  if (stored === "light" || stored === "dark") return stored;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 function getServerSnapshot(): Theme {
-  return "light"
+  return "light";
 }
 
 export function ThemeToggle() {
-  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
-  const isDark = theme === "dark"
+  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const isDark = theme === "dark";
 
   const toggleTheme = useCallback(() => {
-    const next: Theme = isDark ? "light" : "dark"
-    localStorage.setItem(THEME_STORAGE_KEY, next)
-    document.documentElement.classList.toggle("dark", next === "dark")
-    window.dispatchEvent(new StorageEvent("storage", { key: THEME_STORAGE_KEY, newValue: next }))
-  }, [isDark])
+    const next: Theme = isDark ? "light" : "dark";
+    localStorage.setItem(THEME_STORAGE_KEY, next);
+    document.documentElement.classList.toggle("dark", next === "dark");
+    window.dispatchEvent(new StorageEvent("storage", { key: THEME_STORAGE_KEY, newValue: next }));
+  }, [isDark]);
 
   return (
     <Button
@@ -50,5 +50,5 @@ export function ThemeToggle() {
     >
       {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
     </Button>
-  )
+  );
 }

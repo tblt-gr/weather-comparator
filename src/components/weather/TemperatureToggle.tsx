@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import type { TemperatureMode } from "@/types/weather"
+import { Button } from "@/components/ui/button";
+import type { TemperatureMode } from "@/types/weather";
 
 type TemperatureToggleProps = {
-  value: TemperatureMode
-  onChange: (value: TemperatureMode) => void
-}
+  value: TemperatureMode;
+  onChange: (value: TemperatureMode) => void;
+};
 
 export function TemperatureToggle({ value, onChange }: TemperatureToggleProps) {
   return (
@@ -34,5 +34,5 @@ export function TemperatureToggle({ value, onChange }: TemperatureToggleProps) {
         Tmin
       </Button>
     </div>
-  )
+  );
 }
