@@ -33,6 +33,7 @@ function WeatherDashboardContent() {
     setCity,
     setPeriod,
     toggleComparisonOffset,
+    clearComparisonOffsets,
     setTemperatureMode,
     toggleHiddenSeries,
     setShowNormals,
@@ -99,6 +100,7 @@ function WeatherDashboardContent() {
           <CitySearch key={city?.id ?? "empty"} city={city} onCityChange={setCity} />
           <PeriodPicker period={period} onPeriodChange={setPeriod} />
           <YearSelector
+            onClearOffsets={clearComparisonOffsets}
             onToggleOffset={toggleComparisonOffset}
             period={period}
             selectedOffsets={comparisonOffsets}

@@ -153,6 +153,18 @@ test("toggleComparisonOffset keeps offsets sorted and unhides the related series
   assert.deepEqual(useWeatherStore.getState().comparisonOffsets, [1, 3]);
 });
 
+test("clearComparisonOffsets removes compared periods and related hidden series", () => {
+  useWeatherStore.setState({
+    comparisonOffsets: [1, 3],
+    hiddenSeries: ["minus-1", "current", "minus-3"],
+  });
+
+  useWeatherStore.getState().clearComparisonOffsets();
+
+  assert.deepEqual(useWeatherStore.getState().comparisonOffsets, []);
+  assert.deepEqual(useWeatherStore.getState().hiddenSeries, ["current"]);
+});
+
 test("toggleHiddenSeries adds and removes a series id", () => {
   useWeatherStore.getState().toggleHiddenSeries("current");
   assert.deepEqual(useWeatherStore.getState().hiddenSeries, ["current"]);

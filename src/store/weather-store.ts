@@ -17,6 +17,7 @@ type WeatherState = {
   setCity: (city: City | null) => void;
   setPeriod: (period: DatePeriod) => void;
   toggleComparisonOffset: (offsetYears: number) => void;
+  clearComparisonOffsets: () => void;
   setTemperatureMode: (mode: TemperatureMode) => void;
   toggleHiddenSeries: (seriesId: string) => void;
   setShowNormals: (showNormals: boolean) => void;
@@ -58,6 +59,7 @@ export function getInitialWeatherState(): Omit<
   | "setCity"
   | "setPeriod"
   | "toggleComparisonOffset"
+  | "clearComparisonOffsets"
   | "setTemperatureMode"
   | "toggleHiddenSeries"
   | "setShowNormals"
@@ -90,6 +92,11 @@ export const useWeatherStore = create<WeatherState>((set) => ({
         hiddenSeries: state.hiddenSeries.filter((seriesId) => seriesId !== `minus-${offsetYears}`),
       };
     }),
+  clearComparisonOffsets: () =>
+    set((state) => ({
+      comparisonOffsets: [],
+      hiddenSeries: state.hiddenSeries.filter((seriesId) => !seriesId.startsWith("minus-")),
+    })),
   setTemperatureMode: (temperatureMode) => set({ temperatureMode }),
   toggleHiddenSeries: (seriesId) =>
     set((state) => ({

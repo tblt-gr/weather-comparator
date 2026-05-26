@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,9 +15,15 @@ type YearSelectorProps = {
   period: DatePeriod;
   selectedOffsets: number[];
   onToggleOffset: (offsetYears: number) => void;
+  onClearOffsets: () => void;
 };
 
-export function YearSelector({ period, selectedOffsets, onToggleOffset }: YearSelectorProps) {
+export function YearSelector({
+  period,
+  selectedOffsets,
+  onToggleOffset,
+  onClearOffsets,
+}: YearSelectorProps) {
   const offsets = getAvailableComparisonOffsets(period);
   const visibleSelectedOffsets = selectedOffsets.filter((offsetYears) =>
     offsets.includes(offsetYears)
@@ -33,38 +39,51 @@ export function YearSelector({ period, selectedOffsets, onToggleOffset }: YearSe
   return (
     <div className="grid gap-1">
       <span className="text-sm font-medium">Périodes comparées</span>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+      <div className="flex items-center gap-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              aria-label="Sélectionner les périodes à comparer"
+              className="w-full justify-between"
+              type="button"
+              variant="outline"
+            >
+              <span className="truncate">{label}</span>
+              <ChevronDown className="size-4 text-muted-foreground" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="max-h-80 w-64 overflow-y-auto">
+            {offsets.map((offsetYears) => {
+              const checked = selectedOffsets.includes(offsetYears);
+              return (
+                <DropdownMenuCheckboxItem
+                  checked={checked}
+                  className="justify-between"
+                  key={offsetYears}
+                  onCheckedChange={() => onToggleOffset(offsetYears)}
+                  onSelect={keepDropdownMenuOpen}
+                >
+                  <span className="flex items-center gap-2">
+                    <Check className={checked ? "size-4 opacity-100" : "size-4 opacity-0"} />
+                    {formatComparisonOffsetLabel(period, offsetYears)}
+                  </span>
+                </DropdownMenuCheckboxItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        {count > 0 ? (
           <Button
-            aria-label="Sélectionner les périodes à comparer"
-            className="w-full justify-between"
+            aria-label="Effacer les périodes comparées"
+            onClick={onClearOffsets}
+            size="icon"
             type="button"
             variant="outline"
           >
-            <span className="truncate">{label}</span>
-            <ChevronDown className="size-4 text-muted-foreground" />
+            <X className="size-4" />
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="max-h-80 w-64 overflow-y-auto">
-          {offsets.map((offsetYears) => {
-            const checked = selectedOffsets.includes(offsetYears);
-            return (
-              <DropdownMenuCheckboxItem
-                checked={checked}
-                className="justify-between"
-                key={offsetYears}
-                onCheckedChange={() => onToggleOffset(offsetYears)}
-                onSelect={keepDropdownMenuOpen}
-              >
-                <span className="flex items-center gap-2">
-                  <Check className={checked ? "size-4 opacity-100" : "size-4 opacity-0"} />
-                  {formatComparisonOffsetLabel(period, offsetYears)}
-                </span>
-              </DropdownMenuCheckboxItem>
-            );
-          })}
-        </DropdownMenuContent>
-      </DropdownMenu>
+        ) : null}
+      </div>
     </div>
   );
 }
