@@ -95,7 +95,7 @@ function WeatherDashboardContent() {
         {/* Filters */}
         <section
           aria-label="Filtres de comparaison"
-          className="glass-panel grid gap-4 rounded-2xl p-4 lg:grid-cols-[minmax(240px,340px)_minmax(360px,520px)_1fr_auto]"
+          className="glass-panel grid gap-4 rounded-2xl p-4 lg:items-end lg:grid-cols-[minmax(240px,340px)_minmax(360px,520px)_1fr_auto]"
         >
           <CitySearch key={city?.id ?? "empty"} city={city} onCityChange={setCity} />
           <PeriodPicker period={period} onPeriodChange={setPeriod} />

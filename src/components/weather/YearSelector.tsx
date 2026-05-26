@@ -35,16 +35,17 @@ export function YearSelector({
       : count === 1
         ? formatComparisonOffsetLabel(period, visibleSelectedOffsets[0])
         : `${count} périodes sélectionnées`;
+  const canClear = canClearComparisonOffsets(selectedOffsets);
 
   return (
     <div className="grid gap-1">
       <span className="text-sm font-medium">Périodes comparées</span>
-      <div className="flex items-center gap-2">
+      <div className="flex items-stretch gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               aria-label="Sélectionner les périodes à comparer"
-              className="w-full justify-between"
+              className="h-8 flex-1 justify-between"
               type="button"
               variant="outline"
             >
@@ -72,17 +73,17 @@ export function YearSelector({
             })}
           </DropdownMenuContent>
         </DropdownMenu>
-        {count > 0 ? (
-          <Button
-            aria-label="Effacer les périodes comparées"
-            onClick={onClearOffsets}
-            size="icon"
-            type="button"
-            variant="outline"
-          >
-            <X className="size-4" />
-          </Button>
-        ) : null}
+        <Button
+          aria-label="Effacer les périodes comparées"
+          className="shrink-0"
+          disabled={!canClear}
+          onClick={onClearOffsets}
+          size="icon"
+          type="button"
+          variant="outline"
+        >
+          <X className="size-4" />
+        </Button>
       </div>
     </div>
   );
@@ -90,6 +91,10 @@ export function YearSelector({
 
 export function keepDropdownMenuOpen(event: { preventDefault: () => void }) {
   event.preventDefault();
+}
+
+export function canClearComparisonOffsets(selectedOffsets: number[]) {
+  return selectedOffsets.length > 0;
 }
 
 export function formatComparisonOffsetLabel(period: DatePeriod, offsetYears: number) {

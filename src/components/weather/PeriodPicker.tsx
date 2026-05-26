@@ -31,9 +31,10 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
       <span className="text-sm font-medium">Fin</span>
       <span aria-hidden="true" />
 
-      <div>
+      <div className="min-w-0">
         <Input
           aria-label="Sélectionner la date de début"
+          className="h-8"
           onChange={(event) =>
             handleChange(normalizeDatePeriod({ ...localPeriod, startDate: event.target.value }, "startDate"))
           }
@@ -42,9 +43,10 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
         />
       </div>
 
-      <div>
+      <div className="min-w-0">
         <Input
           aria-label="Sélectionner la date de fin"
+          className="h-8"
           onChange={(event) =>
             handleChange(normalizeDatePeriod({ ...localPeriod, endDate: event.target.value }, "endDate"))
           }
@@ -53,9 +55,10 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
         />
       </div>
 
-      <div className="self-end">
+      <div className="flex items-end">
         <Button
           aria-label="Rafraîchir la période sélectionnée"
+          className="h-8"
           disabled={!hasPendingChange}
           onClick={() => onPeriodChange(localPeriod)}
           type="button"

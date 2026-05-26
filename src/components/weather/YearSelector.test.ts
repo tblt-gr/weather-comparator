@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { formatComparisonOffsetLabel, keepDropdownMenuOpen } from "./YearSelector";
+import {
+  canClearComparisonOffsets,
+  formatComparisonOffsetLabel,
+  keepDropdownMenuOpen,
+} from "./YearSelector";
 
 test("formats comparison offsets with the compared year", () => {
   const period = {
@@ -32,4 +36,9 @@ test("prevents the comparison period menu from closing after a selection", () =>
   });
 
   assert.equal(prevented, true);
+});
+
+test("enables the clear action whenever at least one offset is stored", () => {
+  assert.equal(canClearComparisonOffsets([]), false);
+  assert.equal(canClearComparisonOffsets([2]), true);
 });
