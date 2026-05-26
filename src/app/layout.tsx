@@ -15,13 +15,7 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning className="h-full antialiased">
       <body className="flex min-h-full flex-col" suppressHydrationWarning>
-        <Script
-          id="theme-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem("weather-compare.theme");var d=t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches;document.documentElement.classList.toggle("dark",d)}catch(e){}`,
-          }}
-        />
+        <Script id="theme-init" src="/theme-init.js" strategy="beforeInteractive" />
         {children}
       </body>
     </html>
