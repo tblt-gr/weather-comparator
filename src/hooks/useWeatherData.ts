@@ -32,7 +32,7 @@ export function useWeatherData({
               offsetYears,
             ],
             enabled: isValidDatePeriod(period) && getComparableDateRangeByOffset({ offsetYears, period }) !== null,
-            queryFn: async () => {
+            queryFn: async ({ signal }: { signal: AbortSignal }) => {
               const range = getComparableDateRangeByOffset({
                 offsetYears,
                 period,
@@ -51,6 +51,7 @@ export function useWeatherData({
                 city,
                 offsetYears,
                 period,
+                signal,
               });
               return normalizeWeatherData({ offsetYears, range, response });
             },

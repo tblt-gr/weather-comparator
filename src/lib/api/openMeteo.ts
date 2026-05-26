@@ -22,7 +22,7 @@ export type OpenMeteoArchiveResponse = {
   };
 };
 
-export async function searchCities(query: string): Promise<City[]> {
+export async function searchCities(query: string, signal?: AbortSignal): Promise<City[]> {
   const trimmedQuery = query.trim();
 
   if (trimmedQuery.length < 2) {
@@ -37,7 +37,8 @@ export async function searchCities(query: string): Promise<City[]> {
   });
 
   const response = await fetch(
-    `https://geocoding-api.open-meteo.com/v1/search?${params.toString()}`
+    `https://geocoding-api.open-meteo.com/v1/search?${params.toString()}`,
+    { signal }
   );
 
   if (!response.ok) {
@@ -60,10 +61,12 @@ export async function fetchHistoricalWeather({
   city,
   offsetYears,
   period,
+  signal,
 }: {
   city: City;
   offsetYears: number;
   period: DatePeriod;
+  signal?: AbortSignal;
 }): Promise<OpenMeteoArchiveResponse> {
   const range = getComparableDateRangeByOffset({ offsetYears, period });
 
@@ -87,7 +90,8 @@ export async function fetchHistoricalWeather({
   });
 
   const response = await fetch(
-    `https://archive-api.open-meteo.com/v1/archive?${params.toString()}`
+    `https://archive-api.open-meteo.com/v1/archive?${params.toString()}`,
+    { signal }
   );
 
   if (!response.ok) {
@@ -102,9 +106,11 @@ export async function fetchHistoricalWeather({
 export async function fetchClimateNormalsRange({
   city,
   period,
+  signal,
 }: {
   city: City;
   period: DatePeriod;
+  signal?: AbortSignal;
 }): Promise<OpenMeteoArchiveResponse> {
   const startMonthDay = period.startDate.slice(5);
   const endMonthDay = period.endDate.slice(5);
@@ -123,7 +129,8 @@ export async function fetchClimateNormalsRange({
   });
 
   const response = await fetch(
-    `https://archive-api.open-meteo.com/v1/archive?${params.toString()}`
+    `https://archive-api.open-meteo.com/v1/archive?${params.toString()}`,
+    { signal }
   );
 
   if (!response.ok) {

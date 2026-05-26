@@ -125,3 +125,44 @@ test("fetchClimateNormalsRange surfaces the API reason when the request fails", 
 
   mock.restoreAll();
 });
+
+test("fetchHistoricalWeather forwards the abort signal to fetch", async () => {
+  const signal = new AbortController().signal;
+
+  mock.method(globalThis, "fetch", async (_input: string | URL | Request, init?: RequestInit) => {
+    assert.equal(init?.signal, signal);
+    return new Response(JSON.stringify({ daily: { time: [] } }));
+  });
+
+  await fetchHistoricalWeather({
+    city: baseCity,
+    offsetYears: 0,
+    period: {
+      startDate: "2025-05-01",
+      endDate: "2025-05-25",
+    },
+    signal,
+  });
+
+  mock.restoreAll();
+});
+
+test("fetchClimateNormalsRange forwards the abort signal to fetch", async () => {
+  const signal = new AbortController().signal;
+
+  mock.method(globalThis, "fetch", async (_input: string | URL | Request, init?: RequestInit) => {
+    assert.equal(init?.signal, signal);
+    return new Response(JSON.stringify({ daily: { time: [] } }));
+  });
+
+  await fetchClimateNormalsRange({
+    city: baseCity,
+    period: {
+      startDate: "2025-05-01",
+      endDate: "2025-05-25",
+    },
+    signal,
+  });
+
+  mock.restoreAll();
+});

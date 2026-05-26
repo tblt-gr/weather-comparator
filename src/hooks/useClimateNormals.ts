@@ -29,10 +29,10 @@ export function useClimateNormals({
       period.startDate,
       period.endDate,
     ],
-    queryFn: async () => {
+    queryFn: async ({ signal }: { signal: AbortSignal }) => {
       if (city === null) return [];
 
-      const response = await fetchClimateNormalsRange({ city, period });
+      const response = await fetchClimateNormalsRange({ city, period, signal });
       return buildClimateDatasetsFromRange(response, period);
     },
     select: (datasets) => calculateClimateNormals(datasets, temperatureMode),
