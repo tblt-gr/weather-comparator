@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CartesianGrid,
   Line,
@@ -61,12 +61,22 @@ export function WeatherChart({
 }: WeatherChartProps) {
   const chartShellRef = useRef<HTMLDivElement | null>(null);
   const [chartWidth, setChartWidth] = useState(0);
-  const colors = Object.fromEntries(
-    datasets.map((dataset, index) => [dataset.id, palette[index % palette.length]])
-  ) as Record<string, string>;
-  const rows = buildChartRows(datasets, temperatureMode, normals);
-  const monthBoundaryDays = getMonthBoundaryDays(rows);
-  const visibleDatasets = datasets.filter((dataset) => !hiddenSeries.includes(dataset.id));
+  const colors = useMemo(
+    () =>
+      Object.fromEntries(
+        datasets.map((dataset, index) => [dataset.id, palette[index % palette.length]])
+      ) as Record<string, string>,
+    [datasets]
+  );
+  const rows = useMemo(
+    () => buildChartRows(datasets, temperatureMode, normals),
+    [datasets, normals, temperatureMode]
+  );
+  const monthBoundaryDays = useMemo(() => getMonthBoundaryDays(rows), [rows]);
+  const visibleDatasets = useMemo(
+    () => datasets.filter((dataset) => !hiddenSeries.includes(dataset.id)),
+    [datasets, hiddenSeries]
+  );
 
   useEffect(() => {
     const element = chartShellRef.current;
