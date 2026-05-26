@@ -7,6 +7,7 @@ import { getInitialWeatherState, loadPersistedCity, useWeatherStore } from "./we
 
 const storage = new Map<string, string>();
 const originalWindow = globalThis.window;
+const originalDate = globalThis.Date;
 const initialState = useWeatherStore.getState();
 
 const baseCity: City = {
@@ -54,6 +55,8 @@ test.beforeEach(() => {
 });
 
 test.after(() => {
+  globalThis.Date = originalDate;
+
   if (originalWindow === undefined) {
     Reflect.deleteProperty(globalThis, "window");
     return;
@@ -83,6 +86,43 @@ test("getInitialWeatherState hydrates the persisted city only once", () => {
 
   assert.equal(useWeatherStore.getState().city, null);
   assert.equal(loadPersistedCity(), null);
+});
+
+test("getInitialWeatherState computes the default period from the current date at call time", () => {
+  class MockDate extends Date {
+    constructor(value?: string | number | Date) {
+      super(value ?? "2026-05-26T12:00:00.000Z");
+    }
+
+    static now() {
+      return new originalDate("2026-05-26T12:00:00.000Z").getTime();
+    }
+  }
+
+  globalThis.Date = MockDate as DateConstructor;
+  const firstPeriod = getInitialWeatherState().period;
+
+  class NextDayDate extends Date {
+    constructor(value?: string | number | Date) {
+      super(value ?? "2026-05-27T12:00:00.000Z");
+    }
+
+    static now() {
+      return new originalDate("2026-05-27T12:00:00.000Z").getTime();
+    }
+  }
+
+  globalThis.Date = NextDayDate as DateConstructor;
+  const secondPeriod = getInitialWeatherState().period;
+
+  assert.deepEqual(firstPeriod, {
+    startDate: "2026-05-01",
+    endDate: "2026-05-26",
+  });
+  assert.deepEqual(secondPeriod, {
+    startDate: "2026-05-01",
+    endDate: "2026-05-27",
+  });
 });
 
 test("setCity persists the city and clearing it removes the storage entry", () => {
