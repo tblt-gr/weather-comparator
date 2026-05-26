@@ -116,6 +116,26 @@ test("fetchClimateNormalsRange uses 2021 as the end year for cross-year periods"
   mock.restoreAll();
 });
 
+test("fetchClimateNormalsRange keeps 2020 as the end year for single-day periods", async () => {
+  mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    const url = new URL(String(input));
+    assert.equal(url.searchParams.get("start_date"), "1991-12-31");
+    assert.equal(url.searchParams.get("end_date"), "2020-12-31");
+
+    return new Response(JSON.stringify({ daily: { time: [] } }));
+  });
+
+  await fetchClimateNormalsRange({
+    city: baseCity,
+    period: {
+      startDate: "2025-12-31",
+      endDate: "2025-12-31",
+    },
+  });
+
+  mock.restoreAll();
+});
+
 test("fetchClimateNormalsRange surfaces the API reason when the request fails", async () => {
   mock.method(globalThis, "fetch", async () =>
     new Response(JSON.stringify({ reason: "Out of range" }), { status: 400 })
