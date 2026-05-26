@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+
+import { Providers } from "@/app/providers";
+
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,7 +19,7 @@ export default function RootLayout({
     <html lang="fr" suppressHydrationWarning className="h-full antialiased">
       <body className="flex min-h-full flex-col" suppressHydrationWarning>
         <Script id="theme-init" src="/theme-init.js" strategy="beforeInteractive" />
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

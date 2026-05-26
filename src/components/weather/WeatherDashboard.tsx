@@ -1,8 +1,7 @@
 "use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Thermometer } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 
 import { HeatwaveOverlay } from "@/components/chart/HeatwaveOverlay";
 import { WeatherChart } from "@/components/chart/WeatherChart";
@@ -20,13 +19,7 @@ import { detectHeatwaves } from "@/lib/weather/detectHeatwaves";
 import { useWeatherStore } from "@/store/weather-store";
 
 export function WeatherDashboard() {
-  const [queryClient] = useState(() => new QueryClient());
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <WeatherDashboardContent />
-    </QueryClientProvider>
-  );
+  return <WeatherDashboardContent />;
 }
 
 function WeatherDashboardContent() {
