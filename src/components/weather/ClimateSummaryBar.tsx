@@ -13,6 +13,7 @@ type ClimateSummaryBarProps = {
   datasets: WeatherYearDataset[];
   normals?: ClimateNormal[];
   heatwaves: HeatwavePeriod[];
+  showNormals: boolean;
 };
 
 export function ClimateSummaryBar({
@@ -20,7 +21,46 @@ export function ClimateSummaryBar({
   datasets,
   normals,
   heatwaves,
+  showNormals,
 }: ClimateSummaryBarProps) {
+  const stats = buildClimateSummaryStats({
+    temperatureMode,
+    datasets,
+    normals,
+    heatwaves,
+    showNormals,
+  });
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {stats.map((stat) => (
+        <StatCard key={stat.label} label={stat.label} tone={stat.tone} value={stat.value} />
+      ))}
+    </div>
+  );
+}
+
+type ClimateSummaryStat = {
+  label: string;
+  value: string;
+  tone?: "neutral" | "warm" | "cold";
+};
+
+type BuildClimateSummaryStatsParams = {
+  temperatureMode: TemperatureMode;
+  datasets: WeatherYearDataset[];
+  normals?: ClimateNormal[];
+  heatwaves: HeatwavePeriod[];
+  showNormals: boolean;
+};
+
+export function buildClimateSummaryStats({
+  temperatureMode,
+  datasets,
+  normals,
+  heatwaves,
+  showNormals,
+}: BuildClimateSummaryStatsParams): ClimateSummaryStat[] {
   const referenceDataset = datasets.find((d) => d.offsetYears === 0);
   const average = averageDatasetTemperature(referenceDataset, temperatureMode);
   const normalValues =
@@ -37,21 +77,23 @@ export function ClimateSummaryBar({
   const vagueHeatwaves = heatwaves.filter((heatwave) => heatwave.kind === "vague_de_chaleur");
   const canicules = heatwaves.filter((heatwave) => heatwave.kind === "canicule");
 
-  return (
-    <div className="flex flex-wrap gap-2">
-      <StatCard label="Moyenne période" value={formatTemp(average)} />
-      <StatCard label="Normale 1991–2020" value={formatTemp(normalAverage)} />
-      <StatCard
-        label="Écart"
-        tone={delta === null ? "neutral" : delta >= 0 ? "warm" : "cold"}
-        value={delta === null ? "—" : `${delta >= 0 ? "+" : ""}${delta.toFixed(1)} °C`}
-      />
-      <StatCard label="Jours > 30 °C" value={String(hotDays)} />
-      <StatCard label="Nuits tropicales" value={String(tropicalNights)} />
-      <StatCard label="Vagues de chaleur" value={String(vagueHeatwaves.length)} />
-      <StatCard label="Canicules" tone="warm" value={String(canicules.length)} />
-    </div>
-  );
+  return [
+    { label: "Moyenne période", value: formatTemp(average) },
+    ...(showNormals
+      ? [
+          { label: "Normale 1991–2020", value: formatTemp(normalAverage) },
+          {
+            label: "Écart",
+            tone: delta === null ? "neutral" : delta >= 0 ? "warm" : "cold",
+            value: delta === null ? "—" : `${delta >= 0 ? "+" : ""}${delta.toFixed(1)} °C`,
+          } satisfies ClimateSummaryStat,
+        ]
+      : []),
+    { label: "Jours > 30 °C", value: String(hotDays) },
+    { label: "Nuits tropicales", value: String(tropicalNights) },
+    { label: "Vagues de chaleur", value: String(vagueHeatwaves.length) },
+    { label: "Canicules", tone: "warm", value: String(canicules.length) },
+  ];
 }
 
 function StatCard({

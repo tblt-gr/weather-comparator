@@ -133,6 +133,7 @@ function WeatherDashboardContent() {
                   datasets={weather.data}
                   heatwaves={heatwaves}
                   normals={normals.data}
+                  showNormals={showNormals}
                   temperatureMode={temperatureMode}
                 />
                 <ExportButtons chartRef={chartRef} datasets={visibleDatasets} />
