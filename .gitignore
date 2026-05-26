@@ -1,6 +1,6 @@
 .idea
 .vscode
-
+docs/
 # dependencies
 /node_modules
 /.pnp
