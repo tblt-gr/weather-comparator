@@ -59,6 +59,19 @@ test("searchCities trims the query and maps geocoding results", async () => {
   mock.restoreAll();
 });
 
+test("searchCities forwards the abort signal to fetch", async () => {
+  const signal = new AbortController().signal;
+
+  mock.method(globalThis, "fetch", async (_input: string | URL | Request, init?: RequestInit) => {
+    assert.equal(init?.signal, signal);
+    return new Response(JSON.stringify({ results: [] }));
+  });
+
+  await searchCities("Paris", signal);
+
+  mock.restoreAll();
+});
+
 test("fetchHistoricalWeather returns an empty payload when the shifted range is unavailable", async () => {
   const fetchMock = mock.method(globalThis, "fetch", async () => new Response());
 

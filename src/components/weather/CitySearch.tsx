@@ -30,7 +30,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
       setIsLoading(true);
 
       try {
-        const cities = await searchCities(query);
+        const cities = await searchCities(query, controller.signal);
         if (!controller.signal.aborted) {
           setResults(cities);
           setIsOpen(true);
