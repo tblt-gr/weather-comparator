@@ -8,6 +8,14 @@ import { normalizeWeatherData } from "@/lib/weather/normalizeWeatherData";
 import { isValidDatePeriod } from "@/lib/weather/periodValidation";
 import type { City, WeatherYearDataset } from "@/types/weather";
 
+export function getWeatherQueryKey(
+  city: City,
+  period: DatePeriod,
+  offsetYears: number
+) {
+  return ["weather", city.id, period.startDate, period.endDate, offsetYears] as const;
+}
+
 export function useWeatherData({
   city,
   offsets,
@@ -22,15 +30,7 @@ export function useWeatherData({
       city === null
         ? []
         : offsets.map((offsetYears) => ({
-            queryKey: [
-              "weather",
-              city.id,
-              city.latitude,
-              city.longitude,
-              period.startDate,
-              period.endDate,
-              offsetYears,
-            ],
+            queryKey: getWeatherQueryKey(city, period, offsetYears),
             enabled: isValidDatePeriod(period) && getComparableDateRangeByOffset({ offsetYears, period }) !== null,
             queryFn: async ({ signal }: { signal: AbortSignal }) => {
               const range = getComparableDateRangeByOffset({
