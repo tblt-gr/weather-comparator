@@ -3,6 +3,7 @@
 import { create } from "zustand";
 
 import { type DatePeriod, getDefaultComparisonPeriod } from "@/lib/weather/dateRange";
+import type { WeatherUrlState } from "@/lib/weather/urlState";
 import type { City, TemperatureMode } from "@/types/weather";
 
 const CITY_STORAGE_KEY = "weather-compare.city";
@@ -21,6 +22,7 @@ type WeatherState = {
   setTemperatureMode: (mode: TemperatureMode) => void;
   toggleHiddenSeries: (seriesId: string) => void;
   setShowNormals: (showNormals: boolean) => void;
+  hydrateFromUrl: (state: WeatherUrlState) => void;
 };
 
 function persistCity(city: City | null) {
@@ -63,6 +65,7 @@ export function getInitialWeatherState(): Omit<
   | "setTemperatureMode"
   | "toggleHiddenSeries"
   | "setShowNormals"
+  | "hydrateFromUrl"
 > {
   return {
     city: loadPersistedCity(),
@@ -105,4 +108,19 @@ export const useWeatherStore = create<WeatherState>((set) => ({
         : [...state.hiddenSeries, seriesId],
     })),
   setShowNormals: (showNormals) => set({ showNormals }),
+  hydrateFromUrl: (state) => {
+    if (state.city !== undefined) {
+      persistCity(state.city);
+    }
+
+    set((currentState) => ({
+      city: state.city ?? currentState.city,
+      period: state.period ?? currentState.period,
+      comparisonOffsets:
+        state.comparisonOffsets?.slice().sort((left, right) => left - right) ??
+        currentState.comparisonOffsets,
+      temperatureMode: state.temperatureMode ?? currentState.temperatureMode,
+      showNormals: state.showNormals ?? currentState.showNormals,
+    }));
+  },
 }));

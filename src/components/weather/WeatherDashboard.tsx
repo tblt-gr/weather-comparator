@@ -1,7 +1,7 @@
 "use client";
 
 import { Thermometer } from "lucide-react";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 
 import { ColdWaveOverlay } from "@/components/chart/ColdWaveOverlay";
 import { HeatwaveOverlay } from "@/components/chart/HeatwaveOverlay";
@@ -17,11 +17,12 @@ import { YearSelector } from "@/components/weather/YearSelector";
 import { useClimateNormals } from "@/hooks/useClimateNormals";
 import { useGeolocatedCity } from "@/hooks/useGeolocatedCity";
 import { useWeatherData } from "@/hooks/useWeatherData";
-import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { useWeatherUrlState } from "@/hooks/useWeatherUrlState";
 import { LanguageSwitcher } from "@/components/weather/LanguageSwitcher";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { detectColdWaves } from "@/lib/weather/detectColdWaves";
 import { detectHeatwaves } from "@/lib/weather/detectHeatwaves";
-import { loadPersistedCity, useWeatherStore } from "@/store/weather-store";
+import { useWeatherStore } from "@/store/weather-store";
 
 export function WeatherDashboard() {
   return <WeatherDashboardContent />;
@@ -44,11 +45,7 @@ function WeatherDashboardContent() {
     setShowNormals,
   } = useWeatherStore();
   const { t } = useLocale();
-
-  useEffect(() => {
-    const persisted = loadPersistedCity();
-    if (persisted) setCity(persisted);
-  }, [setCity]);
+  const shareUrl = useWeatherUrlState();
 
   useGeolocatedCity();
 
@@ -147,7 +144,7 @@ function WeatherDashboardContent() {
                   showNormals={showNormals}
                   temperatureMode={temperatureMode}
                 />
-                <ExportButtons chartRef={chartRef} datasets={visibleDatasets} />
+                <ExportButtons chartRef={chartRef} datasets={visibleDatasets} shareUrl={shareUrl} />
               </div>
 
               {weather.isLoading ? <LoadingState /> : null}

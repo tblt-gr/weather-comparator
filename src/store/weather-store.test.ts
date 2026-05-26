@@ -165,6 +165,42 @@ test("clearComparisonOffsets removes compared periods and related hidden series"
   assert.deepEqual(useWeatherStore.getState().hiddenSeries, ["current"]);
 });
 
+test("hydrateFromUrl updates URL-managed fields atomically without touching hidden series", () => {
+  useWeatherStore.setState({
+    city: null,
+    comparisonOffsets: [1],
+    hiddenSeries: ["current"],
+    period: {
+      startDate: "2026-05-01",
+      endDate: "2026-05-26",
+    },
+    showNormals: false,
+    temperatureMode: "tmax",
+  });
+
+  useWeatherStore.getState().hydrateFromUrl({
+    city: baseCity,
+    comparisonOffsets: [3, 1],
+    period: {
+      startDate: "2025-06-01",
+      endDate: "2025-06-30",
+    },
+    showNormals: true,
+    temperatureMode: "tmin",
+  });
+
+  assert.deepEqual(useWeatherStore.getState().city, baseCity);
+  assert.deepEqual(useWeatherStore.getState().period, {
+    startDate: "2025-06-01",
+    endDate: "2025-06-30",
+  });
+  assert.deepEqual(useWeatherStore.getState().comparisonOffsets, [1, 3]);
+  assert.equal(useWeatherStore.getState().temperatureMode, "tmin");
+  assert.equal(useWeatherStore.getState().showNormals, true);
+  assert.deepEqual(useWeatherStore.getState().hiddenSeries, ["current"]);
+  assert.deepEqual(loadPersistedCity(), baseCity);
+});
+
 test("toggleHiddenSeries adds and removes a series id", () => {
   useWeatherStore.getState().toggleHiddenSeries("current");
   assert.deepEqual(useWeatherStore.getState().hiddenSeries, ["current"]);

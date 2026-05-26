@@ -31,6 +31,9 @@ export type Translations = {
   "theme.lightAriaLabel": string;
   "theme.darkAriaLabel": string;
   "lang.ariaLabel": string;
+  "share.button": string;
+  "share.copied": string;
+  "share.failed": string;
   "stats.periodAverage": string;
   "stats.normal": string;
   "stats.deviation": string;
