@@ -104,7 +104,6 @@ function WeatherDashboardContent() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <TemperatureToggle onChange={setTemperatureMode} value={temperatureMode} />
               <LanguageSwitcher />
               <ThemeToggle />
             </div>
@@ -124,7 +123,8 @@ function WeatherDashboardContent() {
             period={period}
             selectedOffsets={comparisonOffsets}
           />
-          <div className="flex items-end">
+          <div className="flex flex-wrap items-end justify-end gap-3">
+            <TemperatureToggle onChange={setTemperatureMode} value={temperatureMode} />
             <SeasonalNormalsToggle checked={showNormals} onCheckedChange={setShowNormals} />
           </div>
         </section>

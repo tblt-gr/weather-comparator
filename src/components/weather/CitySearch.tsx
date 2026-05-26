@@ -75,7 +75,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
       <span>Ville</span>
       <Command
         shouldFilter={false}
-        className="relative overflow-visible rounded-xl border border-input bg-transparent p-0 shadow-none"
+        className="relative h-8 overflow-visible rounded-lg! border border-input bg-transparent p-0 shadow-none"
       >
         <CommandInput
           aria-label={t["city.searchAriaLabel"]}
@@ -90,7 +90,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
           value={query}
         />
         {isOpen ? (
-          <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-border/60 bg-popover shadow-md">
+          <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-lg border border-border/60 bg-popover shadow-md">
             <CommandList>
               {isLoading ? (
                 <div className="px-3 py-2 text-sm text-muted-foreground">{t["city.searching"]}</div>
