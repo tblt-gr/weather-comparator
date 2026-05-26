@@ -4,9 +4,14 @@ import test from "node:test";
 import {
   buildChartRows,
   formatChartDateTick,
+  formatTooltipDate,
   getHeatwaveFill,
   getMonthBoundaryDays,
 } from "./WeatherChart";
+
+function stripDiacritics(value: string) {
+  return value.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+}
 
 test("formats ISO chart dates as dd/mm/yy", () => {
   assert.equal(formatChartDateTick("2026-05-25"), "25/05/26");
@@ -16,6 +21,11 @@ test("formats ISO chart dates as dd/mm/yy", () => {
 test("returns the input unchanged when the chart tick is not an ISO date", () => {
   assert.equal(formatChartDateTick("3"), "3");
   assert.equal(formatChartDateTick(3), "3");
+});
+
+test("formats tooltip dates as readable french dates without day number", () => {
+  assert.equal(formatTooltipDate("2025-05-18"), "18 mai");
+  assert.equal(stripDiacritics(formatTooltipDate("1999-12-01")), "1 decembre");
 });
 
 test("extracts month boundary days from chart rows", () => {
