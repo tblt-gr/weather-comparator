@@ -28,14 +28,15 @@ export function groupHeatwavesByYear(heatwaves: HeatwavePeriod[]) {
   const groups = new Map<string, HeatwavePeriod[]>();
 
   heatwaves.forEach((heatwave) => {
-    const current = groups.get(heatwave.datasetLabel);
+    const year = heatwave.start.slice(0, 4);
+    const current = groups.get(year);
 
     if (current) {
       current.push(heatwave);
       return;
     }
 
-    groups.set(heatwave.datasetLabel, [heatwave]);
+    groups.set(year, [heatwave]);
   });
 
   return Array.from(groups, ([year, groupedHeatwaves]) => ({
