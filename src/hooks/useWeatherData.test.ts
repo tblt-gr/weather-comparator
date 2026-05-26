@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getWeatherQueryKey } from "./useWeatherData";
+import { aggregateWeatherQueryErrors, getWeatherQueryKey } from "./useWeatherData";
 
 test("getWeatherQueryKey only depends on the city id, period and offset", () => {
   const period = {
@@ -37,5 +37,16 @@ test("getWeatherQueryKey only depends on the city id, period and offset", () => 
       2
     ),
     ["weather", "paris", "2025-05-01", "2025-05-25", 2]
+  );
+});
+
+test("aggregateWeatherQueryErrors preserves the offset that failed", () => {
+  assert.equal(
+    aggregateWeatherQueryErrors([
+      { error: new Error("Missing archive"), offsetYears: 0 },
+      { error: null, offsetYears: 1 },
+      { error: "Unavailable", offsetYears: 3 },
+    ]),
+    "annee de reference: Missing archive | -3 ans: Unavailable"
   );
 });

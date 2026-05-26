@@ -16,6 +16,23 @@ export function getWeatherQueryKey(
   return ["weather", city.id, period.startDate, period.endDate, offsetYears] as const;
 }
 
+export function aggregateWeatherQueryErrors(
+  queries: Array<{ error: unknown; offsetYears: number }>
+) {
+  const messages = queries.flatMap(({ error, offsetYears }) => {
+    if (!error) {
+      return [];
+    }
+
+    const message =
+      error instanceof Error ? error.message : typeof error === "string" ? error : String(error);
+    const label = offsetYears === 0 ? "annee de reference" : `-${offsetYears} an${offsetYears > 1 ? "s" : ""}`;
+    return [`${label}: ${message}`];
+  });
+
+  return messages.length > 0 ? messages.join(" | ") : null;
+}
+
 export function useWeatherData({
   city,
   offsets,
@@ -64,9 +81,12 @@ export function useWeatherData({
     .filter((dataset): dataset is WeatherYearDataset => Boolean(dataset))
     .sort((a, b) => a.offsetYears - b.offsetYears);
 
-  const firstError = queries.find((q) => q.error)?.error;
-  const errorMessage =
-    firstError instanceof Error ? firstError.message : firstError ? String(firstError) : null;
+  const errorMessage = aggregateWeatherQueryErrors(
+    queries.map((query, index) => ({
+      error: query.error,
+      offsetYears: offsets[index] ?? 0,
+    }))
+  );
 
   return {
     data,
