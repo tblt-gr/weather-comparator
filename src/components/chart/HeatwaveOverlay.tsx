@@ -47,9 +47,10 @@ export function groupHeatwavesByYear(heatwaves: HeatwavePeriod[]) {
 
 type HeatwaveOverlayProps = {
   heatwaves: HeatwavePeriod[];
+  colors?: Record<string, string>;
 };
 
-export function HeatwaveOverlay({ heatwaves }: HeatwaveOverlayProps) {
+export function HeatwaveOverlay({ heatwaves, colors = {} }: HeatwaveOverlayProps) {
   if (heatwaves.length === 0) {
     return null;
   }
@@ -65,7 +66,16 @@ export function HeatwaveOverlay({ heatwaves }: HeatwaveOverlayProps) {
             className="rounded-lg border border-orange-300/35 bg-white/35 p-3 dark:border-orange-200/15 dark:bg-black/10"
             key={group.year}
           >
-            <p className="font-semibold text-orange-950 dark:text-orange-100">{group.year}</p>
+            <p className="flex items-center gap-1.5 font-semibold text-orange-950 dark:text-orange-100">
+              {colors[group.heatwaves[0].datasetId] && (
+                <span
+                  aria-hidden="true"
+                  className="inline-block size-2.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: colors[group.heatwaves[0].datasetId] }}
+                />
+              )}
+              {group.year}
+            </p>
             <ul className="mt-2 grid gap-1.5">
               {group.heatwaves.map((heatwave) => (
                 <li className="flex gap-2" key={`${heatwave.datasetId}-${heatwave.start}`}>

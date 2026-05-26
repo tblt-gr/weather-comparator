@@ -20,7 +20,7 @@ import type {
   WeatherYearDataset,
 } from "@/types/weather";
 
-const palette = [
+export const palette = [
   "var(--chart-1)",
   "var(--chart-2)",
   "var(--chart-3)",

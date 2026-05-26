@@ -4,7 +4,7 @@ import { Thermometer } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 
 import { HeatwaveOverlay } from "@/components/chart/HeatwaveOverlay";
-import { WeatherChart } from "@/components/chart/WeatherChart";
+import { palette, WeatherChart } from "@/components/chart/WeatherChart";
 import { CitySearch } from "@/components/weather/CitySearch";
 import { ClimateSummaryBar } from "@/components/weather/ClimateSummaryBar";
 import { ExportButtons } from "@/components/weather/ExportButtons";
@@ -61,6 +61,13 @@ function WeatherDashboardContent() {
     [hiddenSeries, weather.data]
   );
   const heatwaves = useMemo(() => detectHeatwaves(visibleDatasets), [visibleDatasets]);
+  const datasetColors = useMemo(
+    () =>
+      Object.fromEntries(
+        weather.data.map((dataset, index) => [dataset.id, palette[index % palette.length]])
+      ) as Record<string, string>,
+    [weather.data]
+  );
   const hasCity = city !== null;
   const hasData = weather.data.length > 0;
 
@@ -164,7 +171,7 @@ function WeatherDashboardContent() {
                 </p>
               ) : null}
 
-              <HeatwaveOverlay heatwaves={heatwaves} />
+              <HeatwaveOverlay colors={datasetColors} heatwaves={heatwaves} />
             </div>
           )}
         </section>
