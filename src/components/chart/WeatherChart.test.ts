@@ -73,8 +73,22 @@ test("buildChartRows reuses matching day labels and temperatures across datasets
       [{ day: 2, value: 27 }]
     ),
     [
-      { day: 1, label: "2025-06-01", normal: null, current: 30, "minus-1": 28 },
-      { day: 2, label: "2024-06-02", normal: 27, current: null, "minus-1": 26 },
+      {
+        day: 1,
+        label: "2025-06-01",
+        tickLabel: "01/06/25",
+        normal: null,
+        current: 30,
+        "minus-1": 28,
+      },
+      {
+        day: 2,
+        label: "2024-06-02",
+        tickLabel: "02/06/24",
+        normal: 27,
+        current: null,
+        "minus-1": 26,
+      },
     ]
   );
 });

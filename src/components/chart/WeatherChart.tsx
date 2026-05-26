@@ -52,6 +52,7 @@ type WeatherChartProps = {
 type ChartRow = {
   day: number;
   label: string;
+  tickLabel: string;
   normal?: number | null;
   [year: string]: number | string | null | undefined;
 };
@@ -157,9 +158,7 @@ export function WeatherChart({
                 height={76}
                 stroke="var(--muted-foreground)"
                 textAnchor="end"
-                tickFormatter={(value) =>
-                  formatChartDateTick(rows.find((row) => row.day === value)?.label ?? value)
-                }
+                tickFormatter={(value) => rows.find((row) => row.day === value)?.tickLabel ?? String(value)}
                 tickLine={false}
                 tickMargin={14}
               />
@@ -288,6 +287,7 @@ export function buildChartRows(
     const row: ChartRow = {
       day,
       label: labelsByDay.get(day) ?? "",
+      tickLabel: formatChartDateTick(labelsByDay.get(day) ?? ""),
       normal: normalByDay.get(day) ?? null,
     };
 
