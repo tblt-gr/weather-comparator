@@ -8,11 +8,14 @@ export function calculateClimateNormals(
   temperatureMode: TemperatureMode
 ): ClimateNormal[] {
   const maxDays = Math.max(0, ...datasets.map((dataset) => dataset.values.length));
+  const datasetsByDay = datasets.map(
+    (dataset) => new Map(dataset.values.map((value) => [value.day, value] as const))
+  );
 
   return Array.from({ length: maxDays }, (_, index) => {
     const day = index + 1;
-    const values = datasets
-      .map((dataset) => dataset.values.find((value) => value.day === day)?.[temperatureMode])
+    const values = datasetsByDay
+      .map((dataset) => dataset.get(day)?.[temperatureMode])
       .filter((value): value is number => typeof value === "number");
 
     return {

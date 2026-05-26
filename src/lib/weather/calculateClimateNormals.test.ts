@@ -1,8 +1,12 @@
 import assert from "node:assert";
 import { describe, it } from "node:test";
 
-import { buildClimateDatasetsFromRange } from "@/lib/weather/calculateClimateNormals";
+import {
+  buildClimateDatasetsFromRange,
+  calculateClimateNormals,
+} from "@/lib/weather/calculateClimateNormals";
 import type { OpenMeteoArchiveResponse } from "@/lib/api/openMeteo";
+import type { WeatherYearDataset } from "@/types/weather";
 
 describe("buildClimateDatasetsFromRange", () => {
   it("builds one dataset per valid year from a multi-year response", () => {
@@ -55,5 +59,35 @@ describe("buildClimateDatasetsFromRange", () => {
     assert.strictEqual(dataset1991.values[0]?.day, 1);
     assert.strictEqual(dataset1991.values[1]?.day, 2);
     assert.strictEqual(dataset1991.values[2]?.day, 3);
+  });
+});
+
+describe("calculateClimateNormals", () => {
+  it("averages only matching day values across sparse datasets", () => {
+    const datasets: WeatherYearDataset[] = [
+      {
+        id: "current",
+        label: "2025",
+        offsetYears: 0,
+        values: [
+          { date: "2025-06-01", day: 1, year: 2025, tmax: 30, tmin: 18 },
+          { date: "2025-06-03", day: 3, year: 2025, tmax: 24, tmin: 15 },
+        ],
+      },
+      {
+        id: "minus-1",
+        label: "2024",
+        offsetYears: 1,
+        values: [
+          { date: "2024-06-01", day: 1, year: 2024, tmax: 28, tmin: 17 },
+          { date: "2024-06-02", day: 2, year: 2024, tmax: 26, tmin: 16 },
+        ],
+      },
+    ];
+
+    assert.deepStrictEqual(calculateClimateNormals(datasets, "tmax"), [
+      { day: 1, value: 29 },
+      { day: 2, value: 26 },
+    ]);
   });
 });
