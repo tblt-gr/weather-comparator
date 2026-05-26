@@ -1,6 +1,6 @@
 "use client";
 
-import type { HeatwavePeriod } from "@/types/weather";
+import type { HeatwavePeriod, WeatherYearDataset } from "@/types/weather";
 
 function getSeverityLabel(kind: HeatwavePeriod["kind"]) {
   return kind === "canicule" ? "Canicule" : "Vague de chaleur";
@@ -17,7 +17,7 @@ const frenchDayMonthFormatter = new Intl.DateTimeFormat("fr-FR", {
 });
 
 export function formatHeatwaveDateRange(start: string, end: string) {
-  return `${frenchDayMonthFormatter.format(new Date(start))} à ${frenchDayMonthFormatter.format(new Date(end))}`;
+  return `${frenchDayMonthFormatter.format(new Date(start))} au ${frenchDayMonthFormatter.format(new Date(end))}`;
 }
 
 export function formatHeatwaveSummary(heatwave: HeatwavePeriod) {
@@ -45,21 +45,38 @@ export function groupHeatwavesByYear(heatwaves: HeatwavePeriod[]) {
   }));
 }
 
+export function buildHeatwaveStats(heatwaves: HeatwavePeriod[], datasets: WeatherYearDataset[]) {
+  const referenceDataset = datasets.find((d) => d.offsetYears === 0);
+  const hotDays = referenceDataset?.values.filter((v) => typeof v.tmax === "number" && v.tmax > 30).length ?? 0;
+  const tropicalNights = referenceDataset?.values.filter((v) => typeof v.tmin === "number" && v.tmin >= 20).length ?? 0;
+  const heatwaveCount = heatwaves.filter((h) => h.kind === "vague_de_chaleur").length;
+  const canicula = heatwaves.filter((h) => h.kind === "canicule").length;
+  return { hotDays, tropicalNights, heatwaveCount, canicula };
+}
+
 type HeatwaveOverlayProps = {
   heatwaves: HeatwavePeriod[];
+  datasets: WeatherYearDataset[];
   colors?: Record<string, string>;
 };
 
-export function HeatwaveOverlay({ heatwaves, colors = {} }: HeatwaveOverlayProps) {
+export function HeatwaveOverlay({ heatwaves, datasets, colors = {} }: HeatwaveOverlayProps) {
   if (heatwaves.length === 0) {
     return null;
   }
 
   const groupedHeatwaves = groupHeatwavesByYear(heatwaves);
+  const stats = buildHeatwaveStats(heatwaves, datasets);
 
   return (
     <div className="rounded-xl border border-orange-300/40 bg-orange-100/45 p-3 text-sm shadow-lg shadow-orange-900/5 backdrop-blur-xl dark:border-orange-300/20 dark:bg-orange-400/10 dark:shadow-orange-300/5">
       <p className="font-medium text-orange-950 dark:text-orange-100">Vagues de chaleur et canicules</p>
+      <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-orange-800 dark:text-orange-300">
+        <span>Jours &gt; 30 °C : <strong>{stats.hotDays}</strong></span>
+        <span>Nuits tropicales : <strong>{stats.tropicalNights}</strong></span>
+        <span>Vagues de chaleur : <strong>{stats.heatwaveCount}</strong></span>
+        <span>Canicules : <strong>{stats.canicula}</strong></span>
+      </div>
       <div className="mt-2 grid gap-3 text-orange-900 sm:grid-cols-2 lg:grid-cols-3 dark:text-orange-200">
         {groupedHeatwaves.map((group) => (
           <section

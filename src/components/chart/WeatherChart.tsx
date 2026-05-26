@@ -15,6 +15,7 @@ import {
 import { ChartLegend } from "@/components/chart/ChartLegend";
 import type {
   ClimateNormal,
+  ColdWavePeriod,
   HeatwavePeriod,
   TemperatureMode,
   WeatherYearDataset,
@@ -45,6 +46,7 @@ type WeatherChartProps = {
   hiddenSeries: string[];
   normals?: ClimateNormal[];
   heatwaves?: HeatwavePeriod[];
+  coldWaves?: ColdWavePeriod[];
   showNormals: boolean;
   onToggleSeries: (seriesId: string) => void;
 };
@@ -63,6 +65,7 @@ export function WeatherChart({
   hiddenSeries,
   normals,
   heatwaves = [],
+  coldWaves = [],
   showNormals,
   onToggleSeries,
 }: WeatherChartProps) {
@@ -224,6 +227,20 @@ export function WeatherChart({
                   />
                 );
               })}
+              {coldWaves.map((coldWave) => {
+                return (
+                  <ReferenceArea
+                    fill={getColdWaveFill(coldWave.kind)}
+                    fillOpacity={coldWave.kind === "grand_froid" ? 0.28 : 0.2}
+                    ifOverflow="extendDomain"
+                    key={`${coldWave.datasetId}-${coldWave.start}`}
+                    stroke={getColdWaveFill(coldWave.kind)}
+                    strokeOpacity={coldWave.kind === "grand_froid" ? 0.65 : 0.45}
+                    x1={coldWave.startDay}
+                    x2={coldWave.endDay}
+                  />
+                );
+              })}
               {visibleDatasets.map((dataset) => (
                 <Line
                   connectNulls={false}
@@ -340,4 +357,8 @@ export function formatTooltipDate(value: string | number) {
 
 export function getHeatwaveFill(kind: HeatwavePeriod["kind"]) {
   return kind === "canicule" ? "oklch(0.62 0.24 28)" : "oklch(0.74 0.18 62)";
+}
+
+export function getColdWaveFill(kind: ColdWavePeriod["kind"]) {
+  return kind === "grand_froid" ? "oklch(0.55 0.22 250)" : "oklch(0.68 0.18 230)";
 }

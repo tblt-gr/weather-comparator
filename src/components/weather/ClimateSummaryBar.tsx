@@ -1,18 +1,12 @@
 "use client";
 
 import { averageDatasetTemperature } from "@/lib/weather/calculateClimateNormals";
-import type {
-  ClimateNormal,
-  HeatwavePeriod,
-  TemperatureMode,
-  WeatherYearDataset,
-} from "@/types/weather";
+import type { ClimateNormal, TemperatureMode, WeatherYearDataset } from "@/types/weather";
 
 type ClimateSummaryBarProps = {
   temperatureMode: TemperatureMode;
   datasets: WeatherYearDataset[];
   normals?: ClimateNormal[];
-  heatwaves: HeatwavePeriod[];
   showNormals: boolean;
 };
 
@@ -20,14 +14,12 @@ export function ClimateSummaryBar({
   temperatureMode,
   datasets,
   normals,
-  heatwaves,
   showNormals,
 }: ClimateSummaryBarProps) {
   const stats = buildClimateSummaryStats({
     temperatureMode,
     datasets,
     normals,
-    heatwaves,
     showNormals,
   });
 
@@ -50,7 +42,6 @@ type BuildClimateSummaryStatsParams = {
   temperatureMode: TemperatureMode;
   datasets: WeatherYearDataset[];
   normals?: ClimateNormal[];
-  heatwaves: HeatwavePeriod[];
   showNormals: boolean;
 };
 
@@ -58,7 +49,6 @@ export function buildClimateSummaryStats({
   temperatureMode,
   datasets,
   normals,
-  heatwaves,
   showNormals,
 }: BuildClimateSummaryStatsParams): ClimateSummaryStat[] {
   const referenceDataset = datasets.find((d) => d.offsetYears === 0);
@@ -70,12 +60,6 @@ export function buildClimateSummaryStats({
       ? normalValues.reduce((total, v) => total + v, 0) / normalValues.length
       : null;
   const delta = average !== null && normalAverage !== null ? average - normalAverage : null;
-  const hotDays =
-    referenceDataset?.values.filter((v) => typeof v.tmax === "number" && v.tmax > 30).length ?? 0;
-  const tropicalNights =
-    referenceDataset?.values.filter((v) => typeof v.tmin === "number" && v.tmin >= 20).length ?? 0;
-  const vagueHeatwaves = heatwaves.filter((heatwave) => heatwave.kind === "vague_de_chaleur");
-  const canicules = heatwaves.filter((heatwave) => heatwave.kind === "canicule");
 
   return [
     { label: "Moyenne période", value: formatTemp(average) },
@@ -89,10 +73,6 @@ export function buildClimateSummaryStats({
           } satisfies ClimateSummaryStat,
         ]
       : []),
-    { label: "Jours > 30 °C", value: String(hotDays) },
-    { label: "Nuits tropicales", value: String(tropicalNights) },
-    { label: "Vagues de chaleur", value: String(vagueHeatwaves.length) },
-    { label: "Canicules", tone: "warm", value: String(canicules.length) },
   ];
 }
 

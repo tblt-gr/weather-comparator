@@ -3,6 +3,7 @@
 import { Thermometer } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 
+import { ColdWaveOverlay } from "@/components/chart/ColdWaveOverlay";
 import { HeatwaveOverlay } from "@/components/chart/HeatwaveOverlay";
 import { palette, WeatherChart } from "@/components/chart/WeatherChart";
 import { CitySearch } from "@/components/weather/CitySearch";
@@ -15,6 +16,7 @@ import { ThemeToggle } from "@/components/weather/ThemeToggle";
 import { YearSelector } from "@/components/weather/YearSelector";
 import { useClimateNormals } from "@/hooks/useClimateNormals";
 import { useWeatherData } from "@/hooks/useWeatherData";
+import { detectColdWaves } from "@/lib/weather/detectColdWaves";
 import { detectHeatwaves } from "@/lib/weather/detectHeatwaves";
 import { loadPersistedCity, useWeatherStore } from "@/store/weather-store";
 
@@ -61,6 +63,7 @@ function WeatherDashboardContent() {
     [hiddenSeries, weather.data]
   );
   const heatwaves = useMemo(() => detectHeatwaves(visibleDatasets), [visibleDatasets]);
+  const coldWaves = useMemo(() => detectColdWaves(visibleDatasets), [visibleDatasets]);
   const datasetColors = useMemo(
     () =>
       Object.fromEntries(
@@ -131,7 +134,6 @@ function WeatherDashboardContent() {
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <ClimateSummaryBar
                   datasets={weather.data}
-                  heatwaves={heatwaves}
                   normals={normals.data}
                   showNormals={showNormals}
                   temperatureMode={temperatureMode}
@@ -150,6 +152,7 @@ function WeatherDashboardContent() {
               {!weather.isLoading && !weather.isError && hasData ? (
                 <div ref={chartRef}>
                   <WeatherChart
+                    coldWaves={coldWaves}
                     datasets={weather.data}
                     heatwaves={heatwaves}
                     hiddenSeries={hiddenSeries}
@@ -171,7 +174,8 @@ function WeatherDashboardContent() {
                 </p>
               ) : null}
 
-              <HeatwaveOverlay colors={datasetColors} heatwaves={heatwaves} />
+              <HeatwaveOverlay colors={datasetColors} datasets={weather.data} heatwaves={heatwaves} />
+              <ColdWaveOverlay colors={datasetColors} coldWaves={coldWaves} datasets={visibleDatasets} />
             </div>
           )}
         </section>

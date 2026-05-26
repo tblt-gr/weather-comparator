@@ -42,3 +42,17 @@ export type HeatwavePeriod = {
   duration: number;
   averageMax: number;
 };
+
+export type ColdWaveKind = "vague_de_froid" | "grand_froid";
+
+export type ColdWavePeriod = {
+  datasetId: string;
+  datasetLabel: string;
+  kind: ColdWaveKind;
+  start: string;
+  end: string;
+  startDay: number;
+  endDay: number;
+  duration: number;
+  averageMin: number;
+};

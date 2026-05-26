@@ -16,7 +16,6 @@ test("hides climate normal stats when normals are disabled", () => {
         ],
       },
     ],
-    heatwaves: [],
     normals: [{ day: 1, value: 27 }, { day: 2, value: 28 }],
     showNormals: false,
     temperatureMode: "tmax",
