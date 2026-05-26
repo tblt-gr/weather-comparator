@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { DatePeriod } from "@/lib/weather/dateRange";
-import { normalizeDatePeriod } from "@/lib/weather/periodValidation";
+import { type DatePeriodErrors, validateDatePeriod } from "@/lib/weather/periodValidation";
 
 type PeriodPickerProps = {
   period: DatePeriod;
@@ -18,11 +18,18 @@ export function hasPendingPeriodChange(period: DatePeriod, localPeriod: DatePeri
 
 export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
   const [localPeriod, setLocalPeriod] = useState(period);
+  const [errors, setErrors] = useState<DatePeriodErrors>({});
 
   const hasPendingChange = hasPendingPeriodChange(period, localPeriod);
 
-  function handleChange(newPeriod: DatePeriod) {
-    setLocalPeriod(newPeriod);
+  function handleRefresh() {
+    const validationErrors = validateDatePeriod(localPeriod);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    setErrors({});
+    onPeriodChange(localPeriod);
   }
 
   return (
@@ -33,26 +40,42 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
 
       <div className="min-w-0">
         <Input
+          aria-describedby={errors.startDate ? "start-date-error" : undefined}
+          aria-invalid={errors.startDate ? true : undefined}
           aria-label="Sélectionner la date de début"
           className="h-8"
-          onChange={(event) =>
-            handleChange(normalizeDatePeriod({ ...localPeriod, startDate: event.target.value }, "startDate"))
-          }
+          onChange={(event) => {
+            setLocalPeriod((prev) => ({ ...prev, startDate: event.target.value }));
+            if (errors.startDate) setErrors((prev) => ({ ...prev, startDate: undefined }));
+          }}
           type="date"
           value={localPeriod.startDate}
         />
+        {errors.startDate && (
+          <p className="mt-1 text-xs text-destructive" id="start-date-error" role="alert">
+            {errors.startDate}
+          </p>
+        )}
       </div>
 
       <div className="min-w-0">
         <Input
+          aria-describedby={errors.endDate ? "end-date-error" : undefined}
+          aria-invalid={errors.endDate ? true : undefined}
           aria-label="Sélectionner la date de fin"
           className="h-8"
-          onChange={(event) =>
-            handleChange(normalizeDatePeriod({ ...localPeriod, endDate: event.target.value }, "endDate"))
-          }
+          onChange={(event) => {
+            setLocalPeriod((prev) => ({ ...prev, endDate: event.target.value }));
+            if (errors.endDate) setErrors((prev) => ({ ...prev, endDate: undefined }));
+          }}
           type="date"
           value={localPeriod.endDate}
         />
+        {errors.endDate && (
+          <p className="mt-1 text-xs text-destructive" id="end-date-error" role="alert">
+            {errors.endDate}
+          </p>
+        )}
       </div>
 
       <div className="flex items-end">
@@ -60,7 +83,7 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
           aria-label="Rafraîchir la période sélectionnée"
           className="h-8"
           disabled={!hasPendingChange}
-          onClick={() => onPeriodChange(localPeriod)}
+          onClick={handleRefresh}
           type="button"
         >
           Rafraîchir la période

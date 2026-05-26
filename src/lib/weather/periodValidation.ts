@@ -2,11 +2,35 @@ import { type DatePeriod, formatLocalDate } from "./dateRange";
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
+function isValidDateString(date: string): boolean {
+  return DATE_PATTERN.test(date) && !isNaN(new Date(date).getTime());
+}
+
 export function isValidDatePeriod(period: DatePeriod): boolean {
   const { startDate, endDate } = period;
-  if (!DATE_PATTERN.test(startDate) || !DATE_PATTERN.test(endDate)) return false;
-  if (isNaN(new Date(startDate).getTime()) || isNaN(new Date(endDate).getTime())) return false;
+  if (!isValidDateString(startDate) || !isValidDateString(endDate)) return false;
   return startDate <= endDate;
+}
+
+export type DatePeriodErrors = {
+  startDate?: string;
+  endDate?: string;
+};
+
+export function validateDatePeriod(period: DatePeriod): DatePeriodErrors {
+  const errors: DatePeriodErrors = {};
+
+  if (!isValidDateString(period.startDate)) {
+    errors.startDate = "Date invalide";
+  }
+  if (!isValidDateString(period.endDate)) {
+    errors.endDate = "Date invalide";
+  }
+  if (!errors.startDate && !errors.endDate && period.startDate > period.endDate) {
+    errors.startDate = "Doit être antérieure à la date de fin";
+  }
+
+  return errors;
 }
 
 export function normalizeDatePeriod(
