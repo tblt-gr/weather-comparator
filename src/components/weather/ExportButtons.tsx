@@ -44,6 +44,10 @@ export function getChartExportBackground(background: string) {
   return background.trim() || "hsl(0 0% 100%)";
 }
 
+export function shouldIncludeChartExportNode(domNode: HTMLElement) {
+  return domNode.tagName !== "SCRIPT";
+}
+
 function downloadCsv(datasets: WeatherYearDataset[]) {
   const csv = exportWeatherCsv(datasets);
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
@@ -61,6 +65,7 @@ async function downloadPng(chartRef: RefObject<HTMLDivElement | null>) {
     backgroundColor: getChartExportBackground(
       getComputedStyle(document.documentElement).getPropertyValue("--background")
     ),
+    filter: shouldIncludeChartExportNode,
     pixelRatio: 2,
   });
   triggerDownload(url, "weather-compare.png");
