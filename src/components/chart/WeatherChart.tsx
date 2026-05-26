@@ -151,6 +151,15 @@ export function WeatherChart({
                   x={day}
                 />
               ))}
+              <ReferenceLine
+                ifOverflow="extendDomain"
+                label={{ fill: "var(--muted-foreground)", fontSize: 11, position: "insideTopLeft", value: "0°C" }}
+                stroke="var(--muted-foreground)"
+                strokeDasharray="6 3"
+                strokeOpacity={0.6}
+                strokeWidth={1}
+                y={0}
+              />
               <XAxis
                 angle={-45}
                 axisLine={false}
