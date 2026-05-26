@@ -1,0 +1,110 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import type { City } from "@/types/weather";
+
+import { loadPersistedCity, useWeatherStore } from "./weather-store";
+
+const storage = new Map<string, string>();
+const originalWindow = globalThis.window;
+const initialState = useWeatherStore.getState();
+
+const baseCity: City = {
+  id: "1",
+  name: "Paris",
+  latitude: 48.85,
+  longitude: 2.35,
+  country: "France",
+};
+
+function installWindowMock() {
+  Object.defineProperty(globalThis, "window", {
+    configurable: true,
+    value: {
+      localStorage: {
+        getItem(key: string) {
+          return storage.get(key) ?? null;
+        },
+        setItem(key: string, value: string) {
+          storage.set(key, value);
+        },
+        removeItem(key: string) {
+          storage.delete(key);
+        },
+      },
+    },
+  });
+}
+
+function resetStore() {
+  useWeatherStore.setState({
+    city: initialState.city,
+    period: initialState.period,
+    comparisonOffsets: [...initialState.comparisonOffsets],
+    temperatureMode: initialState.temperatureMode,
+    hiddenSeries: [...initialState.hiddenSeries],
+    showNormals: initialState.showNormals,
+  });
+}
+
+test.beforeEach(() => {
+  storage.clear();
+  installWindowMock();
+  resetStore();
+});
+
+test.after(() => {
+  if (originalWindow === undefined) {
+    Reflect.deleteProperty(globalThis, "window");
+    return;
+  }
+
+  Object.defineProperty(globalThis, "window", {
+    configurable: true,
+    value: originalWindow,
+  });
+});
+
+test("loadPersistedCity returns null when storage is empty or invalid", () => {
+  assert.equal(loadPersistedCity(), null);
+
+  storage.set("weather-compare.city", "{invalid-json");
+
+  assert.equal(loadPersistedCity(), null);
+});
+
+test("setCity persists the city and clearing it removes the storage entry", () => {
+  useWeatherStore.getState().setCity(baseCity);
+
+  assert.deepEqual(loadPersistedCity(), baseCity);
+  assert.deepEqual(useWeatherStore.getState().city, baseCity);
+
+  useWeatherStore.getState().setCity(null);
+
+  assert.equal(loadPersistedCity(), null);
+  assert.equal(storage.has("weather-compare.city"), false);
+});
+
+test("toggleComparisonOffset keeps offsets sorted and unhides the related series", () => {
+  useWeatherStore.setState({
+    comparisonOffsets: [3, 1],
+    hiddenSeries: ["minus-2", "current"],
+  });
+
+  useWeatherStore.getState().toggleComparisonOffset(2);
+
+  assert.deepEqual(useWeatherStore.getState().comparisonOffsets, [1, 2, 3]);
+  assert.deepEqual(useWeatherStore.getState().hiddenSeries, ["current"]);
+
+  useWeatherStore.getState().toggleComparisonOffset(2);
+
+  assert.deepEqual(useWeatherStore.getState().comparisonOffsets, [1, 3]);
+});
+
+test("toggleHiddenSeries adds and removes a series id", () => {
+  useWeatherStore.getState().toggleHiddenSeries("current");
+  assert.deepEqual(useWeatherStore.getState().hiddenSeries, ["current"]);
+
+  useWeatherStore.getState().toggleHiddenSeries("current");
+  assert.deepEqual(useWeatherStore.getState().hiddenSeries, []);
+});
