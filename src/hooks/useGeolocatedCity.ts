@@ -9,7 +9,10 @@ export function useGeolocatedCity() {
   const setCity = useWeatherStore((s) => s.setCity);
 
   useEffect(() => {
-    if (loadPersistedCity() !== null) {
+    const persistedCity = loadPersistedCity();
+
+    if (persistedCity !== null) {
+      setCity(persistedCity);
       return;
     }
 

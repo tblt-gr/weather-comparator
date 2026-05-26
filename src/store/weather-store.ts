@@ -68,7 +68,7 @@ export function getInitialWeatherState(): Omit<
   | "hydrateFromUrl"
 > {
   return {
-    city: loadPersistedCity(),
+    city: null,
     period: getDefaultComparisonPeriod(),
     comparisonOffsets: [],
     temperatureMode: "tmax",

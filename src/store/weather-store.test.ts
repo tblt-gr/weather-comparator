@@ -76,11 +76,11 @@ test("loadPersistedCity returns null when storage is empty or invalid", () => {
   assert.equal(loadPersistedCity(), null);
 });
 
-test("getInitialWeatherState hydrates the persisted city only once", () => {
+test("getInitialWeatherState does not read the persisted city during initial render", () => {
   storage.set("weather-compare.city", JSON.stringify(baseCity));
 
   const initialState = getInitialWeatherState();
-  assert.deepEqual(initialState.city, baseCity);
+  assert.equal(initialState.city, null);
 
   useWeatherStore.getState().setCity(null);
 
