@@ -86,6 +86,7 @@ export function WeatherChart({
 
   useEffect(() => {
     const element = chartShellRef.current;
+    let frameId = 0;
 
     if (!element) {
       return;
@@ -95,12 +96,28 @@ export function WeatherChart({
       setChartWidth(element.clientWidth);
     };
 
+    const scheduleWidthUpdate = () => {
+      if (frameId !== 0) {
+        return;
+      }
+
+      frameId = window.requestAnimationFrame(() => {
+        frameId = 0;
+        updateWidth();
+      });
+    };
+
     updateWidth();
 
-    const observer = new ResizeObserver(updateWidth);
+    const observer = new ResizeObserver(scheduleWidthUpdate);
     observer.observe(element);
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (frameId !== 0) {
+        window.cancelAnimationFrame(frameId);
+      }
+    };
   }, []);
 
   if (datasets.length === 0) {
