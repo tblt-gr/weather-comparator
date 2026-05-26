@@ -9,7 +9,7 @@ test("exportWeatherCsv includes the header and one row per value", () => {
   const datasets: WeatherYearDataset[] = [
     {
       id: "current",
-      label: "2025-07-01 - 2025-07-02",
+      label: "Paris, France",
       offsetYears: 0,
       values: [
         { date: "2025-07-01", day: 1, year: 2025, tmax: 30, tmin: 18 },
@@ -27,10 +27,10 @@ test("exportWeatherCsv includes the header and one row per value", () => {
   assert.equal(
     exportWeatherCsv(datasets),
     [
-      "date,year,tmax,tmin",
-      "2025-07-01,2025,30,18",
-      "2025-07-02,2025,,17",
-      "2024-07-01,2024,28,",
+      "datasetId,datasetLabel,offsetYears,date,year,tmax,tmin",
+      'current,"Paris, France",0,2025-07-01,2025,30,18',
+      'current,"Paris, France",0,2025-07-02,2025,,17',
+      "minus-1,2024-07-01 - 2024-07-02,1,2024-07-01,2024,28,",
     ].join("\n")
   );
 });
