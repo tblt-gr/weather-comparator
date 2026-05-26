@@ -6,7 +6,7 @@ export function isValidDatePeriod(period: DatePeriod): boolean {
   const { startDate, endDate } = period;
   if (!DATE_PATTERN.test(startDate) || !DATE_PATTERN.test(endDate)) return false;
   if (isNaN(new Date(startDate).getTime()) || isNaN(new Date(endDate).getTime())) return false;
-  return startDate < endDate;
+  return startDate <= endDate;
 }
 
 export function normalizeDatePeriod(

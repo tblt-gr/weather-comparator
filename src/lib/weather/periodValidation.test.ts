@@ -1,7 +1,17 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { normalizeDatePeriod } from "./periodValidation";
+import { isValidDatePeriod, normalizeDatePeriod } from "./periodValidation";
+
+test("accepts single-day periods", () => {
+  assert.equal(
+    isValidDatePeriod({
+      startDate: "2026-05-26",
+      endDate: "2026-05-26",
+    }),
+    true
+  );
+});
 
 test("keeps the start date when the end date is edited before it", () => {
   assert.deepEqual(
