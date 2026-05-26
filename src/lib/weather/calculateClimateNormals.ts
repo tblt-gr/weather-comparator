@@ -1,3 +1,7 @@
+import {
+  CLIMATE_NORMAL_START_YEAR,
+  CLIMATE_NORMAL_YEAR_COUNT,
+} from "@/lib/weather/climateNormals";
 import type { OpenMeteoArchiveResponse } from "@/lib/api/openMeteo";
 import { type DatePeriod, getComparableDateRangeByOffset } from "@/lib/weather/dateRange";
 import { normalizeWeatherData } from "@/lib/weather/normalizeWeatherData";
@@ -50,7 +54,7 @@ export function buildClimateDatasetsFromRange(
 ): WeatherYearDataset[] {
   const referenceYear = Number(period.startDate.slice(0, 4));
 
-  return Array.from({ length: 30 }, (_, i) => 1991 + i).flatMap((year) => {
+  return Array.from({ length: CLIMATE_NORMAL_YEAR_COUNT }, (_, i) => CLIMATE_NORMAL_START_YEAR + i).flatMap((year) => {
     const offsetYears = referenceYear - year;
     const range = getComparableDateRangeByOffset({ offsetYears, period });
 

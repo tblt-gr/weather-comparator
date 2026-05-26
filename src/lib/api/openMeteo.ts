@@ -1,4 +1,8 @@
 import { type DatePeriod, getComparableDateRangeByOffset } from "@/lib/weather/dateRange";
+import {
+  CLIMATE_NORMAL_END_YEAR,
+  CLIMATE_NORMAL_START_YEAR,
+} from "@/lib/weather/climateNormals";
 import type { City } from "@/types/weather";
 
 type GeocodingResult = {
@@ -116,8 +120,8 @@ export async function fetchClimateNormalsRange({
   const endMonthDay = period.endDate.slice(5);
   const isCrossYear = endMonthDay < startMonthDay;
 
-  const startDate = `1991-${startMonthDay}`;
-  const endDate = `${isCrossYear ? 2021 : 2020}-${endMonthDay}`;
+  const startDate = `${CLIMATE_NORMAL_START_YEAR}-${startMonthDay}`;
+  const endDate = `${isCrossYear ? CLIMATE_NORMAL_END_YEAR + 1 : CLIMATE_NORMAL_END_YEAR}-${endMonthDay}`;
 
   const params = new URLSearchParams({
     latitude: String(city.latitude),
