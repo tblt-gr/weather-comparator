@@ -3,8 +3,11 @@
 import { averageDatasetTemperature } from "@/lib/weather/calculateClimateNormals";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Translations } from "@/lib/i18n/types";
+import { buildColdWaveStats } from "@/lib/weather/coldWaveStats";
+import { buildHeatwaveStats } from "@/lib/weather/heatwaveStats";
 import type {
   ClimateNormal,
+  ColdWavePeriod,
   HeatwavePeriod,
   TemperatureMode,
   WeatherYearDataset,
@@ -14,6 +17,7 @@ type ClimateSummaryBarProps = {
   temperatureMode: TemperatureMode;
   datasets: WeatherYearDataset[];
   normals?: ClimateNormal[];
+  coldWaves: ColdWavePeriod[];
   heatwaves: HeatwavePeriod[];
   showNormals: boolean;
 };
@@ -22,6 +26,7 @@ export function ClimateSummaryBar({
   temperatureMode,
   datasets,
   normals,
+  coldWaves,
   heatwaves,
   showNormals,
 }: ClimateSummaryBarProps) {
@@ -30,6 +35,7 @@ export function ClimateSummaryBar({
     temperatureMode,
     datasets,
     normals,
+    coldWaves,
     heatwaves,
     showNormals,
     t,
@@ -54,6 +60,7 @@ type BuildClimateSummaryStatsParams = {
   temperatureMode: TemperatureMode;
   datasets: WeatherYearDataset[];
   normals?: ClimateNormal[];
+  coldWaves: ColdWavePeriod[];
   heatwaves: HeatwavePeriod[];
   showNormals: boolean;
   t: Translations;
@@ -63,6 +70,7 @@ export function buildClimateSummaryStats({
   temperatureMode,
   datasets,
   normals,
+  coldWaves,
   heatwaves,
   showNormals,
   t,
@@ -76,12 +84,8 @@ export function buildClimateSummaryStats({
       ? normalValues.reduce((total, v) => total + v, 0) / normalValues.length
       : null;
   const delta = average !== null && normalAverage !== null ? average - normalAverage : null;
-  const hotDays =
-    referenceDataset?.values.filter((v) => typeof v.tmax === "number" && v.tmax > 30).length ?? 0;
-  const tropicalNights =
-    referenceDataset?.values.filter((v) => typeof v.tmin === "number" && v.tmin >= 20).length ?? 0;
-  const vagueHeatwaves = heatwaves.filter((heatwave) => heatwave.kind === "vague_de_chaleur");
-  const canicules = heatwaves.filter((heatwave) => heatwave.kind === "canicule");
+  const heatwaveStats = buildHeatwaveStats(heatwaves, datasets);
+  const coldWaveStats = buildColdWaveStats(coldWaves, datasets);
 
   return [
     { label: t["stats.periodAverage"], value: formatTemp(average) },
@@ -95,11 +99,75 @@ export function buildClimateSummaryStats({
           } satisfies ClimateSummaryStat,
         ]
       : []),
-    { label: t["stats.hotDays"], value: String(hotDays) },
-    { label: t["stats.tropicalNights"], value: String(tropicalNights) },
-    { label: t["stats.heatwaves"], value: String(vagueHeatwaves.length) },
-    { label: t["stats.canicules"], tone: "warm", value: String(canicules.length) },
+    { label: t["stats.hotDays"], value: String(heatwaveStats.hotDays) },
+    ...(heatwaveStats.tropicalNights > 0
+      ? [{ label: t["stats.tropicalNights"], value: String(heatwaveStats.tropicalNights) }]
+      : []),
+    ...buildOptionalHeatwaveStats(heatwaveStats, t),
+    ...buildOptionalColdStats(coldWaveStats, t),
   ];
+}
+
+function buildOptionalHeatwaveStats(
+  heatwaveStats: ReturnType<typeof buildHeatwaveStats>,
+  t: Translations
+) {
+  const stats: ClimateSummaryStat[] = [];
+
+  if (heatwaveStats.heatwaveCount > 0) {
+    stats.push({
+      label: t["stats.heatwaves"],
+      value: String(heatwaveStats.heatwaveCount),
+    });
+  }
+
+  if (heatwaveStats.caniculeCount > 0) {
+    stats.push({
+      label: t["stats.canicules"],
+      tone: "warm",
+      value: String(heatwaveStats.caniculeCount),
+    });
+  }
+
+  return stats;
+}
+
+function buildOptionalColdStats(coldWaveStats: ReturnType<typeof buildColdWaveStats>, t: Translations) {
+  const stats: ClimateSummaryStat[] = [];
+
+  if (coldWaveStats.freezingDays > 0) {
+    stats.push({
+      label: t["stats.freezingDays"],
+      tone: "cold",
+      value: String(coldWaveStats.freezingDays),
+    });
+  }
+
+  if (coldWaveStats.extremeColdNights > 0) {
+    stats.push({
+      label: t["stats.extremeColdNights"],
+      tone: "cold",
+      value: String(coldWaveStats.extremeColdNights),
+    });
+  }
+
+  if (coldWaveStats.coldWaveCount > 0) {
+    stats.push({
+      label: t["stats.coldWaves"],
+      tone: "cold",
+      value: String(coldWaveStats.coldWaveCount),
+    });
+  }
+
+  if (coldWaveStats.grandFroidCount > 0) {
+    stats.push({
+      label: t["stats.grandFroid"],
+      tone: "cold",
+      value: String(coldWaveStats.grandFroidCount),
+    });
+  }
+
+  return stats;
 }
 
 function StatCard({

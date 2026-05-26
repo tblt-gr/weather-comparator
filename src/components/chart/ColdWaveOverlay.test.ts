@@ -2,12 +2,11 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
 import {
-  buildColdWaveStats,
   formatColdWaveDateRange,
   formatColdWaveSummary,
   groupColdWavesByYear,
 } from "./ColdWaveOverlay";
-
+import { buildColdWaveStats } from "@/lib/weather/coldWaveStats";
 import type { ColdWavePeriod, WeatherYearDataset } from "@/types/weather";
 
 const makeColdWave = (overrides: Partial<ColdWavePeriod> = {}): ColdWavePeriod => ({
@@ -100,14 +99,14 @@ describe("buildColdWaveStats", () => {
     });
   });
 
-  it("returns zeros for freezingDays and extremeColdNights when no reference dataset", () => {
+  it("counts freezingDays and extremeColdNights even without a reference dataset", () => {
     const cw = makeColdWave({ kind: "vague_de_froid" });
     const nonRefDataset = makeDataset({
       offsetYears: 1,
       values: [{ date: "2023-01-10", day: 10, year: 2023, tmax: 5, tmin: -3 }],
     });
     const stats = buildColdWaveStats([cw], [nonRefDataset]);
-    assert.equal(stats.freezingDays, 0);
+    assert.equal(stats.freezingDays, 1);
     assert.equal(stats.extremeColdNights, 0);
     assert.equal(stats.coldWaveCount, 1);
   });
@@ -151,7 +150,7 @@ describe("buildColdWaveStats", () => {
     assert.equal(stats.grandFroidCount, 1);
   });
 
-  it("uses only reference dataset (offsetYears === 0) for day counts", () => {
+  it("aggregates day counts across all selected datasets", () => {
     const referenceDataset = makeDataset({
       offsetYears: 0,
       values: [
@@ -168,7 +167,7 @@ describe("buildColdWaveStats", () => {
       ],
     });
     const stats = buildColdWaveStats([], [referenceDataset, otherDataset]);
-    assert.equal(stats.freezingDays, 1);
-    assert.equal(stats.extremeColdNights, 0);
+    assert.equal(stats.freezingDays, 3);
+    assert.equal(stats.extremeColdNights, 2);
   });
 });

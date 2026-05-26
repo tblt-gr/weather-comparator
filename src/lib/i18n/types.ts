@@ -38,6 +38,10 @@ export type Translations = {
   "stats.tropicalNights": string;
   "stats.heatwaves": string;
   "stats.canicules": string;
+  "stats.freezingDays": string;
+  "stats.extremeColdNights": string;
+  "stats.coldWaves": string;
+  "stats.grandFroid": string;
   "heatwave.sectionTitle": string;
   "heatwave.canicule": string;
   "heatwave.vagueLabel": string;

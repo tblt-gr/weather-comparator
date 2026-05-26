@@ -140,6 +140,7 @@ function WeatherDashboardContent() {
             <div className="grid gap-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <ClimateSummaryBar
+                  coldWaves={coldWaves}
                   datasets={weather.data}
                   heatwaves={heatwaves}
                   normals={normals.data}
@@ -183,7 +184,7 @@ function WeatherDashboardContent() {
               ) : null}
 
               <HeatwaveOverlay colors={datasetColors} heatwaves={heatwaves} />
-              <ColdWaveOverlay colors={datasetColors} coldWaves={coldWaves} datasets={visibleDatasets} />
+              <ColdWaveOverlay colors={datasetColors} coldWaves={coldWaves} />
             </div>
           )}
         </section>

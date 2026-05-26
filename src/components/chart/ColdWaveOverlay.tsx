@@ -1,6 +1,6 @@
 "use client";
 
-import type { ColdWavePeriod, WeatherYearDataset } from "@/types/weather";
+import type { ColdWavePeriod } from "@/types/weather";
 
 function getSeverityLabel(kind: ColdWavePeriod["kind"]) {
   return kind === "grand_froid" ? "Grand froid" : "Vague de froid";
@@ -45,64 +45,21 @@ export function groupColdWavesByYear(coldWaves: ColdWavePeriod[]) {
   }));
 }
 
-export type ColdWaveStats = {
-  freezingDays: number;
-  extremeColdNights: number;
-  coldWaveCount: number;
-  grandFroidCount: number;
-};
-
-export function buildColdWaveStats(
-  coldWaves: ColdWavePeriod[],
-  datasets: WeatherYearDataset[],
-): ColdWaveStats {
-  const referenceDataset = datasets.find((d) => d.offsetYears === 0);
-
-  const freezingDays = referenceDataset
-    ? referenceDataset.values.filter((v) => v.tmin !== null && v.tmin <= 0).length
-    : 0;
-
-  const extremeColdNights = referenceDataset
-    ? referenceDataset.values.filter((v) => v.tmin !== null && v.tmin <= -5).length
-    : 0;
-
-  const coldWaveCount = coldWaves.filter((cw) => cw.kind === "vague_de_froid").length;
-  const grandFroidCount = coldWaves.filter((cw) => cw.kind === "grand_froid").length;
-
-  return { freezingDays, extremeColdNights, coldWaveCount, grandFroidCount };
-}
-
 type ColdWaveOverlayProps = {
   coldWaves: ColdWavePeriod[];
-  datasets: WeatherYearDataset[];
   colors?: Record<string, string>;
 };
 
-export function ColdWaveOverlay({ coldWaves, datasets, colors = {} }: ColdWaveOverlayProps) {
+export function ColdWaveOverlay({ coldWaves, colors = {} }: ColdWaveOverlayProps) {
   if (coldWaves.length === 0) {
     return null;
   }
 
-  const stats = buildColdWaveStats(coldWaves, datasets);
   const groupedColdWaves = groupColdWavesByYear(coldWaves);
 
   return (
     <div className="rounded-xl border border-blue-300/40 bg-blue-100/45 p-3 text-sm shadow-lg shadow-blue-900/5 backdrop-blur-xl dark:border-blue-300/20 dark:bg-blue-400/10 dark:shadow-blue-300/5">
       <p className="font-medium text-blue-950 dark:text-blue-100">Vagues de froid et grand froid</p>
-      <div className="mt-2 flex flex-wrap gap-4 text-blue-900 dark:text-blue-200">
-        <span>
-          <span className="font-semibold">{stats.freezingDays}</span> jour{stats.freezingDays !== 1 ? "s" : ""} de gel
-        </span>
-        <span>
-          <span className="font-semibold">{stats.extremeColdNights}</span> nuit{stats.extremeColdNights !== 1 ? "s" : ""} de grand froid
-        </span>
-        <span>
-          <span className="font-semibold">{stats.coldWaveCount}</span> vague{stats.coldWaveCount !== 1 ? "s" : ""} de froid
-        </span>
-        <span>
-          <span className="font-semibold">{stats.grandFroidCount}</span> grand{stats.grandFroidCount !== 1 ? "s" : ""} froid
-        </span>
-      </div>
       <div className="mt-2 grid gap-3 text-blue-900 sm:grid-cols-2 lg:grid-cols-3 dark:text-blue-200">
         {groupedColdWaves.map((group) => (
           <section
