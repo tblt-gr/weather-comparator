@@ -12,6 +12,10 @@ type PeriodPickerProps = {
   onPeriodChange: (period: DatePeriod) => void;
 };
 
+export function hasPendingPeriodChange(period: DatePeriod, localPeriod: DatePeriod) {
+  return localPeriod.startDate !== period.startDate || localPeriod.endDate !== period.endDate;
+}
+
 export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
   const [localPeriod, setLocalPeriod] = useState(period);
   const [prevPeriod, setPrevPeriod] = useState(period);
@@ -21,17 +25,19 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
     setLocalPeriod(period);
   }
 
-  const hasPendingChange =
-    localPeriod.startDate !== period.startDate || localPeriod.endDate !== period.endDate;
+  const hasPendingChange = hasPendingPeriodChange(period, localPeriod);
 
   function handleChange(newPeriod: DatePeriod) {
     setLocalPeriod(newPeriod);
   }
 
   return (
-    <div className="grid gap-2 sm:grid-cols-2">
-      <label className="grid gap-1 text-sm font-medium">
-        Début
+    <div className="grid gap-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+      <span className="text-sm font-medium">Début</span>
+      <span className="text-sm font-medium">Fin</span>
+      <span aria-hidden="true" />
+
+      <div>
         <Input
           aria-label="Sélectionner la date de début"
           onChange={(event) =>
@@ -40,10 +46,9 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
           type="date"
           value={localPeriod.startDate}
         />
-      </label>
+      </div>
 
-      <label className="grid gap-1 text-sm font-medium">
-        Fin
+      <div>
         <Input
           aria-label="Sélectionner la date de fin"
           onChange={(event) =>
@@ -52,21 +57,18 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
           type="date"
           value={localPeriod.endDate}
         />
-      </label>
+      </div>
 
-      {hasPendingChange && (
-        <div className="sm:col-span-2">
-          <Button
-            aria-label="Appliquer la période sélectionnée"
-            className="w-full"
-            onClick={() => onPeriodChange(localPeriod)}
-            size="sm"
-            type="button"
-          >
-            Appliquer
-          </Button>
-        </div>
-      )}
+      <div className="self-end">
+        <Button
+          aria-label="Rafraîchir la période sélectionnée"
+          disabled={!hasPendingChange}
+          onClick={() => onPeriodChange(localPeriod)}
+          type="button"
+        >
+          Rafraîchir la période
+        </Button>
+      </div>
     </div>
   );
 }
