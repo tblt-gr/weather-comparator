@@ -4,6 +4,7 @@ import { Moon, Sun } from "lucide-react";
 import { useCallback, useSyncExternalStore } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 const THEME_STORAGE_KEY = "weather-compare.theme";
 
@@ -30,6 +31,7 @@ function getServerSnapshot(): Theme {
 }
 
 export function ThemeToggle() {
+  const { t } = useLocale();
   const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const isDark = theme === "dark";
 
@@ -42,7 +44,7 @@ export function ThemeToggle() {
 
   return (
     <Button
-      aria-label={isDark ? "Activer le mode clair" : "Activer le mode sombre"}
+      aria-label={isDark ? t["theme.lightAriaLabel"] : t["theme.darkAriaLabel"]}
       onClick={toggleTheme}
       size="icon"
       type="button"

@@ -13,6 +13,8 @@ import {
 } from "recharts";
 
 import { ChartLegend } from "@/components/chart/ChartLegend";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
+import type { Locale } from "@/lib/i18n/types";
 import type {
   ClimateNormal,
   ColdWavePeriod,
@@ -33,12 +35,6 @@ export const palette = [
   "oklch(0.72 0.17 78)",
   "oklch(0.66 0.16 18)",
 ];
-
-const tooltipDateFormatter = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric",
-  month: "long",
-  timeZone: "UTC",
-});
 
 type WeatherChartProps = {
   datasets: WeatherYearDataset[];
@@ -69,6 +65,16 @@ export function WeatherChart({
   showNormals,
   onToggleSeries,
 }: WeatherChartProps) {
+  const { locale, t } = useLocale();
+  const tooltipDateFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-GB", {
+        day: "numeric",
+        month: "long",
+        timeZone: "UTC",
+      }),
+    [locale]
+  );
   const chartShellRef = useRef<HTMLDivElement | null>(null);
   const [chartWidth, setChartWidth] = useState(0);
   const colors = useMemo(
@@ -127,7 +133,7 @@ export function WeatherChart({
   if (datasets.length === 0) {
     return (
       <div className="flex min-h-[360px] items-center justify-center text-sm text-muted-foreground">
-        Aucune donnee disponible pour cette periode.
+        {t["state.chartNoData"]}
       </div>
     );
   }
@@ -177,7 +183,7 @@ export function WeatherChart({
               <YAxis
                 axisLine={false}
                 stroke="var(--muted-foreground)"
-                tickFormatter={(value) => `${value} deg`}
+                tickFormatter={(value) => `${value} °C`}
                 tickLine={false}
                 width={56}
               />
@@ -191,7 +197,9 @@ export function WeatherChart({
                     <div className="rounded-xl border border-white/40 bg-popover/90 p-3 text-sm text-popover-foreground shadow-2xl shadow-cyan-950/10 backdrop-blur-2xl dark:border-white/10 dark:shadow-black/30">
                       <p className="mb-2 font-medium">
                         {typeof payload[0]?.payload?.label === "string"
-                          ? formatTooltipDate(payload[0].payload.label)
+                          ? tooltipDateFormatter.format(
+                              new Date(`${payload[0].payload.label}T00:00:00.000Z`)
+                            )
                           : String(label)}
                       </p>
                       <div className="grid gap-1">
@@ -203,7 +211,7 @@ export function WeatherChart({
                             <span style={{ color: entry.color }}>{entry.name}</span>
                             <span className="font-medium">
                               {typeof entry.value === "number"
-                                ? `${entry.value.toFixed(1)} degC`
+                                ? `${entry.value.toFixed(1)} °C`
                                 : "-"}
                             </span>
                           </div>
@@ -259,7 +267,7 @@ export function WeatherChart({
                   connectNulls={false}
                   dataKey="normal"
                   dot={false}
-                  name="Normale 1991-2020"
+                  name={t["chart.normalLine"]}
                   stroke="var(--muted-foreground)"
                   strokeDasharray="6 5"
                   strokeWidth={2}
@@ -269,7 +277,7 @@ export function WeatherChart({
             </LineChart>
           ) : (
             <div className="flex h-[420px] items-center justify-center rounded-xl border border-dashed border-white/30 bg-white/25 text-sm text-muted-foreground backdrop-blur-xl dark:border-white/10 dark:bg-white/10">
-              Chargement du graphique...
+              {t["state.chartLoading"]}
             </div>
           )}
         </div>
@@ -333,26 +341,32 @@ export function getMonthBoundaryDays(rows: ChartRow[]) {
 
 export function formatChartDateTick(value: string | number) {
   const text = String(value);
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
+  const parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
 
-  if (!match) {
+  if (!parts) {
     return text;
   }
 
-  const [, year, month, day] = match;
+  const [, year, month, day] = parts;
 
   return `${day}/${month}/${year.slice(2)}`;
 }
 
-export function formatTooltipDate(value: string | number) {
+export function formatTooltipDate(value: string | number, locale: Locale = "fr") {
   const text = String(value);
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
+  const parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
 
-  if (!match) {
+  if (!parts) {
     return text;
   }
 
-  return tooltipDateFormatter.format(new Date(`${text}T00:00:00.000Z`));
+  const fmt = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-GB", {
+    day: "numeric",
+    month: "long",
+    timeZone: "UTC",
+  });
+
+  return fmt.format(new Date(`${text}T00:00:00.000Z`));
 }
 
 export function getHeatwaveFill(kind: HeatwavePeriod["kind"]) {

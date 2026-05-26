@@ -17,6 +17,8 @@ import { YearSelector } from "@/components/weather/YearSelector";
 import { useClimateNormals } from "@/hooks/useClimateNormals";
 import { useGeolocatedCity } from "@/hooks/useGeolocatedCity";
 import { useWeatherData } from "@/hooks/useWeatherData";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { LanguageSwitcher } from "@/components/weather/LanguageSwitcher";
 import { detectColdWaves } from "@/lib/weather/detectColdWaves";
 import { detectHeatwaves } from "@/lib/weather/detectHeatwaves";
 import { loadPersistedCity, useWeatherStore } from "@/store/weather-store";
@@ -41,6 +43,7 @@ function WeatherDashboardContent() {
     toggleHiddenSeries,
     setShowNormals,
   } = useWeatherStore();
+  const { t } = useLocale();
 
   useEffect(() => {
     const persisted = loadPersistedCity();
@@ -90,10 +93,10 @@ function WeatherDashboardContent() {
               </div>
               <div>
                 <h1 className="text-lg leading-tight font-semibold tracking-tight">
-                  Météo Compare
+                  {t["app.title"]}
                 </h1>
                 <p className="mt-0.5 text-sm text-muted-foreground" suppressHydrationWarning>
-                  Comparaison des températures quotidiennes
+                  {t["app.subtitle"]}
                   {city ? (
                     <span className="font-medium text-foreground">
                       {" · "}
@@ -105,6 +108,7 @@ function WeatherDashboardContent() {
             </div>
             <div className="flex items-center gap-2">
               <TemperatureToggle onChange={setTemperatureMode} value={temperatureMode} />
+              <LanguageSwitcher />
               <ThemeToggle />
             </div>
           </div>
@@ -112,7 +116,7 @@ function WeatherDashboardContent() {
 
         {/* Filters */}
         <section
-          aria-label="Filtres de comparaison"
+          aria-label={t["app.filtersAriaLabel"]}
           className="glass-panel grid gap-4 rounded-2xl p-4 lg:items-end lg:grid-cols-[minmax(240px,340px)_minmax(360px,520px)_1fr_auto]"
         >
           <CitySearch key={city?.id ?? "empty"} city={city} onCityChange={setCity} />
@@ -131,12 +135,13 @@ function WeatherDashboardContent() {
         {/* Data */}
         <section className="glass-panel rounded-2xl p-4">
           {!hasCity ? (
-            <EmptyState message="Sélectionnez une ville pour afficher les données." />
+            <EmptyState message={t["state.selectCity"]} />
           ) : (
             <div className="grid gap-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <ClimateSummaryBar
                   datasets={weather.data}
+                  heatwaves={heatwaves}
                   normals={normals.data}
                   showNormals={showNormals}
                   temperatureMode={temperatureMode}
@@ -148,7 +153,7 @@ function WeatherDashboardContent() {
 
               {weather.isError ? (
                 <div className="flex min-h-[360px] items-center justify-center text-sm text-destructive">
-                  {weather.error ?? "Impossible de charger les données météo."}
+                  {weather.error ?? t["state.loadError"]}
                 </div>
               ) : null}
 
@@ -168,16 +173,16 @@ function WeatherDashboardContent() {
               ) : null}
 
               {!weather.isLoading && !weather.isError && !hasData ? (
-                <EmptyState message="Aucune donnée disponible pour cette période." />
+                <EmptyState message={t["state.noData"]} />
               ) : null}
 
               {showNormals && normals.isFetching ? (
                 <p className="text-sm text-muted-foreground">
-                  Calcul de la normale climatique 1991-2020…
+                  {t["state.computingNormals"]}
                 </p>
               ) : null}
 
-              <HeatwaveOverlay colors={datasetColors} datasets={weather.data} heatwaves={heatwaves} />
+              <HeatwaveOverlay colors={datasetColors} heatwaves={heatwaves} />
               <ColdWaveOverlay colors={datasetColors} coldWaves={coldWaves} datasets={visibleDatasets} />
             </div>
           )}

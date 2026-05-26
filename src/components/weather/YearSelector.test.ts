@@ -7,14 +7,24 @@ import {
   keepDropdownMenuOpen,
 } from "./YearSelector";
 
-test("formats comparison offsets with the compared year", () => {
+test("formats comparison offsets with the compared year in french", () => {
   const period = {
     startDate: "2026-05-01",
     endDate: "2026-05-25",
   };
 
-  assert.equal(formatComparisonOffsetLabel(period, 1), "-1 an (2025)");
-  assert.equal(formatComparisonOffsetLabel(period, 2), "-2 ans (2024)");
+  assert.equal(formatComparisonOffsetLabel(period, 1, "fr"), "-1 an (2025)");
+  assert.equal(formatComparisonOffsetLabel(period, 2, "fr"), "-2 ans (2024)");
+});
+
+test("formats comparison offsets with the compared year in english", () => {
+  const period = {
+    startDate: "2026-05-01",
+    endDate: "2026-05-25",
+  };
+
+  assert.equal(formatComparisonOffsetLabel(period, 1, "en"), "-1 year (2025)");
+  assert.equal(formatComparisonOffsetLabel(period, 2, "en"), "-2 years (2024)");
 });
 
 test("formats comparison offsets with the compared year range", () => {
@@ -23,7 +33,7 @@ test("formats comparison offsets with the compared year range", () => {
     endDate: "2026-01-10",
   };
 
-  assert.equal(formatComparisonOffsetLabel(period, 1), "-1 an (2024-2025)");
+  assert.equal(formatComparisonOffsetLabel(period, 1, "fr"), "-1 an (2024-2025)");
 });
 
 test("prevents the comparison period menu from closing after a selection", () => {

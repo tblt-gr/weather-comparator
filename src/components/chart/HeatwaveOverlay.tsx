@@ -1,8 +1,15 @@
 "use client";
 
-import type { HeatwavePeriod, WeatherYearDataset } from "@/types/weather";
+import { useMemo } from "react";
 
-function getSeverityLabel(kind: HeatwavePeriod["kind"]) {
+import { useLocale } from "@/lib/i18n/LocaleProvider";
+import type { Locale } from "@/lib/i18n/types";
+import type { HeatwavePeriod } from "@/types/weather";
+
+function getSeverityLabel(kind: HeatwavePeriod["kind"], locale: Locale) {
+  if (locale === "en") {
+    return kind === "canicule" ? "Scorching heat" : "Heat wave";
+  }
   return kind === "canicule" ? "Canicule" : "Vague de chaleur";
 }
 
@@ -10,18 +17,27 @@ function getSeverityColor(kind: HeatwavePeriod["kind"]) {
   return kind === "canicule" ? "bg-red-500" : "bg-orange-500";
 }
 
-const frenchDayMonthFormatter = new Intl.DateTimeFormat("fr-FR", {
-  day: "2-digit",
-  month: "long",
-  timeZone: "UTC",
-});
-
-export function formatHeatwaveDateRange(start: string, end: string) {
-  return `${frenchDayMonthFormatter.format(new Date(start))} au ${frenchDayMonthFormatter.format(new Date(end))}`;
+export function formatHeatwaveDateRange(
+  start: string,
+  end: string,
+  locale: Locale = "fr"
+): string {
+  const dateLocale = locale === "fr" ? "fr-FR" : "en-GB";
+  const separator = locale === "fr" ? " à " : " to ";
+  const fmt = new Intl.DateTimeFormat(dateLocale, {
+    day: "2-digit",
+    month: "long",
+    timeZone: "UTC",
+  });
+  return `${fmt.format(new Date(start))}${separator}${fmt.format(new Date(end))}`;
 }
 
-export function formatHeatwaveSummary(heatwave: HeatwavePeriod) {
-  return `${getSeverityLabel(heatwave.kind)} ${formatHeatwaveDateRange(heatwave.start, heatwave.end)} (${heatwave.duration} jours, Tmax moyenne ${heatwave.averageMax.toFixed(1)} degC)`;
+export function formatHeatwaveSummary(heatwave: HeatwavePeriod, locale: Locale = "fr"): string {
+  const label = getSeverityLabel(heatwave.kind, locale);
+  const dateRange = formatHeatwaveDateRange(heatwave.start, heatwave.end, locale);
+  const days = locale === "fr" ? "jours" : "days";
+  const avgMax = locale === "fr" ? "Tmax moyenne" : "avg Tmax";
+  return `${label} ${dateRange} (${heatwave.duration} ${days}, ${avgMax} ${heatwave.averageMax.toFixed(1)} °C)`;
 }
 
 export function groupHeatwavesByYear(heatwaves: HeatwavePeriod[]) {
@@ -45,38 +61,23 @@ export function groupHeatwavesByYear(heatwaves: HeatwavePeriod[]) {
   }));
 }
 
-export function buildHeatwaveStats(heatwaves: HeatwavePeriod[], datasets: WeatherYearDataset[]) {
-  const referenceDataset = datasets.find((d) => d.offsetYears === 0);
-  const hotDays = referenceDataset?.values.filter((v) => typeof v.tmax === "number" && v.tmax > 30).length ?? 0;
-  const tropicalNights = referenceDataset?.values.filter((v) => typeof v.tmin === "number" && v.tmin >= 20).length ?? 0;
-  const heatwaveCount = heatwaves.filter((h) => h.kind === "vague_de_chaleur").length;
-  const canicula = heatwaves.filter((h) => h.kind === "canicule").length;
-  return { hotDays, tropicalNights, heatwaveCount, canicula };
-}
-
 type HeatwaveOverlayProps = {
   heatwaves: HeatwavePeriod[];
-  datasets: WeatherYearDataset[];
   colors?: Record<string, string>;
 };
 
-export function HeatwaveOverlay({ heatwaves, datasets, colors = {} }: HeatwaveOverlayProps) {
+export function HeatwaveOverlay({ heatwaves, colors = {} }: HeatwaveOverlayProps) {
+  const { locale, t } = useLocale();
+
+  const groupedHeatwaves = useMemo(() => groupHeatwavesByYear(heatwaves), [heatwaves]);
+
   if (heatwaves.length === 0) {
     return null;
   }
 
-  const groupedHeatwaves = groupHeatwavesByYear(heatwaves);
-  const stats = buildHeatwaveStats(heatwaves, datasets);
-
   return (
     <div className="rounded-xl border border-orange-300/40 bg-orange-100/45 p-3 text-sm shadow-lg shadow-orange-900/5 backdrop-blur-xl dark:border-orange-300/20 dark:bg-orange-400/10 dark:shadow-orange-300/5">
-      <p className="font-medium text-orange-950 dark:text-orange-100">Vagues de chaleur et canicules</p>
-      <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-orange-800 dark:text-orange-300">
-        <span>Jours &gt; 30 °C : <strong>{stats.hotDays}</strong></span>
-        <span>Nuits tropicales : <strong>{stats.tropicalNights}</strong></span>
-        <span>Vagues de chaleur : <strong>{stats.heatwaveCount}</strong></span>
-        <span>Canicules : <strong>{stats.canicula}</strong></span>
-      </div>
+      <p className="font-medium text-orange-950 dark:text-orange-100">{t["heatwave.sectionTitle"]}</p>
       <div className="mt-2 grid gap-3 text-orange-900 sm:grid-cols-2 lg:grid-cols-3 dark:text-orange-200">
         {groupedHeatwaves.map((group) => (
           <section
@@ -100,7 +101,7 @@ export function HeatwaveOverlay({ heatwaves, datasets, colors = {} }: HeatwaveOv
                     aria-hidden="true"
                     className={`mt-1.5 size-2.5 shrink-0 rounded-full ${getSeverityColor(heatwave.kind)}`}
                   />
-                  <span>{formatHeatwaveSummary(heatwave)}</span>
+                  <span>{formatHeatwaveSummary(heatwave, locale)}</span>
                 </li>
               ))}
             </ul>

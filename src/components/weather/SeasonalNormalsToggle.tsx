@@ -1,6 +1,7 @@
 "use client";
 
 import { Checkbox } from "@/components/ui/checkbox";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 type SeasonalNormalsToggleProps = {
   checked: boolean;
@@ -8,14 +9,16 @@ type SeasonalNormalsToggleProps = {
 };
 
 export function SeasonalNormalsToggle({ checked, onCheckedChange }: SeasonalNormalsToggleProps) {
+  const { t } = useLocale();
+
   return (
     <label className="flex h-8 cursor-pointer items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 text-sm font-medium transition-colors hover:bg-muted">
       <Checkbox
-        aria-label="Afficher la normale climatique"
+        aria-label={t["normals.ariaLabel"]}
         checked={checked}
         onCheckedChange={(v) => onCheckedChange(v === true)}
       />
-      Normale climatique
+      {t["normals.label"]}
     </label>
   );
 }

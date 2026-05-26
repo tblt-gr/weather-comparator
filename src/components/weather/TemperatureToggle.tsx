@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { TemperatureMode } from "@/types/weather";
 
 type TemperatureToggleProps = {
@@ -9,9 +10,11 @@ type TemperatureToggleProps = {
 };
 
 export function TemperatureToggle({ value, onChange }: TemperatureToggleProps) {
+  const { t } = useLocale();
+
   return (
     <div
-      aria-label="Type de température"
+      aria-label={t["temp.groupAriaLabel"]}
       className="grid grid-cols-2 gap-1 rounded-xl border border-border bg-muted p-1"
       role="group"
     >

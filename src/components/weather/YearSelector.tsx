@@ -4,13 +4,14 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { Check, ChevronDown, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
+import type { Locale } from "@/lib/i18n/types";
 import { type DatePeriod, getAvailableComparisonOffsets } from "@/lib/weather/dateRange";
 
 type YearSelectorProps = {
@@ -29,6 +30,7 @@ export function YearSelector({
   onToggleOffset,
   onClearOffsets,
 }: YearSelectorProps) {
+  const { locale, t } = useLocale();
   const offsets = useMemo(() => getAvailableComparisonOffsets(period), [period]);
   const visibleSelectedOffsets = selectedOffsets.filter((offsetYears) =>
     offsets.includes(offsetYears)
@@ -36,10 +38,10 @@ export function YearSelector({
   const count = visibleSelectedOffsets.length;
   const label =
     count === 0
-      ? "Aucune période sélectionnée"
+      ? t["year.noSelection"]
       : count === 1
-        ? formatComparisonOffsetLabel(period, visibleSelectedOffsets[0])
-        : `${count} périodes sélectionnées`;
+        ? formatComparisonOffsetLabel(period, visibleSelectedOffsets[0], locale)
+        : t["year.nSelected"].replace("{count}", String(count));
   const canClear = canClearComparisonOffsets(selectedOffsets);
 
   const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
@@ -52,12 +54,12 @@ export function YearSelector({
 
   return (
     <div className="grid gap-1">
-      <span className="text-sm font-medium">Périodes comparées</span>
+      <span className="text-sm font-medium">{t["year.label"]}</span>
       <div className="flex items-stretch gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              aria-label="Sélectionner les périodes à comparer"
+              aria-label={t["year.dropdownAriaLabel"]}
               className="h-8 flex-1 justify-between"
               type="button"
               variant="outline"
@@ -86,7 +88,7 @@ export function YearSelector({
                       type="button"
                     >
                       <Check className={checked ? "size-4 shrink-0 opacity-100" : "size-4 shrink-0 opacity-0"} />
-                      {formatComparisonOffsetLabel(period, offsetYears)}
+                      {formatComparisonOffsetLabel(period, offsetYears, locale)}
                     </button>
                   );
                 })}
@@ -95,7 +97,7 @@ export function YearSelector({
           </DropdownMenuContent>
         </DropdownMenu>
         <Button
-          aria-label="Effacer les périodes comparées"
+          aria-label={t["year.clearAriaLabel"]}
           className="shrink-0"
           disabled={!canClear}
           onClick={onClearOffsets}
@@ -118,11 +120,22 @@ export function canClearComparisonOffsets(selectedOffsets: number[]) {
   return selectedOffsets.length > 0;
 }
 
-export function formatComparisonOffsetLabel(period: DatePeriod, offsetYears: number) {
+export function formatComparisonOffsetLabel(
+  period: DatePeriod,
+  offsetYears: number,
+  locale: Locale = "fr"
+) {
   const startYear = Number(period.startDate.slice(0, 4)) - offsetYears;
   const endYear = Number(period.endDate.slice(0, 4)) - offsetYears;
   const yearLabel = startYear === endYear ? String(startYear) : `${startYear}-${endYear}`;
-  const offsetLabel = offsetYears === 1 ? "-1 an" : `-${offsetYears} ans`;
+  const offsetLabel =
+    locale === "fr"
+      ? offsetYears === 1
+        ? "-1 an"
+        : `-${offsetYears} ans`
+      : offsetYears === 1
+        ? "-1 year"
+        : `-${offsetYears} years`;
 
   return `${offsetLabel} (${yearLabel})`;
 }

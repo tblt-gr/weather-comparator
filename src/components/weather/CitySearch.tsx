@@ -9,6 +9,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { searchCities } from "@/lib/api/openMeteo";
 import type { City } from "@/types/weather";
 
@@ -18,6 +19,7 @@ type CitySearchProps = {
 };
 
 export function CitySearch({ city, onCityChange }: CitySearchProps) {
+  const { t } = useLocale();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [query, setQuery] = useState(city?.name ?? "");
   const [results, setResults] = useState<City[]>([]);
@@ -76,7 +78,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
         className="relative overflow-visible rounded-xl border border-input bg-transparent p-0 shadow-none"
       >
         <CommandInput
-          aria-label="Rechercher une ville"
+          aria-label={t["city.searchAriaLabel"]}
           onFocus={() => setIsOpen(results.length > 0 || isLoading)}
           onKeyDown={(event) => {
             if (event.key === "Escape") {
@@ -84,14 +86,14 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
             }
           }}
           onValueChange={setQuery}
-          placeholder="Paris, Lyon…"
+          placeholder={t["city.placeholder"]}
           value={query}
         />
         {isOpen ? (
           <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-border/60 bg-popover shadow-md">
             <CommandList>
               {isLoading ? (
-                <div className="px-3 py-2 text-sm text-muted-foreground">Recherche…</div>
+                <div className="px-3 py-2 text-sm text-muted-foreground">{t["city.searching"]}</div>
               ) : null}
               {!isLoading ? <CommandEmpty>Aucune ville trouvée.</CommandEmpty> : null}
               {results.map((result) => (

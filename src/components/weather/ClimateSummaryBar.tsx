@@ -1,12 +1,20 @@
 "use client";
 
 import { averageDatasetTemperature } from "@/lib/weather/calculateClimateNormals";
-import type { ClimateNormal, TemperatureMode, WeatherYearDataset } from "@/types/weather";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
+import type { Translations } from "@/lib/i18n/types";
+import type {
+  ClimateNormal,
+  HeatwavePeriod,
+  TemperatureMode,
+  WeatherYearDataset,
+} from "@/types/weather";
 
 type ClimateSummaryBarProps = {
   temperatureMode: TemperatureMode;
   datasets: WeatherYearDataset[];
   normals?: ClimateNormal[];
+  heatwaves: HeatwavePeriod[];
   showNormals: boolean;
 };
 
@@ -14,13 +22,17 @@ export function ClimateSummaryBar({
   temperatureMode,
   datasets,
   normals,
+  heatwaves,
   showNormals,
 }: ClimateSummaryBarProps) {
+  const { t } = useLocale();
   const stats = buildClimateSummaryStats({
     temperatureMode,
     datasets,
     normals,
+    heatwaves,
     showNormals,
+    t,
   });
 
   return (
@@ -42,14 +54,18 @@ type BuildClimateSummaryStatsParams = {
   temperatureMode: TemperatureMode;
   datasets: WeatherYearDataset[];
   normals?: ClimateNormal[];
+  heatwaves: HeatwavePeriod[];
   showNormals: boolean;
+  t: Translations;
 };
 
 export function buildClimateSummaryStats({
   temperatureMode,
   datasets,
   normals,
+  heatwaves,
   showNormals,
+  t,
 }: BuildClimateSummaryStatsParams): ClimateSummaryStat[] {
   const referenceDataset = datasets.find((d) => d.offsetYears === 0);
   const average = averageDatasetTemperature(referenceDataset, temperatureMode);
@@ -60,19 +76,29 @@ export function buildClimateSummaryStats({
       ? normalValues.reduce((total, v) => total + v, 0) / normalValues.length
       : null;
   const delta = average !== null && normalAverage !== null ? average - normalAverage : null;
+  const hotDays =
+    referenceDataset?.values.filter((v) => typeof v.tmax === "number" && v.tmax > 30).length ?? 0;
+  const tropicalNights =
+    referenceDataset?.values.filter((v) => typeof v.tmin === "number" && v.tmin >= 20).length ?? 0;
+  const vagueHeatwaves = heatwaves.filter((heatwave) => heatwave.kind === "vague_de_chaleur");
+  const canicules = heatwaves.filter((heatwave) => heatwave.kind === "canicule");
 
   return [
-    { label: "Moyenne période", value: formatTemp(average) },
+    { label: t["stats.periodAverage"], value: formatTemp(average) },
     ...(showNormals
       ? [
-          { label: "Normale 1991–2020", value: formatTemp(normalAverage) },
+          { label: t["stats.normal"], value: formatTemp(normalAverage) },
           {
-            label: "Écart",
+            label: t["stats.deviation"],
             tone: delta === null ? "neutral" : delta >= 0 ? "warm" : "cold",
             value: delta === null ? "—" : `${delta >= 0 ? "+" : ""}${delta.toFixed(1)} °C`,
           } satisfies ClimateSummaryStat,
         ]
       : []),
+    { label: t["stats.hotDays"], value: String(hotDays) },
+    { label: t["stats.tropicalNights"], value: String(tropicalNights) },
+    { label: t["stats.heatwaves"], value: String(vagueHeatwaves.length) },
+    { label: t["stats.canicules"], tone: "warm", value: String(canicules.length) },
   ];
 }
 

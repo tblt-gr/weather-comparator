@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { isValidDatePeriod, normalizeDatePeriod } from "./periodValidation";
+import { isValidDatePeriod, normalizeDatePeriod, validateDatePeriod } from "./periodValidation";
 
 test("accepts single-day periods", () => {
   assert.equal(
@@ -59,4 +59,21 @@ test("preserves valid ranges as-is", () => {
       endDate: "2026-05-25",
     }
   );
+});
+
+test("returns error.invalidDate for malformed dates", () => {
+  const errors = validateDatePeriod({ startDate: "not-a-date", endDate: "2026-05-25" });
+  assert.equal(errors.startDate, "error.invalidDate");
+  assert.equal(errors.endDate, undefined);
+});
+
+test("returns error.beforeEndDate when start is after end", () => {
+  const errors = validateDatePeriod({ startDate: "2026-05-25", endDate: "2026-05-01" });
+  assert.equal(errors.startDate, "error.beforeEndDate");
+  assert.equal(errors.endDate, undefined);
+});
+
+test("returns no errors for a valid period", () => {
+  const errors = validateDatePeriod({ startDate: "2026-05-01", endDate: "2026-05-25" });
+  assert.deepEqual(errors, {});
 });

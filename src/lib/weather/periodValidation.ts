@@ -2,6 +2,13 @@ import { type DatePeriod, formatLocalDate } from "./dateRange";
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
+export type ValidationErrorKey = "error.invalidDate" | "error.beforeEndDate";
+
+export type DatePeriodErrors = {
+  startDate?: ValidationErrorKey;
+  endDate?: ValidationErrorKey;
+};
+
 function isValidDateString(date: string): boolean {
   return DATE_PATTERN.test(date) && !isNaN(new Date(date).getTime());
 }
@@ -12,22 +19,17 @@ export function isValidDatePeriod(period: DatePeriod): boolean {
   return startDate <= endDate;
 }
 
-export type DatePeriodErrors = {
-  startDate?: string;
-  endDate?: string;
-};
-
 export function validateDatePeriod(period: DatePeriod): DatePeriodErrors {
   const errors: DatePeriodErrors = {};
 
   if (!isValidDateString(period.startDate)) {
-    errors.startDate = "Date invalide";
+    errors.startDate = "error.invalidDate";
   }
   if (!isValidDateString(period.endDate)) {
-    errors.endDate = "Date invalide";
+    errors.endDate = "error.invalidDate";
   }
   if (!errors.startDate && !errors.endDate && period.startDate > period.endDate) {
-    errors.startDate = "Doit être antérieure à la date de fin";
+    errors.startDate = "error.beforeEndDate";
   }
 
   return errors;

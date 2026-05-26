@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { buildClimateSummaryStats } from "./ClimateSummaryBar";
+import { fr } from "@/lib/i18n/locales/fr";
 
 test("hides climate normal stats when normals are disabled", () => {
   const stats = buildClimateSummaryStats({
@@ -16,11 +17,13 @@ test("hides climate normal stats when normals are disabled", () => {
         ],
       },
     ],
+    heatwaves: [],
     normals: [{ day: 1, value: 27 }, { day: 2, value: 28 }],
     showNormals: false,
     temperatureMode: "tmax",
+    t: fr,
   });
 
-  assert.equal(stats.some((stat) => stat.label === "Normale 1991–2020"), false);
-  assert.equal(stats.some((stat) => stat.label === "Écart"), false);
+  assert.equal(stats.some((stat) => stat.label === fr["stats.normal"]), false);
+  assert.equal(stats.some((stat) => stat.label === fr["stats.deviation"]), false);
 });
