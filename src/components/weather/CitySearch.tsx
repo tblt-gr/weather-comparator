@@ -73,7 +73,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
       <span>Ville</span>
       <Command
         shouldFilter={false}
-        className="rounded-xl border border-input bg-transparent p-0 shadow-none"
+        className="relative overflow-visible rounded-xl border border-input bg-transparent p-0 shadow-none"
       >
         <CommandInput
           aria-label="Rechercher une ville"
@@ -88,31 +88,33 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
           value={query}
         />
         {isOpen ? (
-          <CommandList className="border-t border-border/60">
-            {isLoading ? (
-              <div className="px-3 py-2 text-sm text-muted-foreground">Recherche…</div>
-            ) : null}
-            {!isLoading ? <CommandEmpty>Aucune ville trouvée.</CommandEmpty> : null}
-            {results.map((result) => (
-              <CommandItem
-                key={result.id}
-                onSelect={() => {
-                  onCityChange(result);
-                  setQuery(result.name);
-                  setResults([]);
-                  setIsOpen(false);
-                }}
-                value={`${result.id}-${result.name}`}
-              >
-                <span>
-                  {result.name}, {result.country}
-                  {result.admin1 ? (
-                    <span className="text-muted-foreground"> - {result.admin1}</span>
-                  ) : null}
-                </span>
-              </CommandItem>
-            ))}
-          </CommandList>
+          <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-border/60 bg-popover shadow-md">
+            <CommandList>
+              {isLoading ? (
+                <div className="px-3 py-2 text-sm text-muted-foreground">Recherche…</div>
+              ) : null}
+              {!isLoading ? <CommandEmpty>Aucune ville trouvée.</CommandEmpty> : null}
+              {results.map((result) => (
+                <CommandItem
+                  key={result.id}
+                  onSelect={() => {
+                    onCityChange(result);
+                    setQuery(result.name);
+                    setResults([]);
+                    setIsOpen(false);
+                  }}
+                  value={`${result.id}-${result.name}`}
+                >
+                  <span>
+                    {result.name}, {result.country}
+                    {result.admin1 ? (
+                      <span className="text-muted-foreground"> - {result.admin1}</span>
+                    ) : null}
+                  </span>
+                </CommandItem>
+              ))}
+            </CommandList>
+          </div>
         ) : null}
       </Command>
     </div>
