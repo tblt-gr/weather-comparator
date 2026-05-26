@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+// This project runs tests with Node's built-in runner, so this file covers only
+// pure helpers exported by WeatherChart. Rendering tests need a DOM environment.
 import {
   buildChartRows,
   formatChartDateTick,
