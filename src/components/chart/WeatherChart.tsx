@@ -231,25 +231,36 @@ export function WeatherChart({
   );
 }
 
-function buildChartRows(
+export function buildChartRows(
   datasets: WeatherYearDataset[],
   temperatureMode: TemperatureMode,
   normals?: ClimateNormal[]
 ) {
   const maxDays = Math.max(0, ...datasets.map((dataset) => dataset.values.length));
   const normalByDay = new Map(normals?.map((normal) => [normal.day, normal.value]));
+  const labelsByDay = new Map<number, string>();
+  datasets.forEach((dataset) => {
+    dataset.values.forEach((value) => {
+      if (!labelsByDay.has(value.day)) {
+        labelsByDay.set(value.day, value.date);
+      }
+    });
+  });
+  const datasetValuesByDay = datasets.map((dataset) => ({
+    id: dataset.id,
+    valuesByDay: new Map(dataset.values.map((value) => [value.day, value] as const)),
+  }));
 
   return Array.from({ length: maxDays }, (_, index) => {
     const day = index + 1;
     const row: ChartRow = {
       day,
-      label: getPeriodLabel(datasets, day),
+      label: labelsByDay.get(day) ?? "",
       normal: normalByDay.get(day) ?? null,
     };
 
-    datasets.forEach((dataset) => {
-      row[dataset.id] =
-        dataset.values.find((value) => value.day === day)?.[temperatureMode] ?? null;
+    datasetValuesByDay.forEach((dataset) => {
+      row[dataset.id] = dataset.valuesByDay.get(day)?.[temperatureMode] ?? null;
     });
 
     return row;
@@ -260,14 +271,6 @@ export function getMonthBoundaryDays(rows: ChartRow[]) {
   return rows
     .filter((row) => typeof row.label === "string" && row.label.slice(8, 10) === "01")
     .map((row) => row.day);
-}
-
-function getPeriodLabel(datasets: WeatherYearDataset[], day: number) {
-  const date = datasets
-    .flatMap((dataset) => dataset.values)
-    .find((value) => value.day === day)?.date;
-
-  return date ?? "";
 }
 
 export function formatChartDateTick(value: string | number) {

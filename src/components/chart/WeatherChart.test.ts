@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  buildChartRows,
   formatChartDateTick,
   getHeatwaveFill,
   getMonthBoundaryDays,
@@ -33,4 +34,37 @@ test("extracts month boundary days from chart rows", () => {
 test("uses red for canicules and orange for heatwaves", () => {
   assert.equal(getHeatwaveFill("canicule"), "oklch(0.62 0.24 28)");
   assert.equal(getHeatwaveFill("vague_de_chaleur"), "oklch(0.74 0.18 62)");
+});
+
+test("buildChartRows reuses matching day labels and temperatures across datasets", () => {
+  assert.deepEqual(
+    buildChartRows(
+      [
+        {
+          id: "current",
+          label: "2025",
+          offsetYears: 0,
+          values: [
+            { date: "2025-06-01", day: 1, year: 2025, tmax: 30, tmin: 18 },
+            { date: "2025-06-03", day: 3, year: 2025, tmax: 24, tmin: 15 },
+          ],
+        },
+        {
+          id: "minus-1",
+          label: "2024",
+          offsetYears: 1,
+          values: [
+            { date: "2024-06-01", day: 1, year: 2024, tmax: 28, tmin: 17 },
+            { date: "2024-06-02", day: 2, year: 2024, tmax: 26, tmin: 16 },
+          ],
+        },
+      ],
+      "tmax",
+      [{ day: 2, value: 27 }]
+    ),
+    [
+      { day: 1, label: "2025-06-01", normal: null, current: 30, "minus-1": 28 },
+      { day: 2, label: "2024-06-02", normal: 27, current: null, "minus-1": 26 },
+    ]
+  );
 });
