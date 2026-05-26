@@ -15,6 +15,7 @@ import { TemperatureToggle } from "@/components/weather/TemperatureToggle";
 import { ThemeToggle } from "@/components/weather/ThemeToggle";
 import { YearSelector } from "@/components/weather/YearSelector";
 import { useClimateNormals } from "@/hooks/useClimateNormals";
+import { useGeolocatedCity } from "@/hooks/useGeolocatedCity";
 import { useWeatherData } from "@/hooks/useWeatherData";
 import { detectColdWaves } from "@/lib/weather/detectColdWaves";
 import { detectHeatwaves } from "@/lib/weather/detectHeatwaves";
@@ -45,6 +46,8 @@ function WeatherDashboardContent() {
     const persisted = loadPersistedCity();
     if (persisted) setCity(persisted);
   }, [setCity]);
+
+  useGeolocatedCity();
 
   const weather = useWeatherData({
     city,
