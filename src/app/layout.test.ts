@@ -3,12 +3,12 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
-test("root layout defines the theme bootstrap script in head without next/script", () => {
+test("root layout uses next/script for the theme bootstrap script", () => {
   const source = readFileSync(path.join(process.cwd(), "src/app/layout.tsx"), "utf8");
 
-  assert.equal(source.includes('import Script from "next/script";'), false);
-  assert.equal(source.includes("<head>"), true);
+  assert.equal(source.includes('import Script from "next/script";'), true);
   assert.equal(source.includes('src="/theme-init.js"'), true);
+  assert.equal(source.includes("<script"), false);
 });
 
 test("theme bootstrap defaults to dark when no stored preference exists", () => {
