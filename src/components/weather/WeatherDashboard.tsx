@@ -1,7 +1,7 @@
 "use client";
 
 import { Thermometer } from "lucide-react";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import { HeatwaveOverlay } from "@/components/chart/HeatwaveOverlay";
 import { WeatherChart } from "@/components/chart/WeatherChart";
@@ -16,7 +16,7 @@ import { YearSelector } from "@/components/weather/YearSelector";
 import { useClimateNormals } from "@/hooks/useClimateNormals";
 import { useWeatherData } from "@/hooks/useWeatherData";
 import { detectHeatwaves } from "@/lib/weather/detectHeatwaves";
-import { useWeatherStore } from "@/store/weather-store";
+import { loadPersistedCity, useWeatherStore } from "@/store/weather-store";
 
 export function WeatherDashboard() {
   return <WeatherDashboardContent />;
@@ -38,6 +38,11 @@ function WeatherDashboardContent() {
     toggleHiddenSeries,
     setShowNormals,
   } = useWeatherStore();
+
+  useEffect(() => {
+    const persisted = loadPersistedCity();
+    if (persisted) setCity(persisted);
+  }, [setCity]);
 
   const weather = useWeatherData({
     city,
@@ -74,7 +79,7 @@ function WeatherDashboardContent() {
                 <h1 className="text-lg leading-tight font-semibold tracking-tight">
                   Météo Compare
                 </h1>
-                <p className="mt-0.5 text-sm text-muted-foreground">
+                <p className="mt-0.5 text-sm text-muted-foreground" suppressHydrationWarning>
                   Comparaison des températures quotidiennes
                   {city ? (
                     <span className="font-medium text-foreground">

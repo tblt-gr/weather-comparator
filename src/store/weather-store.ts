@@ -66,7 +66,7 @@ export function getInitialWeatherState(): Omit<
 > {
   return {
     city: loadPersistedCity(),
-    period: { startDate: "", endDate: "" },
+    period: getDefaultComparisonPeriod(),
     comparisonOffsets: [],
     temperatureMode: "tmax",
     hiddenSeries: [],

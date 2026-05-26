@@ -1,11 +1,13 @@
 "use client";
 
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { Check, ChevronDown, X } from "lucide-react";
+import { useMemo, useState } from "react";
+
 
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -18,13 +20,16 @@ type YearSelectorProps = {
   onClearOffsets: () => void;
 };
 
+const ITEM_HEIGHT = 32;
+const VISIBLE_ITEMS = 8;
+
 export function YearSelector({
   period,
   selectedOffsets,
   onToggleOffset,
   onClearOffsets,
 }: YearSelectorProps) {
-  const offsets = getAvailableComparisonOffsets(period);
+  const offsets = useMemo(() => getAvailableComparisonOffsets(period), [period]);
   const visibleSelectedOffsets = selectedOffsets.filter((offsetYears) =>
     offsets.includes(offsetYears)
   );
@@ -36,6 +41,14 @@ export function YearSelector({
         ? formatComparisonOffsetLabel(period, visibleSelectedOffsets[0])
         : `${count} périodes sélectionnées`;
   const canClear = canClearComparisonOffsets(selectedOffsets);
+
+  const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
+  const virtualizer = useVirtualizer({
+    count: offsets.length,
+    getScrollElement: () => scrollElement,
+    estimateSize: () => ITEM_HEIGHT,
+    overscan: 3,
+  });
 
   return (
     <div className="grid gap-1">
@@ -53,24 +66,32 @@ export function YearSelector({
               <ChevronDown className="size-4 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="max-h-80 w-64 overflow-y-auto">
-            {offsets.map((offsetYears) => {
-              const checked = selectedOffsets.includes(offsetYears);
-              return (
-                <DropdownMenuCheckboxItem
-                  checked={checked}
-                  className="justify-between"
-                  key={offsetYears}
-                  onCheckedChange={() => onToggleOffset(offsetYears)}
-                  onSelect={keepDropdownMenuOpen}
-                >
-                  <span className="flex items-center gap-2">
-                    <Check className={checked ? "size-4 opacity-100" : "size-4 opacity-0"} />
-                    {formatComparisonOffsetLabel(period, offsetYears)}
-                  </span>
-                </DropdownMenuCheckboxItem>
-              );
-            })}
+          <DropdownMenuContent align="start" className="w-64 p-1">
+            <div
+              ref={setScrollElement}
+              style={{ height: `${ITEM_HEIGHT * VISIBLE_ITEMS}px`, overflowY: "auto" }}
+            >
+              <div style={{ height: `${virtualizer.getTotalSize()}px`, position: "relative" }}>
+                {virtualizer.getVirtualItems().map((virtualItem) => {
+                  const offsetYears = offsets[virtualItem.index];
+                  const checked = selectedOffsets.includes(offsetYears);
+                  return (
+                    <button
+                      aria-checked={checked}
+                      className="absolute left-0 top-0 flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                      key={virtualItem.key}
+                      onClick={() => onToggleOffset(offsetYears)}
+                      role="menuitemcheckbox"
+                      style={{ height: `${ITEM_HEIGHT}px`, transform: `translateY(${virtualItem.start}px)` }}
+                      type="button"
+                    >
+                      <Check className={checked ? "size-4 shrink-0 opacity-100" : "size-4 shrink-0 opacity-0"} />
+                      {formatComparisonOffsetLabel(period, offsetYears)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
         <Button
