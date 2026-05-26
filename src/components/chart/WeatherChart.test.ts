@@ -31,11 +31,11 @@ test("formats tooltip dates as readable french dates without day number", () => 
 test("extracts month boundary days from chart rows", () => {
   assert.deepEqual(
     getMonthBoundaryDays([
-      { day: 1, label: "2026-01-01" },
-      { day: 2, label: "2026-01-02" },
-      { day: 31, label: "2026-01-31" },
-      { day: 32, label: "2026-02-01" },
-      { day: 33, label: "2026-02-02" },
+      { day: 1, label: "2026-01-01", tickLabel: "01/01/26" },
+      { day: 2, label: "2026-01-02", tickLabel: "02/01/26" },
+      { day: 31, label: "2026-01-31", tickLabel: "31/01/26" },
+      { day: 32, label: "2026-02-01", tickLabel: "01/02/26" },
+      { day: 33, label: "2026-02-02", tickLabel: "02/02/26" },
     ]),
     [1, 32]
   );

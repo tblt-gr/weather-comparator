@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,12 +18,10 @@ export function hasPendingPeriodChange(period: DatePeriod, localPeriod: DatePeri
 
 export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
   const [localPeriod, setLocalPeriod] = useState(period);
-  const [prevPeriod, setPrevPeriod] = useState(period);
 
-  if (prevPeriod.startDate !== period.startDate || prevPeriod.endDate !== period.endDate) {
-    setPrevPeriod(period);
+  useEffect(() => {
     setLocalPeriod(period);
-  }
+  }, [period]);
 
   const hasPendingChange = hasPendingPeriodChange(period, localPeriod);
 
