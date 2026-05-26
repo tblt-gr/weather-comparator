@@ -13,7 +13,7 @@ export function normalizeDatePeriod(
   period: DatePeriod,
   changedField: keyof DatePeriod
 ): DatePeriod {
-  if (period.startDate < period.endDate) {
+  if (period.startDate <= period.endDate) {
     return period;
   }
 
@@ -25,11 +25,10 @@ export function normalizeDatePeriod(
   }
 
   return {
-    startDate: period.startDate,
-    endDate: shiftDate(period.startDate, 1),
+    startDate: shiftDate(period.endDate, -1),
+    endDate: period.endDate,
   };
 }
-
 
 function shiftDate(date: string, days: number) {
   const nextDate = new Date(`${date}T00:00:00.000Z`);

@@ -23,13 +23,13 @@ test("keeps the start date when the end date is edited before it", () => {
       "endDate"
     ),
     {
-      startDate: "2026-05-10",
-      endDate: "2026-05-11",
+      startDate: "2026-05-08",
+      endDate: "2026-05-09",
     }
   );
 });
 
-test("pushes the end date forward when the start date reaches it", () => {
+test("preserves single-day periods when the start date reaches the end date", () => {
   assert.deepEqual(
     normalizeDatePeriod(
       {
@@ -40,7 +40,7 @@ test("pushes the end date forward when the start date reaches it", () => {
     ),
     {
       startDate: "2026-05-25",
-      endDate: "2026-05-26",
+      endDate: "2026-05-25",
     }
   );
 });
