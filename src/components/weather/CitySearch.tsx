@@ -1,10 +1,14 @@
 "use client";
 
-import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { searchCities } from "@/lib/api/openMeteo";
 import type { City } from "@/types/weather";
 
@@ -14,6 +18,7 @@ type CitySearchProps = {
 };
 
 export function CitySearch({ city, onCityChange }: CitySearchProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [query, setQuery] = useState(city?.name ?? "");
   const [results, setResults] = useState<City[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -52,52 +57,64 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
     };
   }, [city?.name, query]);
 
+  useEffect(() => {
+    function handlePointerDown(event: PointerEvent) {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, []);
+
   return (
-    <div className="relative grid gap-1 text-sm font-medium">
+    <div className="relative grid gap-1 text-sm font-medium" ref={containerRef}>
       <span>Ville</span>
-      <div className="relative">
-        <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          aria-autocomplete="list"
-          aria-expanded={isOpen}
+      <Command
+        shouldFilter={false}
+        className="rounded-xl border border-input bg-transparent p-0 shadow-none"
+      >
+        <CommandInput
           aria-label="Rechercher une ville"
-          className="pl-8"
-          onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => setIsOpen(results.length > 0)}
+          onFocus={() => setIsOpen(results.length > 0 || isLoading)}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              setIsOpen(false);
+            }
+          }}
+          onValueChange={setQuery}
           placeholder="Paris, Lyon…"
           value={query}
         />
-      </div>
-      {isOpen ? (
-        <div className="absolute top-full z-20 mt-1 max-h-72 w-full overflow-auto rounded-xl border border-border bg-popover p-1 text-popover-foreground shadow-lg shadow-black/8">
-          {isLoading ? (
-            <div className="px-3 py-2 text-sm text-muted-foreground">Recherche…</div>
-          ) : null}
-          {!isLoading && results.length === 0 ? (
-            <div className="px-3 py-2 text-sm text-muted-foreground">Aucune ville trouvée.</div>
-          ) : null}
-          {results.map((result) => (
-            <Button
-              className="h-auto w-full justify-start px-3 py-2 text-left whitespace-normal"
-              key={result.id}
-              onClick={() => {
-                onCityChange(result);
-                setQuery(result.name);
-                setIsOpen(false);
-              }}
-              type="button"
-              variant="ghost"
-            >
-              <span>
-                {result.name}, {result.country}
-                {result.admin1 ? (
-                  <span className="text-muted-foreground"> — {result.admin1}</span>
-                ) : null}
-              </span>
-            </Button>
-          ))}
-        </div>
-      ) : null}
+        {isOpen ? (
+          <CommandList className="border-t border-border/60">
+            {isLoading ? (
+              <div className="px-3 py-2 text-sm text-muted-foreground">Recherche…</div>
+            ) : null}
+            {!isLoading ? <CommandEmpty>Aucune ville trouvée.</CommandEmpty> : null}
+            {results.map((result) => (
+              <CommandItem
+                key={result.id}
+                onSelect={() => {
+                  onCityChange(result);
+                  setQuery(result.name);
+                  setResults([]);
+                  setIsOpen(false);
+                }}
+                value={`${result.id}-${result.name}`}
+              >
+                <span>
+                  {result.name}, {result.country}
+                  {result.admin1 ? (
+                    <span className="text-muted-foreground"> - {result.admin1}</span>
+                  ) : null}
+                </span>
+              </CommandItem>
+            ))}
+          </CommandList>
+        ) : null}
+      </Command>
     </div>
   );
 }
