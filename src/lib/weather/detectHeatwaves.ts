@@ -49,7 +49,7 @@ function pushHeatwave(
   heatwaves.push({
     datasetId,
     datasetLabel,
-    kind: sequence.some((value) => value.isCanicule) ? "canicule" : "vague_de_chaleur",
+    kind: hasConsecutiveCaniculeDays(sequence, minimumDuration) ? "canicule" : "vague_de_chaleur",
     start: sequence[0].date,
     end: sequence[sequence.length - 1].date,
     startDay: sequence[0].day,
@@ -57,4 +57,21 @@ function pushHeatwave(
     duration: sequence.length,
     averageMax: sequence.reduce((total, value) => total + value.tmax, 0) / sequence.length,
   });
+}
+
+function hasConsecutiveCaniculeDays(
+  sequence: { isCanicule: boolean }[],
+  minimumDuration: number
+) {
+  let consecutiveDays = 0;
+
+  for (const value of sequence) {
+    consecutiveDays = value.isCanicule ? consecutiveDays + 1 : 0;
+
+    if (consecutiveDays >= minimumDuration) {
+      return true;
+    }
+  }
+
+  return false;
 }

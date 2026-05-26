@@ -12,7 +12,7 @@ test("classifies a hot spell as a canicule when it crosses the higher threshold"
       [32, 18],
     ]),
     buildDataset("minus-4", "2022", [
-      [30, 15],
+      [33, 15],
       [34, 18],
       [35, 19],
     ]),
@@ -30,6 +30,24 @@ test("classifies a hot spell as a canicule when it crosses the higher threshold"
       { label: "2022", kind: "canicule" },
     ]
   );
+});
+
+test("does not classify a long heatwave as canicule when only one day crosses the higher threshold", () => {
+  const datasets: WeatherYearDataset[] = [
+    buildDataset("minus-7", "2019", [
+      [30, 16],
+      [31, 17],
+      [33, 18],
+      [31, 18],
+      [30, 17],
+      [31, 16],
+      [30, 15],
+    ]),
+  ];
+
+  const [heatwave] = detectHeatwaves(datasets);
+
+  assert.equal(heatwave?.kind, "vague_de_chaleur");
 });
 
 function buildDataset(
