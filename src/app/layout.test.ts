@@ -10,3 +10,9 @@ test("root layout defines the theme bootstrap script in head without next/script
   assert.equal(source.includes("<head>"), true);
   assert.equal(source.includes('src="/theme-init.js"'), true);
 });
+
+test("theme bootstrap defaults to dark when no stored preference exists", () => {
+  const source = readFileSync(path.join(process.cwd(), "public/theme-init.js"), "utf8");
+
+  assert.equal(source.includes('var isDark = storedTheme ? storedTheme === "dark" : true;'), true);
+});
