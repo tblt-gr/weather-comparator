@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { formatComparisonOffsetLabel } from "./YearSelector";
+import { formatComparisonOffsetLabel, keepDropdownMenuOpen } from "./YearSelector";
 
 test("formats comparison offsets with the compared year", () => {
   const period = {
@@ -20,4 +20,16 @@ test("formats comparison offsets with the compared year range", () => {
   };
 
   assert.equal(formatComparisonOffsetLabel(period, 1), "-1 an (2024-2025)");
+});
+
+test("prevents the comparison period menu from closing after a selection", () => {
+  let prevented = false;
+
+  keepDropdownMenuOpen({
+    preventDefault() {
+      prevented = true;
+    },
+  });
+
+  assert.equal(prevented, true);
 });

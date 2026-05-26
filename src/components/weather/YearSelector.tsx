@@ -54,6 +54,7 @@ export function YearSelector({ period, selectedOffsets, onToggleOffset }: YearSe
                 className="justify-between"
                 key={offsetYears}
                 onCheckedChange={() => onToggleOffset(offsetYears)}
+                onSelect={keepDropdownMenuOpen}
               >
                 <span className="flex items-center gap-2">
                   <Check className={checked ? "size-4 opacity-100" : "size-4 opacity-0"} />
@@ -66,6 +67,10 @@ export function YearSelector({ period, selectedOffsets, onToggleOffset }: YearSe
       </DropdownMenu>
     </div>
   );
+}
+
+export function keepDropdownMenuOpen(event: { preventDefault: () => void }) {
+  event.preventDefault();
 }
 
 export function formatComparisonOffsetLabel(period: DatePeriod, offsetYears: number) {
