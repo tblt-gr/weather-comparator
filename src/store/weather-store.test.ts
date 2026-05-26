@@ -3,7 +3,7 @@ import test from "node:test";
 
 import type { City } from "@/types/weather";
 
-import { loadPersistedCity, useWeatherStore } from "./weather-store";
+import { getInitialWeatherState, loadPersistedCity, useWeatherStore } from "./weather-store";
 
 const storage = new Map<string, string>();
 const originalWindow = globalThis.window;
@@ -70,6 +70,18 @@ test("loadPersistedCity returns null when storage is empty or invalid", () => {
 
   storage.set("weather-compare.city", "{invalid-json");
 
+  assert.equal(loadPersistedCity(), null);
+});
+
+test("getInitialWeatherState hydrates the persisted city only once", () => {
+  storage.set("weather-compare.city", JSON.stringify(baseCity));
+
+  const initialState = getInitialWeatherState();
+  assert.deepEqual(initialState.city, baseCity);
+
+  useWeatherStore.getState().setCity(null);
+
+  assert.equal(useWeatherStore.getState().city, null);
   assert.equal(loadPersistedCity(), null);
 });
 

@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Thermometer } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { HeatwaveOverlay } from "@/components/chart/HeatwaveOverlay";
 import { WeatherChart } from "@/components/chart/WeatherChart";
@@ -17,7 +17,7 @@ import { YearSelector } from "@/components/weather/YearSelector";
 import { useClimateNormals } from "@/hooks/useClimateNormals";
 import { useWeatherData } from "@/hooks/useWeatherData";
 import { detectHeatwaves } from "@/lib/weather/detectHeatwaves";
-import { loadPersistedCity, useWeatherStore } from "@/store/weather-store";
+import { useWeatherStore } from "@/store/weather-store";
 
 export function WeatherDashboard() {
   const [queryClient] = useState(() => new QueryClient());
@@ -44,13 +44,6 @@ function WeatherDashboardContent() {
     toggleHiddenSeries,
     setShowNormals,
   } = useWeatherStore();
-
-  useEffect(() => {
-    const persistedCity = loadPersistedCity();
-    if (persistedCity && city === null) {
-      setCity(persistedCity);
-    }
-  }, [city, setCity]);
 
   const weather = useWeatherData({
     city,

@@ -5,7 +5,6 @@ import { create } from "zustand";
 import { type DatePeriod, getDefaultComparisonPeriod } from "@/lib/weather/dateRange";
 import type { City, TemperatureMode } from "@/types/weather";
 
-const now = new Date();
 const CITY_STORAGE_KEY = "weather-compare.city";
 
 type WeatherState = {
@@ -54,13 +53,27 @@ export function loadPersistedCity() {
   }
 }
 
+export function getInitialWeatherState(): Omit<
+  WeatherState,
+  | "setCity"
+  | "setPeriod"
+  | "toggleComparisonOffset"
+  | "setTemperatureMode"
+  | "toggleHiddenSeries"
+  | "setShowNormals"
+> {
+  return {
+    city: loadPersistedCity(),
+    period: getDefaultComparisonPeriod(new Date()),
+    comparisonOffsets: [],
+    temperatureMode: "tmax",
+    hiddenSeries: [],
+    showNormals: false,
+  };
+}
+
 export const useWeatherStore = create<WeatherState>((set) => ({
-  city: null,
-  period: getDefaultComparisonPeriod(now),
-  comparisonOffsets: [],
-  temperatureMode: "tmax",
-  hiddenSeries: [],
-  showNormals: false,
+  ...getInitialWeatherState(),
   setCity: (city) => {
     persistCity(city);
     set({ city });
