@@ -19,3 +19,8 @@ test("ignores invalid stored values and uses browser language", () => {
   assert.equal(resolveLocale("es", "en-US"), "en");
   assert.equal(resolveLocale("invalid", "fr-FR"), "fr");
 });
+
+test("supports an explicit fallback locale when browser language is unavailable", () => {
+  assert.equal(resolveLocale(null, undefined, "fr"), "fr");
+  assert.equal(resolveLocale("invalid", "", "fr"), "fr");
+});
