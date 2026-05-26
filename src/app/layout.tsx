@@ -6,7 +6,7 @@ import { Providers } from "@/app/providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Weather Compare",
+  title: "Weather Comparator",
   description: "Daily temperature comparison",
 };
 

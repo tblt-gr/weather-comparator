@@ -1,7 +1,7 @@
 import type { Translations } from "@/lib/i18n/types";
 
 export const en: Translations = {
-  "app.title": "Weather Compare",
+  "app.title": "Weather Comparator",
   "app.subtitle": "Daily temperature comparison",
   "app.filtersAriaLabel": "Comparison filters",
   "state.selectCity": "Select a city to display data.",
