@@ -5,7 +5,7 @@ import { create } from "zustand";
 import {
   type DatePeriod,
   getDefaultComparisonPeriod,
-} from "@/features/weather/logic";
+} from "@/features/weather/logic/dates";
 import type { WeatherUrlState } from "@/features/weather/logic";
 import type { City, TemperatureMode } from "@/features/weather/types";
 

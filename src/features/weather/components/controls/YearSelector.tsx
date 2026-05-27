@@ -13,7 +13,7 @@ import {
 import {
   type DatePeriod,
   getAvailableComparisonOffsets,
-} from "@/features/weather/logic";
+} from "@/features/weather/logic/dates";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Locale } from "@/lib/i18n/types";
 

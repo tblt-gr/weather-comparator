@@ -6,7 +6,7 @@ import type { OpenMeteoArchiveResponse } from "@/features/weather/api";
 import {
   type DatePeriod,
   getComparableDateRangeByOffset,
-} from "@/features/weather/logic/dateRange";
+} from "@/features/weather/logic/dates";
 import { normalizeWeatherData } from "@/features/weather/logic/normalizeWeatherData";
 import type {
   ClimateNormal,

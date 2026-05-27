@@ -5,7 +5,7 @@ import { useEffect, useState, type RefObject } from "react";
 import { toPng } from "html-to-image";
 
 import { Button } from "@/components/ui/button";
-import { exportWeatherCsv } from "@/features/weather/logic";
+import { exportWeatherCsv } from "@/features/weather/logic/exports";
 import type { WeatherYearDataset } from "@/features/weather/types";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 

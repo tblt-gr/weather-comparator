@@ -1,7 +1,7 @@
 import {
   type DatePeriod,
   getComparableDateRangeByOffset,
-} from "@/features/weather/logic";
+} from "@/features/weather/logic/dates";
 import {
   CLIMATE_NORMAL_END_YEAR,
   CLIMATE_NORMAL_START_YEAR,

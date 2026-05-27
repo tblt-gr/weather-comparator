@@ -2,11 +2,11 @@ import {
   type DatePeriod,
   getAvailableComparisonOffsets,
   getDefaultComparisonPeriod,
-} from "@/features/weather/logic/dateRange";
+} from "@/features/weather/logic/dates";
 import {
   isValidDatePeriod,
   validateDatePeriod,
-} from "@/features/weather/logic/periodValidation";
+} from "@/features/weather/logic/dates";
 import type { City, TemperatureMode } from "@/features/weather/types";
 
 type EncodedCity = {

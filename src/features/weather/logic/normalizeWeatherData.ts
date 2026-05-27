@@ -3,7 +3,7 @@ import {
   type DatePeriod,
   eachDateInRange,
   getPeriodLabel,
-} from "@/features/weather/logic/dateRange";
+} from "@/features/weather/logic/dates";
 import type { DailyTemperature, WeatherYearDataset } from "@/features/weather/types";
 
 export function normalizeWeatherData({

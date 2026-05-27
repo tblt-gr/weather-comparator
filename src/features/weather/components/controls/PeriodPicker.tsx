@@ -4,11 +4,11 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { DatePeriod } from "@/features/weather/logic";
+import type { DatePeriod } from "@/features/weather/logic/dates";
 import {
   type DatePeriodErrors,
   validateDatePeriod,
-} from "@/features/weather/logic";
+} from "@/features/weather/logic/dates";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 type PeriodPickerProps = {

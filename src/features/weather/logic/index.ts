@@ -16,19 +16,19 @@ export {
   getComparableDateRangeByOffset,
   getDefaultComparisonPeriod,
   getPeriodLabel,
-} from "@/features/weather/logic/dateRange";
-export type { DatePeriod } from "@/features/weather/logic/dateRange";
+} from "@/features/weather/logic/dates";
+export type { ComparableDateRange, DatePeriod } from "@/features/weather/logic/dates";
 export { detectColdWaves } from "@/features/weather/logic/detectColdWaves";
 export { detectHeatwaves } from "@/features/weather/logic/detectHeatwaves";
-export { exportWeatherCsv } from "@/features/weather/logic/exportCsv";
+export { exportWeatherCsv } from "@/features/weather/logic/exports";
 export { buildHeatwaveStats } from "@/features/weather/logic/heatwaveStats";
 export type { HeatwaveStats } from "@/features/weather/logic/heatwaveStats";
 export { normalizeWeatherData } from "@/features/weather/logic/normalizeWeatherData";
 export {
   isValidDatePeriod,
   validateDatePeriod,
-} from "@/features/weather/logic/periodValidation";
-export type { DatePeriodErrors } from "@/features/weather/logic/periodValidation";
+} from "@/features/weather/logic/dates";
+export type { DatePeriodErrors, ValidationErrorKey } from "@/features/weather/logic/dates";
 export {
   decodeCityParam,
   encodeCityParam,

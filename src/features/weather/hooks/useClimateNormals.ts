@@ -7,8 +7,7 @@ import {
   buildClimateDatasetsFromRange,
   calculateClimateNormals,
 } from "@/features/weather/logic";
-import { type DatePeriod } from "@/features/weather/logic";
-import { isValidDatePeriod } from "@/features/weather/logic";
+import { type DatePeriod, isValidDatePeriod } from "@/features/weather/logic/dates";
 import type { City, TemperatureMode } from "@/features/weather/types";
 
 export function useClimateNormals({

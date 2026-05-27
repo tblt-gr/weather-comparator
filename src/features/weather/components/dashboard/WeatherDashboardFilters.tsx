@@ -6,7 +6,7 @@ import { SeasonalNormalsToggle } from "@/features/weather/components/controls";
 import { TemperatureToggle } from "@/features/weather/components/controls";
 import { YearSelector } from "@/features/weather/components/controls";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
-import type { DatePeriod } from "@/features/weather/logic";
+import type { DatePeriod } from "@/features/weather/logic/dates";
 import type { City, TemperatureMode } from "@/features/weather/types";
 
 type WeatherDashboardFiltersProps = {

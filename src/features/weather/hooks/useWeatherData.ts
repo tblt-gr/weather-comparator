@@ -6,9 +6,9 @@ import { fetchHistoricalWeather } from "@/features/weather/api";
 import {
   type DatePeriod,
   getComparableDateRangeByOffset,
-} from "@/features/weather/logic";
+} from "@/features/weather/logic/dates";
 import { normalizeWeatherData } from "@/features/weather/logic";
-import { isValidDatePeriod } from "@/features/weather/logic";
+import { isValidDatePeriod } from "@/features/weather/logic/dates";
 import type { City, WeatherYearDataset } from "@/features/weather/types";
 
 export function getWeatherQueryKey(
