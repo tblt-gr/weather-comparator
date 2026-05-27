@@ -6,7 +6,7 @@ import {
   formatColdWaveSummary,
   groupColdWavesByYear,
 } from "./ColdWaveOverlay";
-import { buildColdWaveStats } from "@/features/weather/logic";
+import { buildColdWaveStats } from "@/features/weather/logic/extremes";
 import type { ColdWavePeriod, WeatherYearDataset } from "@/features/weather/types";
 
 const makeColdWave = (overrides: Partial<ColdWavePeriod> = {}): ColdWavePeriod => ({

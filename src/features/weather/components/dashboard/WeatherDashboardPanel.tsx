@@ -2,9 +2,8 @@
 
 import { useMemo, type RefObject } from "react";
 
-import { ColdWaveOverlay } from "@/features/weather/components/chart";
-import { HeatwaveOverlay } from "@/features/weather/components/chart";
 import { palette, WeatherChart } from "@/features/weather/components/chart";
+import { ColdWaveOverlay, HeatwaveOverlay } from "@/features/weather/components/extremes";
 import { ExportButtons } from "@/features/weather/components/export";
 import { ClimateSummaryBar } from "@/features/weather/components/summary";
 import { useLocale } from "@/lib/i18n/LocaleProvider";

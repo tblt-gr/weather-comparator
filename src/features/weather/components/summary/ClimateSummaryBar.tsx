@@ -1,8 +1,7 @@
 "use client";
 
 import { averageDatasetTemperature } from "@/features/weather/logic";
-import { buildColdWaveStats } from "@/features/weather/logic";
-import { buildHeatwaveStats } from "@/features/weather/logic";
+import { buildColdWaveStats, buildHeatwaveStats } from "@/features/weather/logic/extremes";
 import type {
   ClimateNormal,
   ColdWavePeriod,

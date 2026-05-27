@@ -6,13 +6,14 @@ import test from "node:test";
 test("root layout uses next/script for the theme bootstrap script", () => {
   const source = readFileSync(path.join(process.cwd(), "src/app/layout.tsx"), "utf8");
 
-  assert.equal(source.includes('import Script from "next/script";'), true);
-  assert.equal(source.includes('src="/theme-init.js"'), true);
-  assert.equal(source.includes("<script"), false);
+  assert.equal(source.includes('import { cookies } from "next/headers";'), true);
+  assert.equal(source.includes('src="/theme-init.js"'), false);
+  assert.equal(source.includes("await cookies()"), true);
 });
 
-test("theme bootstrap defaults to dark when no stored preference exists", () => {
-  const source = readFileSync(path.join(process.cwd(), "public/theme-init.js"), "utf8");
+test("root layout reads the theme cookie and passes the resolved theme to Providers", () => {
+  const source = readFileSync(path.join(process.cwd(), "src/app/layout.tsx"), "utf8");
 
-  assert.equal(source.includes('var isDark = storedTheme ? storedTheme === "dark" : true;'), true);
+  assert.equal(source.includes("parseTheme(cookieStore.get(THEME_COOKIE_NAME)?.value)"), true);
+  assert.equal(source.includes("<Providers initialTheme={theme}>"), true);
 });

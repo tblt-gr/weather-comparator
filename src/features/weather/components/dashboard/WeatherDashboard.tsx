@@ -9,8 +9,7 @@ import { useClimateNormals } from "@/features/weather/hooks";
 import { useGeolocatedCity } from "@/features/weather/hooks";
 import { useWeatherData } from "@/features/weather/hooks";
 import { useWeatherUrlState } from "@/features/weather/hooks";
-import { detectColdWaves } from "@/features/weather/logic";
-import { detectHeatwaves } from "@/features/weather/logic";
+import { detectColdWaves, detectHeatwaves } from "@/features/weather/logic/extremes";
 import { useWeatherStore } from "@/features/weather/store";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 
