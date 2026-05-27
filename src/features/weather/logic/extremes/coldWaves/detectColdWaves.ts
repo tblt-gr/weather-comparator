@@ -14,6 +14,12 @@ export function detectColdWaves(
     let sequence: { date: string; day: number; tmin: number; tmax: number; isGrandFroid: boolean }[] = [];
 
     dataset.values.forEach((value) => {
+      if (value.isForecast) {
+        pushColdWave(dataset.id, dataset.label, sequence, minimumDuration, coldWaves);
+        sequence = [];
+        return;
+      }
+
       if (
         typeof value.tmin === "number" &&
         typeof value.tmax === "number" &&

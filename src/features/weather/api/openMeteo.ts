@@ -1,11 +1,12 @@
 import {
   type DatePeriod,
+  formatLocalDate,
   getComparableDateRangeByOffset,
 } from "@/features/weather/logic/dates";
 import {
   CLIMATE_NORMAL_END_YEAR,
   CLIMATE_NORMAL_START_YEAR,
-} from "@/features/weather/logic";
+} from "@/features/weather/logic/climateNormalYears";
 import type { City } from "@/features/weather/types";
 
 type GeocodingResult = {
@@ -26,8 +27,27 @@ export type OpenMeteoArchiveResponse = {
     time?: string[];
     temperature_2m_max?: (number | null)[];
     temperature_2m_min?: (number | null)[];
+    is_forecast?: boolean[];
   };
 };
+
+const FORECAST_REQUEST_TIMEOUT_MS = 5000;
+
+export function createEmptyDailyWeatherResponse(): OpenMeteoArchiveResponse {
+  return {
+    daily: {
+      time: [],
+      temperature_2m_max: [],
+      temperature_2m_min: [],
+    },
+  };
+}
+
+export function createWeatherRequestSignal(signal?: AbortSignal, timeoutMs = FORECAST_REQUEST_TIMEOUT_MS) {
+  const timeoutSignal = AbortSignal.timeout(timeoutMs);
+
+  return signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
+}
 
 export async function searchCities(query: string, signal?: AbortSignal): Promise<City[]> {
   const trimmedQuery = query.trim();
@@ -78,13 +98,7 @@ export async function fetchHistoricalWeather({
   const range = getComparableDateRangeByOffset({ offsetYears, period });
 
   if (!range) {
-    return {
-      daily: {
-        time: [],
-        temperature_2m_max: [],
-        temperature_2m_min: [],
-      },
-    };
+    return createEmptyDailyWeatherResponse();
   }
 
   const params = new URLSearchParams({
@@ -105,6 +119,47 @@ export async function fetchHistoricalWeather({
     const body = await response.json().catch(() => ({}));
     const reason = (body as { reason?: string }).reason;
     throw new Error(reason ?? "Weather fetch failed");
+  }
+
+  return (await response.json()) as OpenMeteoArchiveResponse;
+}
+
+export async function fetchForecastWeather({
+  city,
+  period,
+  signal,
+  today = formatLocalDate(new Date()),
+  timeoutMs = FORECAST_REQUEST_TIMEOUT_MS,
+}: {
+  city: City;
+  period: DatePeriod;
+  signal?: AbortSignal;
+  today?: string;
+  timeoutMs?: number;
+}): Promise<OpenMeteoArchiveResponse> {
+  const startDate = period.startDate > today ? period.startDate : addDays(today, 1);
+
+  if (startDate > period.endDate) {
+    return createEmptyDailyWeatherResponse();
+  }
+
+  const params = new URLSearchParams({
+    latitude: String(city.latitude),
+    longitude: String(city.longitude),
+    start_date: startDate,
+    end_date: period.endDate,
+    daily: "temperature_2m_max,temperature_2m_min",
+    timezone: "Europe/Paris",
+  });
+
+  const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`, {
+    signal: createWeatherRequestSignal(signal, timeoutMs),
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    const reason = (body as { reason?: string }).reason;
+    throw new Error(reason ?? "Forecast fetch failed");
   }
 
   return (await response.json()) as OpenMeteoArchiveResponse;
@@ -147,4 +202,11 @@ export async function fetchClimateNormalsRange({
   }
 
   return (await response.json()) as OpenMeteoArchiveResponse;
+}
+
+function addDays(date: string, days: number) {
+  const nextDate = new Date(`${date}T00:00:00.000Z`);
+  nextDate.setUTCDate(nextDate.getUTCDate() + days);
+
+  return nextDate.toISOString().slice(0, 10);
 }

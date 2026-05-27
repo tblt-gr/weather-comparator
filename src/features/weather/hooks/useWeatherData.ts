@@ -2,12 +2,17 @@
 
 import { useQueries } from "@tanstack/react-query";
 
-import { fetchHistoricalWeather } from "@/features/weather/api";
+import { fetchForecastWeather, fetchHistoricalWeather } from "@/features/weather/api/openMeteo";
 import {
   type DatePeriod,
   getComparableDateRangeByOffset,
 } from "@/features/weather/logic/dates";
-import { normalizeWeatherData } from "@/features/weather/logic";
+import {
+  getForecastDateRangeForPeriod,
+  mergeArchiveAndForecastWeather,
+} from "@/features/weather/logic/forecastWeather";
+import { normalizeWeatherData } from "@/features/weather/logic/normalizeWeatherData";
+import { formatLocalDate as formatToday } from "@/features/weather/logic/dates";
 import { isValidDatePeriod } from "@/features/weather/logic/dates";
 import type { City, WeatherYearDataset } from "@/features/weather/types";
 
@@ -16,7 +21,14 @@ export function getWeatherQueryKey(
   period: DatePeriod,
   offsetYears: number
 ) {
-  return ["weather", city.id, period.startDate, period.endDate, offsetYears] as const;
+  return [
+    "weather",
+    city.id,
+    period.startDate,
+    period.endDate,
+    offsetYears,
+    offsetYears === 0 ? "forecast-aware" : "archive-only",
+  ] as const;
 }
 
 export function aggregateWeatherQueryErrors(
@@ -36,6 +48,89 @@ export function aggregateWeatherQueryErrors(
   return messages.length > 0 ? messages.join(" | ") : null;
 }
 
+export function shouldIgnoreWeatherError({
+  stage,
+  offsetYears,
+}: {
+  stage: "archive" | "forecast";
+  offsetYears: number;
+}) {
+  return stage === "forecast" && offsetYears === 0;
+}
+
+export async function fetchWeatherDataset({
+  city,
+  offsetYears,
+  period,
+  signal,
+  today,
+}: {
+  city: City;
+  offsetYears: number;
+  period: DatePeriod;
+  signal: AbortSignal;
+  today?: string;
+}) {
+  const range = getComparableDateRangeByOffset({
+    offsetYears,
+    period,
+    today,
+  });
+
+  if (range === null) {
+    return {
+      id: offsetYears === 0 ? "current" : `minus-${offsetYears}`,
+      label: "",
+      offsetYears,
+      values: [],
+    } satisfies WeatherYearDataset;
+  }
+
+  const archiveResponse = await fetchHistoricalWeather({
+    city,
+    offsetYears,
+    period,
+    signal,
+  });
+
+  if (offsetYears !== 0) {
+    return normalizeWeatherData({ offsetYears, range, response: archiveResponse });
+  }
+
+  const forecastRange = getForecastDateRangeForPeriod({
+    period,
+    today: today ?? formatToday(new Date()),
+  });
+
+  if (forecastRange === null) {
+    return normalizeWeatherData({ offsetYears, range, response: archiveResponse });
+  }
+
+  try {
+    const forecastResponse = await fetchForecastWeather({
+      city,
+      period: forecastRange,
+      signal,
+      today,
+    });
+
+    return normalizeWeatherData({
+      offsetYears,
+      range,
+      response: mergeArchiveAndForecastWeather({
+        archive: archiveResponse,
+        forecast: forecastResponse,
+      }),
+    });
+  } catch (error) {
+    if (!shouldIgnoreWeatherError({ stage: "forecast", offsetYears })) {
+      throw error;
+    }
+
+    return normalizeWeatherData({ offsetYears, range, response: archiveResponse });
+  }
+}
+
 export function useWeatherData({
   city,
   offsets,
@@ -53,27 +148,12 @@ export function useWeatherData({
             queryKey: getWeatherQueryKey(city, period, offsetYears),
             enabled: isValidDatePeriod(period) && getComparableDateRangeByOffset({ offsetYears, period }) !== null,
             queryFn: async ({ signal }: { signal: AbortSignal }) => {
-              const range = getComparableDateRangeByOffset({
-                offsetYears,
-                period,
-              });
-
-              if (range === null) {
-                return {
-                  id: offsetYears === 0 ? "current" : `minus-${offsetYears}`,
-                  label: "",
-                  offsetYears,
-                  values: [],
-                };
-              }
-
-              const response = await fetchHistoricalWeather({
+              return fetchWeatherDataset({
                 city,
                 offsetYears,
                 period,
                 signal,
               });
-              return normalizeWeatherData({ offsetYears, range, response });
             },
             staleTime: 1000 * 60 * 60 * 24,
           })),

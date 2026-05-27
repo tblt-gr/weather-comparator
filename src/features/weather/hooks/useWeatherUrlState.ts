@@ -6,7 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   parseWeatherUrlState,
   serializeWeatherUrlState,
-} from "@/features/weather/logic";
+} from "@/features/weather/logic/urlState";
 import { useWeatherStore } from "@/features/weather/store";
 
 type WeatherUrlStoreSlice = {

@@ -2,11 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchClimateNormalsRange } from "@/features/weather/api";
+import { fetchClimateNormalsRange } from "@/features/weather/api/openMeteo";
 import {
   buildClimateDatasetsFromRange,
   calculateClimateNormals,
-} from "@/features/weather/logic";
+} from "@/features/weather/logic/calculateClimateNormals";
 import { type DatePeriod, isValidDatePeriod } from "@/features/weather/logic/dates";
 import type { City, TemperatureMode } from "@/features/weather/types";
 

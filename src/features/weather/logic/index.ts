@@ -13,11 +13,16 @@ export {
   getAvailableComparisonOffsets,
   getComparableDateRangeByOffset,
   getDefaultComparisonPeriod,
+  formatLocalDate,
   getPeriodLabel,
 } from "@/features/weather/logic/dates";
 export type { ComparableDateRange, DatePeriod } from "@/features/weather/logic/dates";
 export { exportWeatherCsv } from "@/features/weather/logic/exports";
 export { normalizeWeatherData } from "@/features/weather/logic/normalizeWeatherData";
+export {
+  getForecastDateRangeForPeriod,
+  mergeArchiveAndForecastWeather,
+} from "@/features/weather/logic/forecastWeather";
 export {
   isValidDatePeriod,
   validateDatePeriod,

@@ -6,7 +6,7 @@ import {
   type DatePeriod,
   getDefaultComparisonPeriod,
 } from "@/features/weather/logic/dates";
-import type { WeatherUrlState } from "@/features/weather/logic";
+import type { WeatherUrlState } from "@/features/weather/logic/urlState";
 import type { City, TemperatureMode } from "@/features/weather/types";
 
 const CITY_STORAGE_KEY = "weather-compare.city";

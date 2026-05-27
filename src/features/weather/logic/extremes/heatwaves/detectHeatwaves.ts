@@ -12,6 +12,12 @@ export function detectHeatwaves(
     let sequence: { date: string; day: number; tmax: number; isCanicule: boolean }[] = [];
 
     dataset.values.forEach((value) => {
+      if (value.isForecast) {
+        pushHeatwave(dataset.id, dataset.label, sequence, minimumDuration, heatwaves);
+        sequence = [];
+        return;
+      }
+
       if (
         typeof value.tmax === "number" &&
         value.tmax >= thresholdHeatwave

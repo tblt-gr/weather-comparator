@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { mock, test } from "node:test";
 
 import {
+  createEmptyDailyWeatherResponse,
+  createWeatherRequestSignal,
   fetchClimateNormalsRange,
+  fetchForecastWeather,
   fetchHistoricalWeather,
   searchCities,
 } from "./openMeteo";
@@ -198,4 +201,65 @@ test("fetchClimateNormalsRange forwards the abort signal to fetch", async () => 
   });
 
   mock.restoreAll();
+});
+
+test("createEmptyDailyWeatherResponse returns an empty daily payload", () => {
+  assert.deepEqual(createEmptyDailyWeatherResponse(), {
+    daily: {
+      time: [],
+      temperature_2m_max: [],
+      temperature_2m_min: [],
+    },
+  });
+});
+
+test("fetchForecastWeather returns an empty payload when the period has no future slice", async () => {
+  const fetchMock = mock.method(globalThis, "fetch", async () => new Response());
+
+  const response = await fetchForecastWeather({
+    city: baseCity,
+    period: {
+      startDate: "2025-05-01",
+      endDate: "2025-05-25",
+    },
+    today: "2025-05-25",
+  });
+
+  assert.deepEqual(response, createEmptyDailyWeatherResponse());
+  assert.equal(fetchMock.mock.callCount(), 0);
+
+  mock.restoreAll();
+});
+
+test("fetchForecastWeather uses the forecast endpoint and future-only range", async () => {
+  mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    const url = new URL(String(input));
+    assert.equal(url.origin, "https://api.open-meteo.com");
+    assert.equal(url.pathname, "/v1/forecast");
+    assert.equal(url.searchParams.get("start_date"), "2025-05-26");
+    assert.equal(url.searchParams.get("end_date"), "2025-05-30");
+    assert.equal(url.searchParams.get("daily"), "temperature_2m_max,temperature_2m_min");
+    assert.equal(url.searchParams.get("timezone"), "Europe/Paris");
+
+    return new Response(JSON.stringify({ daily: { time: [] } }));
+  });
+
+  await fetchForecastWeather({
+    city: baseCity,
+    period: {
+      startDate: "2025-05-20",
+      endDate: "2025-05-30",
+    },
+    today: "2025-05-25",
+  });
+
+  mock.restoreAll();
+});
+
+test("createWeatherRequestSignal aborts after the timeout when no parent signal is provided", async () => {
+  const signal = createWeatherRequestSignal(undefined, 5);
+
+  await new Promise((resolve) => setTimeout(resolve, 20));
+
+  assert.equal(signal.aborted, true);
 });

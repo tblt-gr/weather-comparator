@@ -7,6 +7,7 @@ import {
   buildChartRows,
   formatChartDateTick,
   formatTooltipDate,
+  getForecastBoundaryDay,
   getHeatwaveFill,
   getMonthBoundaryDays,
 } from "./WeatherChart";
@@ -57,8 +58,22 @@ test("buildChartRows reuses matching day labels and temperatures across datasets
           label: "2025",
           offsetYears: 0,
           values: [
-            { date: "2025-06-01", day: 1, year: 2025, tmax: 30, tmin: 18 },
-            { date: "2025-06-03", day: 3, year: 2025, tmax: 24, tmin: 15 },
+            {
+              date: "2025-06-01",
+              day: 1,
+              year: 2025,
+              tmax: 30,
+              tmin: 18,
+              isForecast: false,
+            },
+            {
+              date: "2025-06-03",
+              day: 3,
+              year: 2025,
+              tmax: 24,
+              tmin: 15,
+              isForecast: true,
+            },
           ],
         },
         {
@@ -66,8 +81,22 @@ test("buildChartRows reuses matching day labels and temperatures across datasets
           label: "2024",
           offsetYears: 1,
           values: [
-            { date: "2024-06-01", day: 1, year: 2024, tmax: 28, tmin: 17 },
-            { date: "2024-06-02", day: 2, year: 2024, tmax: 26, tmin: 16 },
+            {
+              date: "2024-06-01",
+              day: 1,
+              year: 2024,
+              tmax: 28,
+              tmin: 17,
+              isForecast: false,
+            },
+            {
+              date: "2024-06-02",
+              day: 2,
+              year: 2024,
+              tmax: 26,
+              tmin: 16,
+              isForecast: false,
+            },
           ],
         },
       ],
@@ -80,7 +109,8 @@ test("buildChartRows reuses matching day labels and temperatures across datasets
         label: "2025-06-01",
         tickLabel: "01/06/25",
         normal: null,
-        current: 30,
+        currentObserved: 30,
+        currentForecast: null,
         "minus-1": 28,
       },
       {
@@ -88,9 +118,41 @@ test("buildChartRows reuses matching day labels and temperatures across datasets
         label: "2024-06-02",
         tickLabel: "02/06/24",
         normal: 27,
-        current: null,
+        currentObserved: null,
+        currentForecast: null,
         "minus-1": 26,
       },
     ]
+  );
+});
+
+test("returns the first forecast boundary day for the current dataset", () => {
+  assert.equal(
+    getForecastBoundaryDay([
+      {
+        id: "current",
+        label: "2025",
+        offsetYears: 0,
+        values: [
+          {
+            date: "2025-06-01",
+            day: 1,
+            year: 2025,
+            tmax: 30,
+            tmin: 18,
+            isForecast: false,
+          },
+          {
+            date: "2025-06-02",
+            day: 2,
+            year: 2025,
+            tmax: 28,
+            tmin: 17,
+            isForecast: true,
+          },
+        ],
+      },
+    ]),
+    2
   );
 });

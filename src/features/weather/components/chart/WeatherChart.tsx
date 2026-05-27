@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import {
   CartesianGrid,
   Line,
@@ -89,6 +89,7 @@ export function WeatherChart({
     [datasets, normals, temperatureMode]
   );
   const monthBoundaryDays = useMemo(() => getMonthBoundaryDays(rows), [rows]);
+  const forecastBoundaryDay = useMemo(() => getForecastBoundaryDay(datasets), [datasets]);
   const visibleDatasets = useMemo(
     () => datasets.filter((dataset) => !hiddenSeries.includes(dataset.id)),
     [datasets, hiddenSeries]
@@ -160,6 +161,16 @@ export function WeatherChart({
                   x={day}
                 />
               ))}
+              {forecastBoundaryDay !== null ? (
+                <ReferenceLine
+                  ifOverflow="extendDomain"
+                  stroke="var(--chart-1)"
+                  strokeDasharray="3 3"
+                  strokeOpacity={0.9}
+                  strokeWidth={1.5}
+                  x={forecastBoundaryDay}
+                />
+              ) : null}
               <ReferenceLine
                 ifOverflow="extendDomain"
                 label={{ fill: "var(--muted-foreground)", fontSize: 11, position: "insideTopLeft", value: "0°C" }}
@@ -189,21 +200,25 @@ export function WeatherChart({
               />
               <Tooltip
                 content={({ active, label, payload }) => {
-                  if (!active || !payload?.length) {
+                  const visiblePayload = payload?.filter(
+                    (entry) => typeof entry.value === "number"
+                  );
+
+                  if (!active || !visiblePayload?.length) {
                     return null;
                   }
 
                   return (
                     <div className="rounded-xl border border-white/40 bg-popover/90 p-3 text-sm text-popover-foreground shadow-2xl shadow-cyan-950/10 backdrop-blur-2xl dark:border-white/10 dark:shadow-black/30">
                       <p className="mb-2 font-medium">
-                        {typeof payload[0]?.payload?.label === "string"
+                        {typeof visiblePayload[0]?.payload?.label === "string"
                           ? tooltipDateFormatter.format(
-                              new Date(`${payload[0].payload.label}T00:00:00.000Z`)
+                              new Date(`${visiblePayload[0].payload.label}T00:00:00.000Z`)
                             )
                           : String(label)}
                       </p>
                       <div className="grid gap-1">
-                        {payload.map((entry) => (
+                        {visiblePayload.map((entry) => (
                           <div
                             className="flex items-center justify-between gap-6"
                             key={String(entry.dataKey ?? entry.name)}
@@ -249,19 +264,48 @@ export function WeatherChart({
                   />
                 );
               })}
-              {visibleDatasets.map((dataset) => (
-                <Line
-                  connectNulls={false}
-                  dataKey={dataset.id}
-                  dot={false}
-                  key={dataset.id}
-                  name={dataset.label}
-                  stroke={colors[dataset.id]}
-                  strokeOpacity={dataset.offsetYears === 0 ? 1 : 0.7}
-                  strokeWidth={dataset.offsetYears === 0 ? 3 : 2}
-                  type="monotone"
-                />
-              ))}
+              {visibleDatasets.map((dataset) =>
+                dataset.id === "current" ? (
+                  <Fragment key={dataset.id}>
+                    <Line
+                      connectNulls={false}
+                      dataKey="currentObserved"
+                      dot={false}
+                      key="currentObserved"
+                      name={dataset.label}
+                      stroke={colors[dataset.id]}
+                      strokeOpacity={1}
+                      strokeWidth={3}
+                      type="monotone"
+                    />
+                    <Line
+                      connectNulls={false}
+                      dataKey="currentForecast"
+                      dot={false}
+                      key="currentForecast"
+                      legendType="none"
+                      name={dataset.label}
+                      stroke={colors[dataset.id]}
+                      strokeDasharray="7 4"
+                      strokeOpacity={0.7}
+                      strokeWidth={3}
+                      type="monotone"
+                    />
+                  </Fragment>
+                ) : (
+                  <Line
+                    connectNulls={false}
+                    dataKey={dataset.id}
+                    dot={false}
+                    key={dataset.id}
+                    name={dataset.label}
+                    stroke={colors[dataset.id]}
+                    strokeOpacity={0.7}
+                    strokeWidth={2}
+                    type="monotone"
+                  />
+                )
+              )}
               {showNormals ? (
                 <Line
                   connectNulls={false}
@@ -326,11 +370,26 @@ export function buildChartRows(
     };
 
     datasetValuesByDay.forEach((dataset) => {
-      row[dataset.id] = dataset.valuesByDay.get(day)?.[temperatureMode] ?? null;
+      const value = dataset.valuesByDay.get(day);
+
+      if (dataset.id === "current") {
+        row.currentObserved = value?.isForecast ? null : value?.[temperatureMode] ?? null;
+        row.currentForecast = value?.isForecast ? value[temperatureMode] ?? null : null;
+        return;
+      }
+
+      row[dataset.id] = value?.[temperatureMode] ?? null;
     });
 
     return row;
   });
+}
+
+export function getForecastBoundaryDay(datasets: WeatherYearDataset[]) {
+  const currentDataset = datasets.find((dataset) => dataset.id === "current");
+  const firstForecastDay = currentDataset?.values.find((value) => value.isForecast)?.day;
+
+  return typeof firstForecastDay === "number" ? firstForecastDay : null;
 }
 
 export function getMonthBoundaryDays(rows: ChartRow[]) {

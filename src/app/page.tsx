@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { WeatherDashboard } from "@/features/weather";
+import { WeatherDashboard } from "@/features/weather/components/dashboard";
 
 export default function Home() {
   return (

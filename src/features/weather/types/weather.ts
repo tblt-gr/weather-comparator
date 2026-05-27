@@ -15,6 +15,7 @@ export type DailyTemperature = {
   year: number;
   tmax: number | null;
   tmin: number | null;
+  isForecast?: boolean;
 };
 
 export type WeatherYearDataset = {

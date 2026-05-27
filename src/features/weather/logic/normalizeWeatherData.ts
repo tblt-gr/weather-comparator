@@ -1,4 +1,4 @@
-import type { OpenMeteoArchiveResponse } from "@/features/weather/api";
+import type { OpenMeteoArchiveResponse } from "@/features/weather/api/openMeteo";
 import {
   type DatePeriod,
   eachDateInRange,
@@ -19,6 +19,7 @@ export function normalizeWeatherData({
   const dates = response.daily?.time ?? [];
   const tmax = response.daily?.temperature_2m_max ?? [];
   const tmin = response.daily?.temperature_2m_min ?? [];
+  const isForecast = response.daily?.is_forecast ?? [];
 
   dates.forEach((date, index) => {
     byDate.set(date, {
@@ -27,6 +28,7 @@ export function normalizeWeatherData({
       year: Number(date.slice(0, 4)),
       tmax: tmax[index] ?? null,
       tmin: tmin[index] ?? null,
+      isForecast: isForecast[index] ?? false,
     });
   });
 
@@ -36,7 +38,14 @@ export function normalizeWeatherData({
 
     return value
       ? { ...value, day }
-      : { date, day, year: Number(date.slice(0, 4)), tmax: null, tmin: null };
+      : {
+          date,
+          day,
+          year: Number(date.slice(0, 4)),
+          tmax: null,
+          tmin: null,
+          isForecast: false,
+        };
   });
 
   return {

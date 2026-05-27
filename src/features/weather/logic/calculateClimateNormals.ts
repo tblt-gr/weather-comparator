@@ -2,7 +2,7 @@ import {
   CLIMATE_NORMAL_START_YEAR,
   CLIMATE_NORMAL_YEAR_COUNT,
 } from "@/features/weather/logic/climateNormalYears";
-import type { OpenMeteoArchiveResponse } from "@/features/weather/api";
+import type { OpenMeteoArchiveResponse } from "@/features/weather/api/openMeteo";
 import {
   type DatePeriod,
   getComparableDateRangeByOffset,
