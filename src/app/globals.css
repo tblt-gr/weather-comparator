@@ -169,6 +169,12 @@
         border: 1px solid var(--border);
     }
 
+    .weather-chart-shell :is(.recharts-wrapper, .recharts-surface):focus,
+    .weather-chart-shell :is(.recharts-wrapper, .recharts-surface):focus-visible {
+        outline: none;
+        box-shadow: none;
+    }
+
     .dark .glass-card {
         background: oklch(0.148 0.025 260);
         border-color: var(--border);
