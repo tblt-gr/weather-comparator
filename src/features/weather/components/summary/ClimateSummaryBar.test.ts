@@ -75,6 +75,8 @@ test("shows cold wave stat cards only when their value is greater than zero", ()
         endDay: 4,
         duration: 3,
         averageMin: -4.7,
+        includesForecast: false,
+        forecastStartDay: null,
       },
     ],
     heatwaves: [],

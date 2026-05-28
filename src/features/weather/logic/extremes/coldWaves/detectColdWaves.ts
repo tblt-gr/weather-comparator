@@ -11,15 +11,16 @@ export function detectColdWaves(
   const coldWaves: ColdWavePeriod[] = [];
 
   datasets.forEach((dataset) => {
-    let sequence: { date: string; day: number; tmin: number; tmax: number; isGrandFroid: boolean }[] = [];
+    let sequence: {
+      date: string;
+      day: number;
+      tmin: number;
+      tmax: number;
+      isGrandFroid: boolean;
+      isForecast: boolean;
+    }[] = [];
 
     dataset.values.forEach((value) => {
-      if (value.isForecast) {
-        pushColdWave(dataset.id, dataset.label, sequence, minimumDuration, coldWaves);
-        sequence = [];
-        return;
-      }
-
       if (
         typeof value.tmin === "number" &&
         typeof value.tmax === "number" &&
@@ -32,6 +33,7 @@ export function detectColdWaves(
           tmin: value.tmin,
           tmax: value.tmax,
           isGrandFroid: value.tmin <= thresholdGrandFroidTmin || value.tmax <= thresholdGrandFroidTmax,
+          isForecast: value.isForecast === true,
         });
         return;
       }
@@ -49,13 +51,22 @@ export function detectColdWaves(
 function pushColdWave(
   datasetId: string,
   datasetLabel: string,
-  sequence: { date: string; day: number; tmin: number; tmax: number; isGrandFroid: boolean }[],
+  sequence: {
+    date: string;
+    day: number;
+    tmin: number;
+    tmax: number;
+    isGrandFroid: boolean;
+    isForecast: boolean;
+  }[],
   minimumDuration: number,
   coldWaves: ColdWavePeriod[]
 ) {
   if (sequence.length < minimumDuration) {
     return;
   }
+
+  const firstForecastDay = sequence.find((value) => value.isForecast)?.day ?? null;
 
   coldWaves.push({
     datasetId,
@@ -67,6 +78,8 @@ function pushColdWave(
     endDay: sequence[sequence.length - 1].day,
     duration: sequence.length,
     averageMin: sequence.reduce((total, value) => total + value.tmin, 0) / sequence.length,
+    includesForecast: firstForecastDay !== null,
+    forecastStartDay: firstForecastDay,
   });
 }
 

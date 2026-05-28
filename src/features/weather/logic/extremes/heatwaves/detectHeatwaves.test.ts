@@ -50,21 +50,65 @@ test("does not classify a long heatwave as canicule when only one day crosses th
   assert.equal(heatwave?.kind, "vague_de_chaleur");
 });
 
+test("detects a forecast-only heatwave and marks it as forecast", () => {
+  const datasets: WeatherYearDataset[] = [
+    buildDataset("current", "2026", [
+      [30, 18, true],
+      [31, 19, true],
+      [32, 20, true],
+    ]),
+  ];
+
+  const [heatwave] = detectHeatwaves(datasets);
+
+  assert.deepEqual(heatwave, {
+    datasetId: "current",
+    datasetLabel: "2026",
+    kind: "vague_de_chaleur",
+    start: "2026-07-01",
+    end: "2026-07-03",
+    startDay: 1,
+    endDay: 3,
+    duration: 3,
+    averageMax: 31,
+    includesForecast: true,
+    forecastStartDay: 1,
+  });
+});
+
+test("keeps one heatwave across the observed to forecast boundary and records where forecast starts", () => {
+  const datasets: WeatherYearDataset[] = [
+    buildDataset("current", "2026", [
+      [30, 18, false],
+      [31, 19, false],
+      [32, 20, true],
+      [33, 21, true],
+    ]),
+  ];
+
+  const [heatwave] = detectHeatwaves(datasets);
+
+  assert.equal(heatwave?.duration, 4);
+  assert.equal(heatwave?.includesForecast, true);
+  assert.equal(heatwave?.forecastStartDay, 3);
+});
+
 function buildDataset(
   id: string,
   label: string,
-  temperatures: [tmax: number, tmin: number][]
+  temperatures: [tmax: number, tmin: number, isForecast?: boolean][]
 ): WeatherYearDataset {
   return {
     id,
     label,
     offsetYears: 0,
-    values: temperatures.map(([tmax, tmin], index) => ({
+    values: temperatures.map(([tmax, tmin, isForecast], index) => ({
       date: `2026-07-${String(index + 1).padStart(2, "0")}`,
       day: index + 1,
       year: 2026,
       tmax,
       tmin,
+      isForecast,
     })),
   };
 }

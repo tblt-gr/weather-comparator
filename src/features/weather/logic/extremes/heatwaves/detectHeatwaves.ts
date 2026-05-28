@@ -9,15 +9,15 @@ export function detectHeatwaves(
   const heatwaves: HeatwavePeriod[] = [];
 
   datasets.forEach((dataset) => {
-    let sequence: { date: string; day: number; tmax: number; isCanicule: boolean }[] = [];
+    let sequence: {
+      date: string;
+      day: number;
+      tmax: number;
+      isCanicule: boolean;
+      isForecast: boolean;
+    }[] = [];
 
     dataset.values.forEach((value) => {
-      if (value.isForecast) {
-        pushHeatwave(dataset.id, dataset.label, sequence, minimumDuration, heatwaves);
-        sequence = [];
-        return;
-      }
-
       if (
         typeof value.tmax === "number" &&
         value.tmax >= thresholdHeatwave
@@ -27,6 +27,7 @@ export function detectHeatwaves(
           day: value.day,
           tmax: value.tmax,
           isCanicule: value.tmax >= thresholdCanicule,
+          isForecast: value.isForecast === true,
         });
         return;
       }
@@ -44,13 +45,21 @@ export function detectHeatwaves(
 function pushHeatwave(
   datasetId: string,
   datasetLabel: string,
-  sequence: { date: string; day: number; tmax: number; isCanicule: boolean }[],
+  sequence: {
+    date: string;
+    day: number;
+    tmax: number;
+    isCanicule: boolean;
+    isForecast: boolean;
+  }[],
   minimumDuration: number,
   heatwaves: HeatwavePeriod[]
 ) {
   if (sequence.length < minimumDuration) {
     return;
   }
+
+  const firstForecastDay = sequence.find((value) => value.isForecast)?.day ?? null;
 
   heatwaves.push({
     datasetId,
@@ -62,6 +71,8 @@ function pushHeatwave(
     endDay: sequence[sequence.length - 1].day,
     duration: sequence.length,
     averageMax: sequence.reduce((total, value) => total + value.tmax, 0) / sequence.length,
+    includesForecast: firstForecastDay !== null,
+    forecastStartDay: firstForecastDay,
   });
 }
 

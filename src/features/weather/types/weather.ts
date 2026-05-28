@@ -42,6 +42,8 @@ export type HeatwavePeriod = {
   endDay: number;
   duration: number;
   averageMax: number;
+  includesForecast: boolean;
+  forecastStartDay: number | null;
 };
 
 export type ColdWaveKind = "vague_de_froid" | "grand_froid";
@@ -56,4 +58,6 @@ export type ColdWavePeriod = {
   endDay: number;
   duration: number;
   averageMin: number;
+  includesForecast: boolean;
+  forecastStartDay: number | null;
 };

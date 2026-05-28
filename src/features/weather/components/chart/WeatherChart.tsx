@@ -24,6 +24,12 @@ import type {
   WeatherYearDataset,
 } from "@/features/weather/types";
 
+type ExtremeAreaSegment = {
+  x1: number;
+  x2: number;
+  isForecast: boolean;
+};
+
 export const palette = [
   "var(--chart-1)",
   "var(--chart-2)",
@@ -167,6 +173,50 @@ export function WeatherChart({
               margin={{ bottom: 56, left: 8, right: 24, top: 16 }}
               width={Math.max(chartWidth, 760)}
             >
+              <defs>
+                {heatwaves.map((heatwave) => (
+                  <pattern
+                    height="8"
+                    id={getExtremePatternId(heatwave.datasetId, heatwave.start, heatwave.kind, "heat")}
+                    key={getExtremePatternId(heatwave.datasetId, heatwave.start, heatwave.kind, "heat")}
+                    patternTransform="rotate(45)"
+                    patternUnits="userSpaceOnUse"
+                    width="8"
+                  >
+                    <rect fill={getHeatwaveFill(heatwave.kind)} height="8" opacity="0.14" width="8" x="0" y="0" />
+                    <line
+                      stroke={getHeatwaveFill(heatwave.kind)}
+                      strokeOpacity="0.6"
+                      strokeWidth="3"
+                      x1="0"
+                      x2="0"
+                      y1="0"
+                      y2="8"
+                    />
+                  </pattern>
+                ))}
+                {coldWaves.map((coldWave) => (
+                  <pattern
+                    height="8"
+                    id={getExtremePatternId(coldWave.datasetId, coldWave.start, coldWave.kind, "cold")}
+                    key={getExtremePatternId(coldWave.datasetId, coldWave.start, coldWave.kind, "cold")}
+                    patternTransform="rotate(45)"
+                    patternUnits="userSpaceOnUse"
+                    width="8"
+                  >
+                    <rect fill={getColdWaveFill(coldWave.kind)} height="8" opacity="0.14" width="8" x="0" y="0" />
+                    <line
+                      stroke={getColdWaveFill(coldWave.kind)}
+                      strokeOpacity="0.6"
+                      strokeWidth="3"
+                      x1="0"
+                      x2="0"
+                      y1="0"
+                      y2="8"
+                    />
+                  </pattern>
+                ))}
+              </defs>
               <CartesianGrid stroke="var(--border)" strokeDasharray="4 4" strokeOpacity={0.72} />
               {monthBoundaryDays.map((day) => (
                 <ReferenceLine
@@ -264,32 +314,34 @@ export function WeatherChart({
                 }}
               />
               {heatwaves.map((heatwave) => {
-                return (
+                return getExtremeAreaSegments(heatwave).map((segment) => (
                   <ReferenceArea
-                    fill={getHeatwaveFill(heatwave.kind)}
+                    fill={segment.isForecast ? `url(#${getExtremePatternId(heatwave.datasetId, heatwave.start, heatwave.kind, "heat")})` : getHeatwaveFill(heatwave.kind)}
                     fillOpacity={heatwave.kind === "canicule" ? 0.28 : 0.2}
                     ifOverflow="extendDomain"
-                    key={`${heatwave.datasetId}-${heatwave.start}`}
+                    key={`${heatwave.datasetId}-${heatwave.start}-${segment.x1}-${segment.x2}`}
                     stroke={getHeatwaveFill(heatwave.kind)}
+                    strokeDasharray={segment.isForecast ? "5 3" : undefined}
                     strokeOpacity={heatwave.kind === "canicule" ? 0.65 : 0.45}
-                    x1={heatwave.startDay}
-                    x2={heatwave.endDay}
+                    x1={segment.x1}
+                    x2={segment.x2}
                   />
-                );
+                ));
               })}
               {coldWaves.map((coldWave) => {
-                return (
+                return getExtremeAreaSegments(coldWave).map((segment) => (
                   <ReferenceArea
-                    fill={getColdWaveFill(coldWave.kind)}
+                    fill={segment.isForecast ? `url(#${getExtremePatternId(coldWave.datasetId, coldWave.start, coldWave.kind, "cold")})` : getColdWaveFill(coldWave.kind)}
                     fillOpacity={coldWave.kind === "grand_froid" ? 0.28 : 0.2}
                     ifOverflow="extendDomain"
-                    key={`${coldWave.datasetId}-${coldWave.start}`}
+                    key={`${coldWave.datasetId}-${coldWave.start}-${segment.x1}-${segment.x2}`}
                     stroke={getColdWaveFill(coldWave.kind)}
+                    strokeDasharray={segment.isForecast ? "5 3" : undefined}
                     strokeOpacity={coldWave.kind === "grand_froid" ? 0.65 : 0.45}
-                    x1={coldWave.startDay}
-                    x2={coldWave.endDay}
+                    x1={segment.x1}
+                    x2={segment.x2}
                   />
-                );
+                ));
               })}
               {visibleDatasets.map((dataset) =>
                 dataset.id === "current" ? (
@@ -533,4 +585,33 @@ export function getHeatwaveFill(kind: HeatwavePeriod["kind"]) {
 
 export function getColdWaveFill(kind: ColdWavePeriod["kind"]) {
   return kind === "grand_froid" ? "oklch(0.55 0.22 250)" : "oklch(0.68 0.18 230)";
+}
+
+export function getExtremeAreaSegments(period: {
+  startDay: number;
+  endDay: number;
+  includesForecast: boolean;
+  forecastStartDay: number | null;
+}): ExtremeAreaSegment[] {
+  if (!period.includesForecast || period.forecastStartDay === null) {
+    return [{ x1: period.startDay, x2: period.endDay, isForecast: false }];
+  }
+
+  if (period.forecastStartDay <= period.startDay) {
+    return [{ x1: period.startDay, x2: period.endDay, isForecast: true }];
+  }
+
+  return [
+    { x1: period.startDay, x2: period.forecastStartDay, isForecast: false },
+    { x1: period.forecastStartDay, x2: period.endDay, isForecast: true },
+  ];
+}
+
+function getExtremePatternId(
+  datasetId: string,
+  start: string,
+  kind: HeatwavePeriod["kind"] | ColdWavePeriod["kind"],
+  family: "heat" | "cold"
+) {
+  return `${family}-${datasetId}-${start}-${kind}`.replace(/[^a-zA-Z0-9_-]/g, "-");
 }

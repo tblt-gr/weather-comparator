@@ -19,6 +19,8 @@ const makeColdWave = (overrides: Partial<ColdWavePeriod> = {}): ColdWavePeriod =
   endDay: 15,
   duration: 6,
   averageMin: -3.2,
+  includesForecast: false,
+  forecastStartDay: null,
   ...overrides,
 });
 

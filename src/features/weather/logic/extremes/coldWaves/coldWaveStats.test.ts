@@ -54,5 +54,7 @@ function buildColdWave(
     endDay: 4,
     duration: 4,
     averageMin: -7.5,
+    includesForecast: false,
+    forecastStartDay: null,
   };
 }

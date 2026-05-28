@@ -99,5 +99,7 @@ function buildHeatwave(
     endDay: 4,
     duration: 4,
     averageMax: 32.5,
+    includesForecast: false,
+    forecastStartDay: null,
   };
 }

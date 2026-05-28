@@ -8,6 +8,7 @@ import {
   formatChartDateTick,
   formatTooltipDate,
   getCurrentSeriesAnimation,
+  getExtremeAreaSegments,
   getDisplayedForecastBoundaryDay,
   getForecastBoundaryDay,
   getHeatwaveFill,
@@ -77,6 +78,33 @@ test("returns null when today is outside the displayed range", () => {
 test("uses red for canicules and orange for heatwaves", () => {
   assert.equal(getHeatwaveFill("canicule"), "oklch(0.62 0.24 28)");
   assert.equal(getHeatwaveFill("vague_de_chaleur"), "oklch(0.74 0.18 62)");
+});
+
+test("splits a mixed extreme area at the forecast boundary day", () => {
+  assert.deepEqual(
+    getExtremeAreaSegments({
+      startDay: 10,
+      endDay: 14,
+      includesForecast: true,
+      forecastStartDay: 12,
+    }),
+    [
+      { x1: 10, x2: 12, isForecast: false },
+      { x1: 12, x2: 14, isForecast: true },
+    ]
+  );
+});
+
+test("returns a single forecast segment for a forecast-only extreme area", () => {
+  assert.deepEqual(
+    getExtremeAreaSegments({
+      startDay: 10,
+      endDay: 14,
+      includesForecast: true,
+      forecastStartDay: 10,
+    }),
+    [{ x1: 10, x2: 14, isForecast: true }]
+  );
 });
 
 test("buildChartRows reuses matching day labels and temperatures across datasets", () => {
