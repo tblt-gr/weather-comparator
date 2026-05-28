@@ -137,7 +137,7 @@ export async function fetchForecastWeather({
   today?: string;
   timeoutMs?: number;
 }): Promise<OpenMeteoArchiveResponse> {
-  const startDate = period.startDate > today ? period.startDate : addDays(today, 1);
+  const startDate = period.startDate > today ? period.startDate : today;
 
   if (startDate > period.endDate) {
     return createEmptyDailyWeatherResponse();

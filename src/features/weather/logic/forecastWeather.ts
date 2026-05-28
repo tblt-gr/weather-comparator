@@ -8,7 +8,7 @@ export function getForecastDateRangeForPeriod({
   period: DatePeriod;
   today: string;
 }): DatePeriod | null {
-  const startDate = period.startDate > today ? period.startDate : addDays(today, 1);
+  const startDate = period.startDate > today ? period.startDate : today;
 
   if (startDate > period.endDate) {
     return null;
@@ -32,18 +32,6 @@ export function mergeArchiveAndForecastWeather({
     { tmax: number | null; tmin: number | null; isForecast: boolean }
   >();
 
-  const forecastDates = forecast.daily?.time ?? [];
-  const forecastTmax = forecast.daily?.temperature_2m_max ?? [];
-  const forecastTmin = forecast.daily?.temperature_2m_min ?? [];
-
-  forecastDates.forEach((date, index) => {
-    daily.set(date, {
-      tmax: forecastTmax[index] ?? null,
-      tmin: forecastTmin[index] ?? null,
-      isForecast: true,
-    });
-  });
-
   const archiveDates = archive.daily?.time ?? [];
   const archiveTmax = archive.daily?.temperature_2m_max ?? [];
   const archiveTmin = archive.daily?.temperature_2m_min ?? [];
@@ -53,6 +41,18 @@ export function mergeArchiveAndForecastWeather({
       tmax: archiveTmax[index] ?? null,
       tmin: archiveTmin[index] ?? null,
       isForecast: false,
+    });
+  });
+
+  const forecastDates = forecast.daily?.time ?? [];
+  const forecastTmax = forecast.daily?.temperature_2m_max ?? [];
+  const forecastTmin = forecast.daily?.temperature_2m_min ?? [];
+
+  forecastDates.forEach((date, index) => {
+    daily.set(date, {
+      tmax: forecastTmax[index] ?? null,
+      tmin: forecastTmin[index] ?? null,
+      isForecast: true,
     });
   });
 
@@ -66,11 +66,4 @@ export function mergeArchiveAndForecastWeather({
       is_forecast: sortedDates.map((date) => daily.get(date)?.isForecast ?? false),
     },
   };
-}
-
-function addDays(date: string, days: number) {
-  const nextDate = new Date(`${date}T00:00:00.000Z`);
-  nextDate.setUTCDate(nextDate.getUTCDate() + days);
-
-  return nextDate.toISOString().slice(0, 10);
 }

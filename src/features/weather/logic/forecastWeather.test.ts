@@ -8,8 +8,8 @@ import {
   mergeArchiveAndForecastWeather,
 } from "./forecastWeather";
 
-test("getForecastDateRangeForPeriod returns null when the selected period ends today", () => {
-  assert.equal(
+test("getForecastDateRangeForPeriod returns today when the selected period ends today", () => {
+  assert.deepEqual(
     getForecastDateRangeForPeriod({
       period: {
         startDate: "2025-05-01",
@@ -17,11 +17,14 @@ test("getForecastDateRangeForPeriod returns null when the selected period ends t
       },
       today: "2025-05-25",
     }),
-    null
+    {
+      startDate: "2025-05-25",
+      endDate: "2025-05-25",
+    }
   );
 });
 
-test("getForecastDateRangeForPeriod returns the future slice starting tomorrow", () => {
+test("getForecastDateRangeForPeriod returns the future slice starting today", () => {
   assert.deepEqual(
     getForecastDateRangeForPeriod({
       period: {
@@ -31,13 +34,13 @@ test("getForecastDateRangeForPeriod returns the future slice starting tomorrow",
       today: "2025-05-25",
     }),
     {
-      startDate: "2025-05-26",
+      startDate: "2025-05-25",
       endDate: "2025-05-30",
     }
   );
 });
 
-test("mergeArchiveAndForecastWeather preserves archive precedence and forecast markers", () => {
+test("mergeArchiveAndForecastWeather preserves forecast precedence and markers on overlapping days", () => {
   const archive: OpenMeteoArchiveResponse = {
     daily: {
       time: ["2025-05-24", "2025-05-25", "2025-05-26"],
@@ -56,9 +59,9 @@ test("mergeArchiveAndForecastWeather preserves archive precedence and forecast m
   assert.deepEqual(mergeArchiveAndForecastWeather({ archive, forecast }), {
     daily: {
       time: ["2025-05-24", "2025-05-25", "2025-05-26", "2025-05-27"],
-      temperature_2m_max: [23, 24, 25, 27],
-      temperature_2m_min: [14, 15, 16, 17],
-      is_forecast: [false, false, false, true],
+      temperature_2m_max: [23, 24, 99, 27],
+      temperature_2m_min: [14, 15, 99, 17],
+      is_forecast: [false, false, true, true],
     },
   });
 });

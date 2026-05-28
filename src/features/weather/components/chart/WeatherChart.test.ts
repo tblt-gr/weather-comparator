@@ -9,6 +9,7 @@ import {
   formatTooltipDate,
   getForecastBoundaryDay,
   getHeatwaveFill,
+  hasForecastData,
   getMonthBoundaryDays,
 } from "./WeatherChart";
 
@@ -126,6 +127,73 @@ test("buildChartRows reuses matching day labels and temperatures across datasets
   );
 });
 
+test("buildChartRows bridges the forecast segment from the last observed current-day value", () => {
+  assert.deepEqual(
+    buildChartRows(
+      [
+        {
+          id: "current",
+          label: "2025",
+          offsetYears: 0,
+          values: [
+            {
+              date: "2025-06-01",
+              day: 1,
+              year: 2025,
+              tmax: 30,
+              tmin: 18,
+              isForecast: false,
+            },
+            {
+              date: "2025-06-02",
+              day: 2,
+              year: 2025,
+              tmax: 28,
+              tmin: 17,
+              isForecast: true,
+            },
+            {
+              date: "2025-06-03",
+              day: 3,
+              year: 2025,
+              tmax: 26,
+              tmin: 16,
+              isForecast: true,
+            },
+          ],
+        },
+      ],
+      "tmax"
+    ),
+    [
+      {
+        day: 1,
+        label: "2025-06-01",
+        tickLabel: "01/06/25",
+        normal: null,
+        currentObserved: 30,
+        currentForecast: 30,
+      },
+      {
+        day: 2,
+        label: "2025-06-02",
+        tickLabel: "02/06/25",
+        normal: null,
+        currentObserved: null,
+        currentForecast: 28,
+      },
+      {
+        day: 3,
+        label: "2025-06-03",
+        tickLabel: "03/06/25",
+        normal: null,
+        currentObserved: null,
+        currentForecast: 26,
+      },
+    ]
+  );
+});
+
 test("returns the first forecast boundary day for the current dataset", () => {
   assert.equal(
     getForecastBoundaryDay([
@@ -154,5 +222,57 @@ test("returns the first forecast boundary day for the current dataset", () => {
       },
     ]),
     2
+  );
+});
+
+test("detects when the current year dataset includes forecast values", () => {
+  assert.equal(
+    hasForecastData([
+      {
+        id: "current",
+        label: "2025",
+        offsetYears: 0,
+        values: [
+          {
+            date: "2025-06-01",
+            day: 1,
+            year: 2025,
+            tmax: 30,
+            tmin: 18,
+            isForecast: false,
+          },
+          {
+            date: "2025-06-02",
+            day: 2,
+            year: 2025,
+            tmax: 28,
+            tmin: 17,
+            isForecast: true,
+          },
+        ],
+      },
+    ]),
+    true
+  );
+
+  assert.equal(
+    hasForecastData([
+      {
+        id: "current",
+        label: "2025",
+        offsetYears: 0,
+        values: [
+          {
+            date: "2025-06-01",
+            day: 1,
+            year: 2025,
+            tmax: 30,
+            tmin: 18,
+            isForecast: false,
+          },
+        ],
+      },
+    ]),
+    false
   );
 });

@@ -2,9 +2,11 @@
 
 import { useQueries } from "@tanstack/react-query";
 
+import type { OpenMeteoArchiveResponse } from "@/features/weather/api/openMeteo";
 import { fetchForecastWeather, fetchHistoricalWeather } from "@/features/weather/api/openMeteo";
 import {
   type DatePeriod,
+  eachDateInRange,
   getComparableDateRangeByOffset,
 } from "@/features/weather/logic/dates";
 import {
@@ -116,7 +118,10 @@ export async function fetchWeatherDataset({
 
     return normalizeWeatherData({
       offsetYears,
-      range,
+      range: {
+        startDate: range.startDate,
+        endDate: period.endDate,
+      },
       response: mergeArchiveAndForecastWeather({
         archive: archiveResponse,
         forecast: forecastResponse,
@@ -131,6 +136,73 @@ export async function fetchWeatherDataset({
   }
 }
 
+export function mergeCurrentDatasetWithForecast({
+  currentDataset,
+  forecastResponse,
+  period,
+}: {
+  currentDataset: WeatherYearDataset | undefined;
+  forecastResponse?: OpenMeteoArchiveResponse;
+  period: DatePeriod;
+}) {
+  if (!currentDataset || !forecastResponse?.daily?.time?.length) {
+    return currentDataset;
+  }
+
+  const forecastDates = forecastResponse.daily.time ?? [];
+  const forecastTmax = forecastResponse.daily.temperature_2m_max ?? [];
+  const forecastTmin = forecastResponse.daily.temperature_2m_min ?? [];
+  const forecastByDate = new Map(
+    forecastDates.map((date, index) => [
+      date,
+      {
+        date,
+        tmax: forecastTmax[index] ?? null,
+        tmin: forecastTmin[index] ?? null,
+      },
+    ])
+  );
+  const currentByDate = new Map(currentDataset.values.map((value) => [value.date, value] as const));
+  const firstDate = currentDataset.values[0]?.date ?? period.startDate;
+
+  return {
+    ...currentDataset,
+    label: `${firstDate} - ${period.endDate}`,
+    values: eachDateInRange({ startDate: firstDate, endDate: period.endDate }).map((date, index) => {
+      const forecastValue = forecastByDate.get(date);
+
+      if (forecastValue) {
+        return {
+          date,
+          day: index + 1,
+          year: Number(date.slice(0, 4)),
+          tmax: forecastValue.tmax,
+          tmin: forecastValue.tmin,
+          isForecast: true,
+        };
+      }
+
+      const currentValue = currentByDate.get(date);
+
+      if (currentValue) {
+        return {
+          ...currentValue,
+          day: index + 1,
+        };
+      }
+
+      return {
+        date,
+        day: index + 1,
+        year: Number(date.slice(0, 4)),
+        tmax: null,
+        tmin: null,
+        isForecast: false,
+      };
+    }),
+  } satisfies WeatherYearDataset;
+}
+
 export function useWeatherData({
   city,
   offsets,
@@ -140,7 +212,7 @@ export function useWeatherData({
   offsets: number[];
   period: DatePeriod;
 }) {
-  const queries = useQueries({
+  const archiveQueries = useQueries({
     queries:
       city === null
         ? []
@@ -148,34 +220,97 @@ export function useWeatherData({
             queryKey: getWeatherQueryKey(city, period, offsetYears),
             enabled: isValidDatePeriod(period) && getComparableDateRangeByOffset({ offsetYears, period }) !== null,
             queryFn: async ({ signal }: { signal: AbortSignal }) => {
-              return fetchWeatherDataset({
+              const range = getComparableDateRangeByOffset({
+                offsetYears,
+                period,
+              });
+
+              if (range === null) {
+                return {
+                  id: offsetYears === 0 ? "current" : `minus-${offsetYears}`,
+                  label: "",
+                  offsetYears,
+                  values: [],
+                } satisfies WeatherYearDataset;
+              }
+
+              const archiveResponse = await fetchHistoricalWeather({
                 city,
                 offsetYears,
                 period,
                 signal,
               });
+
+              return normalizeWeatherData({ offsetYears, range, response: archiveResponse });
             },
             staleTime: 1000 * 60 * 60 * 24,
           })),
   });
 
-  const data = queries
+  const [forecastQuery] = useQueries({
+    queries:
+      city === null ||
+      !offsets.includes(0) ||
+      !isValidDatePeriod(period) ||
+      getComparableDateRangeByOffset({ offsetYears: 0, period }) === null
+        ? []
+        : [
+            {
+              queryKey: [
+                "weather-forecast",
+                city.id,
+                period.startDate,
+                period.endDate,
+              ] as const,
+              queryFn: async ({ signal }: { signal: AbortSignal }) => {
+                const forecastRange = getForecastDateRangeForPeriod({
+                  period,
+                  today: formatToday(new Date()),
+                });
+
+                if (forecastRange === null) {
+                  return null;
+                }
+
+                return fetchForecastWeather({
+                  city,
+                  period: forecastRange,
+                  signal,
+                });
+              },
+              staleTime: 1000 * 60 * 60 * 24,
+            },
+          ],
+  });
+
+  const data = archiveQueries
     .map((query) => query.data)
     .filter((dataset): dataset is WeatherYearDataset => Boolean(dataset))
+    .map((dataset) =>
+      dataset.id === "current"
+        ? mergeCurrentDatasetWithForecast({
+            currentDataset: dataset,
+            forecastResponse: forecastQuery?.data ?? undefined,
+            period,
+          }) ?? dataset
+        : dataset
+    )
     .sort((a, b) => a.offsetYears - b.offsetYears);
 
   const errorMessage = aggregateWeatherQueryErrors(
-    queries.map((query, index) => ({
+    archiveQueries.map((query, index) => ({
       error: query.error,
       offsetYears: offsets[index] ?? 0,
     }))
   );
+  const isArchiveLoading = archiveQueries.some((query) => query.isLoading);
 
   return {
     data,
-    isLoading: queries.some((query) => query.isLoading),
-    isFetching: queries.some((query) => query.isFetching),
-    isError: queries.some((query) => query.isError),
+    isLoading: data.length === 0 && isArchiveLoading,
+    isFetching:
+      archiveQueries.some((query) => query.isFetching) || Boolean(forecastQuery?.isFetching),
+    isError: archiveQueries.some((query) => query.isError),
     error: errorMessage,
   };
 }
