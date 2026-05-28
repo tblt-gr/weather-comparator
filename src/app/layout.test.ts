@@ -15,5 +15,13 @@ test("root layout reads the theme cookie and passes the resolved theme to Provid
   const source = readFileSync(path.join(process.cwd(), "src/app/layout.tsx"), "utf8");
 
   assert.equal(source.includes("parseTheme(cookieStore.get(THEME_COOKIE_NAME)?.value)"), true);
-  assert.equal(source.includes("<Providers initialTheme={theme}>"), true);
+  assert.equal(source.includes("initialTheme={theme}"), true);
+});
+
+test("root layout reads the locale cookie and passes the resolved locale to Providers", () => {
+  const source = readFileSync(path.join(process.cwd(), "src/app/layout.tsx"), "utf8");
+
+  assert.equal(source.includes("cookieStore.get(LOCALE_COOKIE_NAME)?.value"), true);
+  assert.equal(source.includes("lang={locale}"), true);
+  assert.equal(source.includes("initialLocale={locale}"), true);
 });

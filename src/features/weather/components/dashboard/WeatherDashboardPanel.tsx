@@ -118,6 +118,8 @@ export function EmptyState({ message }: { message: string }) {
 }
 
 function LoadingState() {
+  const { t } = useLocale();
+
   return (
     <div className="flex min-h-[420px] flex-col items-center justify-center gap-3 rounded-xl">
       <div className="flex gap-1.5">
@@ -129,7 +131,7 @@ function LoadingState() {
           />
         ))}
       </div>
-      <p className="text-sm text-muted-foreground">Chargement des données météo…</p>
+      <p className="text-sm text-muted-foreground">{t["state.weatherLoading"]}</p>
     </div>
   );
 }

@@ -1,8 +1,16 @@
 "use client";
 
+import { useMemo } from "react";
+
+import { useLocale } from "@/lib/i18n/LocaleProvider";
+import type { Locale } from "@/lib/i18n/types";
 import type { ColdWavePeriod } from "@/features/weather/types";
 
-function getSeverityLabel(kind: ColdWavePeriod["kind"]) {
+function getSeverityLabel(kind: ColdWavePeriod["kind"], locale: Locale) {
+  if (locale === "en") {
+    return kind === "grand_froid" ? "Severe cold" : "Cold wave";
+  }
+
   return kind === "grand_froid" ? "Grand froid" : "Vague de froid";
 }
 
@@ -10,18 +18,29 @@ function getSeverityColor(kind: ColdWavePeriod["kind"]) {
   return kind === "grand_froid" ? "bg-blue-700" : "bg-blue-500";
 }
 
-const frenchDayMonthFormatter = new Intl.DateTimeFormat("fr-FR", {
-  day: "2-digit",
-  month: "long",
-  timeZone: "UTC",
-});
+export function formatColdWaveDateRange(
+  start: string,
+  end: string,
+  locale: Locale = "fr"
+) {
+  const dateLocale = locale === "fr" ? "fr-FR" : "en-GB";
+  const separator = locale === "fr" ? " au " : " to ";
+  const formatter = new Intl.DateTimeFormat(dateLocale, {
+    day: "2-digit",
+    month: "long",
+    timeZone: "UTC",
+  });
 
-export function formatColdWaveDateRange(start: string, end: string) {
-  return `${frenchDayMonthFormatter.format(new Date(start))} au ${frenchDayMonthFormatter.format(new Date(end))}`;
+  return `${formatter.format(new Date(start))}${separator}${formatter.format(new Date(end))}`;
 }
 
-export function formatColdWaveSummary(coldWave: ColdWavePeriod) {
-  return `${getSeverityLabel(coldWave.kind)} ${formatColdWaveDateRange(coldWave.start, coldWave.end)} (${coldWave.duration} jours, Tmin moyenne ${coldWave.averageMin.toFixed(1)} degC)`;
+export function formatColdWaveSummary(coldWave: ColdWavePeriod, locale: Locale = "fr") {
+  const label = getSeverityLabel(coldWave.kind, locale);
+  const dateRange = formatColdWaveDateRange(coldWave.start, coldWave.end, locale);
+  const days = locale === "fr" ? "jours" : "days";
+  const avgMin = locale === "fr" ? "Tmin moyenne" : "avg Tmin";
+
+  return `${label} ${dateRange} (${coldWave.duration} ${days}, ${avgMin} ${coldWave.averageMin.toFixed(1)} °C)`;
 }
 
 export function groupColdWavesByYear(coldWaves: ColdWavePeriod[]) {
@@ -51,15 +70,16 @@ type ColdWaveOverlayProps = {
 };
 
 export function ColdWaveOverlay({ coldWaves, colors = {} }: ColdWaveOverlayProps) {
+  const { locale, t } = useLocale();
+  const groupedColdWaves = useMemo(() => groupColdWavesByYear(coldWaves), [coldWaves]);
+
   if (coldWaves.length === 0) {
     return null;
   }
 
-  const groupedColdWaves = groupColdWavesByYear(coldWaves);
-
   return (
     <div className="rounded-xl border border-blue-300/40 bg-blue-100/45 p-3 text-sm shadow-lg shadow-blue-900/5 backdrop-blur-xl dark:border-blue-300/20 dark:bg-blue-400/10 dark:shadow-blue-300/5">
-      <p className="font-medium text-blue-950 dark:text-blue-100">Vagues de froid et grand froid</p>
+      <p className="font-medium text-blue-950 dark:text-blue-100">{t["coldwave.sectionTitle"]}</p>
       <div className="mt-2 grid gap-3 text-blue-900 sm:grid-cols-2 lg:grid-cols-3 dark:text-blue-200">
         {groupedColdWaves.map((group) => (
           <section
@@ -83,7 +103,7 @@ export function ColdWaveOverlay({ coldWaves, colors = {} }: ColdWaveOverlayProps
                     aria-hidden="true"
                     className={`mt-1.5 size-2.5 shrink-0 rounded-full ${getSeverityColor(coldWave.kind)}`}
                   />
-                  <span>{formatColdWaveSummary(coldWave)}</span>
+                  <span>{formatColdWaveSummary(coldWave, locale)}</span>
                 </li>
               ))}
             </ul>

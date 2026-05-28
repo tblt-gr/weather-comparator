@@ -1,13 +1,11 @@
 "use client";
 
-import { createContext, useContext, useSyncExternalStore } from "react";
+import { createContext, useContext, useEffect, useSyncExternalStore } from "react";
 
-import { en } from "@/lib/i18n/locales/en";
-import { fr } from "@/lib/i18n/locales/fr";
+import { getTranslations } from "@/lib/i18n/getTranslations";
+import { DEFAULT_LOCALE, LOCALE_COOKIE_NAME, LOCALE_KEY } from "@/lib/i18n/locale";
 import { resolveLocale } from "@/lib/i18n/resolveLocale";
 import type { Locale, Translations } from "@/lib/i18n/types";
-
-const LOCALE_KEY = "weather-compare.locale";
 
 function subscribe(callback: () => void) {
   window.addEventListener("storage", callback);
@@ -17,11 +15,7 @@ function subscribe(callback: () => void) {
 }
 
 function getSnapshot(): Locale {
-  return resolveLocale(localStorage.getItem(LOCALE_KEY), navigator.language, "fr");
-}
-
-function getServerSnapshot(): Locale {
-  return "fr";
+  return resolveLocale(localStorage.getItem(LOCALE_KEY), navigator.language, DEFAULT_LOCALE);
 }
 
 type LocaleContextValue = {
@@ -32,15 +26,36 @@ type LocaleContextValue = {
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
-export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const locale = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+export function LocaleProvider({
+  children,
+  initialLocale,
+}: {
+  children: React.ReactNode;
+  initialLocale: Locale;
+}) {
+  const locale = useSyncExternalStore(subscribe, getSnapshot, () => initialLocale);
+  const t = getTranslations(locale);
 
   function setLocale(next: Locale) {
     localStorage.setItem(LOCALE_KEY, next);
+    document.cookie = `${LOCALE_COOKIE_NAME}=${next}; path=/; max-age=31536000; samesite=lax`;
     window.dispatchEvent(new StorageEvent("storage", { key: LOCALE_KEY, newValue: next }));
   }
 
-  const t = locale === "en" ? en : fr;
+  useEffect(() => {
+    document.documentElement.lang = locale;
+    document.title = t["app.title"];
+
+    let descriptionMeta = document.head.querySelector('meta[name="description"]');
+
+    if (!descriptionMeta) {
+      descriptionMeta = document.createElement("meta");
+      descriptionMeta.setAttribute("name", "description");
+      document.head.appendChild(descriptionMeta);
+    }
+
+    descriptionMeta.setAttribute("content", t["app.subtitle"]);
+  }, [locale, t]);
 
   return (
     <LocaleContext.Provider value={{ locale, setLocale, t }}>

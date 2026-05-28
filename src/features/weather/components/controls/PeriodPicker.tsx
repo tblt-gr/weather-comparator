@@ -91,7 +91,7 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
           onClick={handleRefresh}
           type="button"
         >
-          Rafraîchir la période
+          {t["period.refreshButton"]}
         </Button>
       </div>
     </div>

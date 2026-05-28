@@ -72,7 +72,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
 
   return (
     <div className="relative grid gap-1 text-sm font-medium" ref={containerRef}>
-      <span>Ville</span>
+      <span>{t["city.label"]}</span>
       <Command
         shouldFilter={false}
         className="relative h-8 overflow-visible rounded-lg! border border-input bg-transparent p-0 shadow-none"
@@ -95,7 +95,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
               {isLoading ? (
                 <div className="px-3 py-2 text-sm text-muted-foreground">{t["city.searching"]}</div>
               ) : null}
-              {!isLoading ? <CommandEmpty>Aucune ville trouvée.</CommandEmpty> : null}
+              {!isLoading ? <CommandEmpty>{t["city.noResults"]}</CommandEmpty> : null}
               {results.map((result) => (
                 <CommandItem
                   key={result.id}

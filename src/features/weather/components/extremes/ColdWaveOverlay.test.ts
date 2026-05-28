@@ -38,6 +38,12 @@ describe("formatColdWaveDateRange", () => {
     assert.ok(result.includes("janvier"), `Expected 'janvier' in: ${result}`);
     assert.ok(result.includes("au"), `Expected 'au' in: ${result}`);
   });
+
+  it("formats date range in English", () => {
+    const result = formatColdWaveDateRange("2024-01-10", "2024-01-15", "en");
+    assert.ok(result.includes("January"), `Expected 'January' in: ${result}`);
+    assert.ok(result.includes("to"), `Expected 'to' in: ${result}`);
+  });
 });
 
 describe("formatColdWaveSummary", () => {
@@ -46,14 +52,25 @@ describe("formatColdWaveSummary", () => {
     const result = formatColdWaveSummary(cw);
     assert.ok(result.startsWith("Vague de froid"), `Expected 'Vague de froid' prefix: ${result}`);
     assert.ok(result.includes("6 jours"), `Expected '6 jours': ${result}`);
-    assert.ok(result.includes("Tmin moyenne -3.2 degC"), `Expected Tmin info: ${result}`);
+    assert.ok(result.includes("Tmin moyenne -3.2 °C"), `Expected Tmin info: ${result}`);
   });
 
   it("formats grand_froid summary", () => {
     const cw = makeColdWave({ kind: "grand_froid", averageMin: -8.5, duration: 3 });
     const result = formatColdWaveSummary(cw);
     assert.ok(result.startsWith("Grand froid"), `Expected 'Grand froid' prefix: ${result}`);
-    assert.ok(result.includes("Tmin moyenne -8.5 degC"), `Expected Tmin info: ${result}`);
+    assert.ok(result.includes("Tmin moyenne -8.5 °C"), `Expected Tmin info: ${result}`);
+  });
+
+  it("formats cold-wave summaries in English", () => {
+    const result = formatColdWaveSummary(
+      makeColdWave({ kind: "grand_froid", averageMin: -8.5, duration: 3 }),
+      "en"
+    );
+
+    assert.ok(result.startsWith("Severe cold"), `Expected 'Severe cold' prefix: ${result}`);
+    assert.ok(result.includes("3 days"), `Expected '3 days': ${result}`);
+    assert.ok(result.includes("avg Tmin -8.5 °C"), `Expected Tmin info: ${result}`);
   });
 });
 

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { hasPendingPeriodChange } from "./PeriodPicker";
@@ -25,4 +26,10 @@ test("detects when the period picker button should be enabled", () => {
     }),
     true
   );
+});
+
+test("does not keep the refresh button label hardcoded in french", () => {
+  const source = readFileSync(new URL("./PeriodPicker.tsx", import.meta.url), "utf8");
+
+  assert.equal(source.includes("Rafraîchir la période"), false);
 });
