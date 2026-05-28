@@ -10,6 +10,7 @@ import {
   formatChartDateTick,
   formatExtremeTooltipLabel,
   formatTooltipDate,
+  getChartTickFontWeight,
   getCurrentSeriesAnimation,
   getExtremeAreaSegments,
   getTooltipExtremeEntries,
@@ -174,6 +175,13 @@ test("returns null when today is outside the displayed range", () => {
     ),
     null
   );
+});
+
+test("uses a bold font weight only for today's x-axis tick", () => {
+  assert.equal(getChartTickFontWeight(3, 3), 700);
+  assert.equal(getChartTickFontWeight("3", 3), 700);
+  assert.equal(getChartTickFontWeight(2, 3), 400);
+  assert.equal(getChartTickFontWeight(3, null), 400);
 });
 
 test("uses red for canicules and orange for heatwaves", () => {
@@ -478,4 +486,12 @@ test("disables the recharts accessibility focus layer on the main chart", () => 
   );
 
   assert.equal(source.includes("accessibilityLayer={false}"), true);
+  assert.equal(source.includes('className="weather-chart-shell min-w-[760px]"'), true);
+});
+
+test("removes focus outline styles from recharts surfaces inside the chart shell", () => {
+  const source = readFileSync(path.join(process.cwd(), "src/app/globals.css"), "utf8");
+
+  assert.equal(source.includes(".weather-chart-shell :is(.recharts-wrapper, .recharts-surface):focus"), true);
+  assert.equal(source.includes("outline: none;"), true);
 });

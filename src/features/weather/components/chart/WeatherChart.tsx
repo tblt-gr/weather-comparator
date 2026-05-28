@@ -77,6 +77,14 @@ type TooltipExtremeEntry = {
   color: string;
 };
 
+type ChartXAxisTickProps = {
+  payload?: {
+    value?: number | string;
+  };
+  x?: number;
+  y?: number;
+};
+
 const SERIES_ANIMATION_MS = 1500;
 const NORMALS_LINE_STROKE_DASHARRAY = "6 5";
 
@@ -189,10 +197,36 @@ export function WeatherChart({
     );
   }
 
+  const renderXAxisTick = ({ payload, x = 0, y = 0 }: ChartXAxisTickProps) => {
+    const dayValue = payload?.value;
+    const day =
+      typeof dayValue === "number"
+        ? dayValue
+        : typeof dayValue === "string"
+          ? Number(dayValue)
+          : Number.NaN;
+    const tickLabel = rows.find((row) => row.day === day)?.tickLabel ?? String(dayValue ?? "");
+
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text
+          dy={16}
+          fill="var(--muted-foreground)"
+          fontSize={12}
+          fontWeight={getChartTickFontWeight(dayValue, todayBoundaryDay)}
+          textAnchor="end"
+          transform="rotate(-45)"
+        >
+          {tickLabel}
+        </text>
+      </g>
+    );
+  };
+
   return (
     <div className="grid gap-4">
       <div className="overflow-x-auto">
-        <div className="min-w-[760px]" ref={chartShellRef}>
+        <div className="weather-chart-shell min-w-[760px]" ref={chartShellRef}>
           {chartWidth > 0 ? (
             <LineChart
               accessibilityLayer={false}
@@ -286,13 +320,11 @@ export function WeatherChart({
                 y={0}
               />
               <XAxis
-                angle={-45}
                 axisLine={false}
                 dataKey="day"
                 height={76}
                 stroke="var(--muted-foreground)"
-                textAnchor="end"
-                tickFormatter={(value) => rows.find((row) => row.day === value)?.tickLabel ?? String(value)}
+                tick={renderXAxisTick}
                 tickLine={false}
                 tickMargin={14}
               />
@@ -609,6 +641,17 @@ export function getTodayBoundaryDay(rows: ChartRow[], today = formatLocalDate(ne
   const matchingRow = rows.find((row) => row.label === today);
 
   return matchingRow?.day ?? null;
+}
+
+export function getChartTickFontWeight(
+  day: number | string | undefined,
+  todayBoundaryDay: number | null
+) {
+  if (todayBoundaryDay === null) {
+    return 400;
+  }
+
+  return Number(day) === todayBoundaryDay ? 700 : 400;
 }
 
 export function formatChartDateTick(value: string | number) {
