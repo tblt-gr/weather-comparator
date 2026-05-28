@@ -15,12 +15,12 @@ export function TemperatureToggle({ value, onChange }: TemperatureToggleProps) {
   return (
     <div
       aria-label={t["temp.groupAriaLabel"]}
-      className="grid h-8 grid-cols-2 rounded-lg border border-border bg-muted/50"
+      className="grid h-8 grid-cols-2 overflow-hidden rounded-lg border border-border bg-muted/50"
       role="group"
     >
       <Button
         aria-pressed={value === "tmax"}
-        className="h-8 rounded-r-none"
+        className="h-full w-full rounded-none border-0 first:rounded-l-[calc(theme(borderRadius.lg)-1px)]"
         onClick={() => onChange("tmax")}
         size="sm"
         type="button"
@@ -30,7 +30,7 @@ export function TemperatureToggle({ value, onChange }: TemperatureToggleProps) {
       </Button>
       <Button
         aria-pressed={value === "tmin"}
-        className="h-8 rounded-l-none"
+        className="h-full w-full rounded-none border-0 last:rounded-r-[calc(theme(borderRadius.lg)-1px)]"
         onClick={() => onChange("tmin")}
         size="sm"
         type="button"
