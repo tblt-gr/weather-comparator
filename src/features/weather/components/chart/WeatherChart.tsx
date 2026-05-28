@@ -8,6 +8,7 @@ import {
   ReferenceArea,
   ReferenceLine,
   Tooltip,
+  type TooltipContentProps,
   XAxis,
   YAxis,
 } from "recharts";
@@ -61,6 +62,8 @@ type ChartRow = {
   normal?: number | null;
   [year: string]: number | string | null | undefined;
 };
+
+type TooltipEntry = NonNullable<TooltipContentProps<number, string>["payload"]>[number];
 
 type SeriesAnimation = {
   observedDuration: number;
@@ -285,11 +288,11 @@ export function WeatherChart({
               />
               <Tooltip
                 content={({ active, label, payload }) => {
-                  const visiblePayload = payload?.filter(
-                    (entry) => typeof entry.value === "number"
+                  const visiblePayload = sortTooltipEntries(
+                    payload?.filter((entry) => typeof entry.value === "number") ?? []
                   );
 
-                  if (!active || !visiblePayload?.length) {
+                  if (!active || !visiblePayload.length) {
                     return null;
                   }
 
@@ -595,6 +598,19 @@ export function formatTooltipDate(value: string | number, locale: Locale = "fr")
   });
 
   return fmt.format(new Date(`${text}T00:00:00.000Z`));
+}
+
+export function sortTooltipEntries(entries: TooltipEntry[]) {
+  return [...entries].sort((left, right) => {
+    const leftValue = typeof left.value === "number" ? left.value : Number.NEGATIVE_INFINITY;
+    const rightValue = typeof right.value === "number" ? right.value : Number.NEGATIVE_INFINITY;
+
+    if (rightValue !== leftValue) {
+      return rightValue - leftValue;
+    }
+
+    return String(right.dataKey ?? right.name).localeCompare(String(left.dataKey ?? left.name));
+  });
 }
 
 export function getHeatwaveFill(kind: HeatwavePeriod["kind"]) {

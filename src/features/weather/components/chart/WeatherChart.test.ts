@@ -15,6 +15,7 @@ import {
   getTodayBoundaryDay,
   getMonthBoundaryDays,
   getNormalsLineConfig,
+  sortTooltipEntries,
 } from "./WeatherChart";
 
 function stripDiacritics(value: string) {
@@ -34,6 +35,18 @@ test("returns the input unchanged when the chart tick is not an ISO date", () =>
 test("formats tooltip dates as readable french dates without day number", () => {
   assert.equal(formatTooltipDate("2025-05-18"), "18 mai");
   assert.equal(stripDiacritics(formatTooltipDate("1999-12-01")), "1 decembre");
+});
+
+test("sorts tooltip entries from highest to lowest temperature", () => {
+  assert.deepEqual(
+    sortTooltipEntries([
+      { dataKey: "minus-1", graphicalItemId: "minus-1", name: "2024", value: 24.1 },
+      { dataKey: "currentObserved", graphicalItemId: "currentObserved", name: "2025", value: 30.5 },
+      { dataKey: "normal", graphicalItemId: "normal", name: "Normal 1991-2020", value: 27.2 },
+      { dataKey: "currentForecast", graphicalItemId: "currentForecast", name: "2025 forecast", value: 30.5 },
+    ]).map((entry) => entry.dataKey),
+    ["currentObserved", "currentForecast", "normal", "minus-1"]
+  );
 });
 
 test("extracts month boundary days from chart rows", () => {
