@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import test from "node:test";
 
 // This project runs tests with Node's built-in runner, so this file covers only
@@ -6,9 +8,11 @@ import test from "node:test";
 import {
   buildChartRows,
   formatChartDateTick,
+  formatExtremeTooltipLabel,
   formatTooltipDate,
   getCurrentSeriesAnimation,
   getExtremeAreaSegments,
+  getTooltipExtremeEntries,
   getDisplayedForecastBoundaryDay,
   getForecastBoundaryDay,
   getHeatwaveFill,
@@ -37,6 +41,12 @@ test("formats tooltip dates as readable french dates without day number", () => 
   assert.equal(stripDiacritics(formatTooltipDate("1999-12-01")), "1 decembre");
 });
 
+test("formats extreme tooltip labels with severity and dataset year", () => {
+  assert.equal(formatExtremeTooltipLabel("canicule", "2022", "fr"), "Canicule • 2022");
+  assert.equal(formatExtremeTooltipLabel("vague_de_froid", "2021", "fr"), "Vague de froid • 2021");
+  assert.equal(formatExtremeTooltipLabel("grand_froid", "2020", "en"), "Severe cold • 2020");
+});
+
 test("sorts tooltip entries from highest to lowest temperature", () => {
   assert.deepEqual(
     sortTooltipEntries([
@@ -46,6 +56,83 @@ test("sorts tooltip entries from highest to lowest temperature", () => {
       { dataKey: "currentForecast", graphicalItemId: "currentForecast", name: "2025 forecast", value: 30.5 },
     ]).map((entry) => entry.dataKey),
     ["currentObserved", "currentForecast", "normal", "minus-1"]
+  );
+});
+
+test("returns active extreme events for the hovered day", () => {
+  assert.deepEqual(
+    getTooltipExtremeEntries(
+      12,
+      [
+        {
+          averageMax: 35.2,
+          datasetId: "minus-3",
+          datasetLabel: "2022",
+          duration: 4,
+          end: "2022-08-13",
+          endDay: 13,
+          forecastStartDay: null,
+          includesForecast: false,
+          kind: "canicule",
+          start: "2022-08-10",
+          startDay: 10,
+        },
+      ],
+      [
+        {
+          averageMin: -8.4,
+          datasetId: "minus-1",
+          datasetLabel: "2024",
+          duration: 3,
+          end: "2024-01-12",
+          endDay: 12,
+          forecastStartDay: null,
+          includesForecast: false,
+          kind: "vague_de_froid",
+          start: "2024-01-10",
+          startDay: 10,
+        },
+      ],
+      "fr"
+    ),
+    [
+      {
+        color: "oklch(0.62 0.24 28)",
+        key: "heat-minus-3-2022-08-10",
+        label: "Canicule • 2022",
+      },
+      {
+        color: "oklch(0.68 0.18 230)",
+        key: "cold-minus-1-2024-01-10",
+        label: "Vague de froid • 2024",
+      },
+    ]
+  );
+});
+
+test("ignores extreme events that do not cover the hovered day", () => {
+  assert.deepEqual(
+    getTooltipExtremeEntries(
+      20,
+      [
+        {
+          averageMax: 35.2,
+          datasetId: "minus-3",
+          datasetLabel: "2022",
+          duration: 4,
+          end: "2022-08-13",
+          endDay: 13,
+          forecastStartDay: null,
+          includesForecast: false,
+          kind: "canicule",
+          start: "2022-08-10",
+          startDay: 10,
+        },
+      ],
+      [],
+      "fr"
+    ),
+    []
   );
 });
 
@@ -382,4 +469,13 @@ test("keeps the climate normals line dashed from the first frame", () => {
     strokeDasharray: "6 5",
     strokeWidth: 2,
   });
+});
+
+test("disables the recharts accessibility focus layer on the main chart", () => {
+  const source = readFileSync(
+    path.join(process.cwd(), "src/features/weather/components/chart/WeatherChart.tsx"),
+    "utf8"
+  );
+
+  assert.equal(source.includes("accessibilityLayer={false}"), true);
 });

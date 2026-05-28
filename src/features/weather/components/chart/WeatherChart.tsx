@@ -71,6 +71,12 @@ type SeriesAnimation = {
   forecastDuration: number;
 };
 
+type TooltipExtremeEntry = {
+  key: string;
+  label: string;
+  color: string;
+};
+
 const SERIES_ANIMATION_MS = 1500;
 const NORMALS_LINE_STROKE_DASHARRAY = "6 5";
 
@@ -128,6 +134,16 @@ export function WeatherChart({
     () => getCurrentSeriesAnimation(datasets.find((dataset) => dataset.id === "current")),
     [datasets]
   );
+  const tooltipExtremeEntriesByDay = useMemo(
+    () =>
+      new Map(
+        rows.map((row) => [
+          row.day,
+          getTooltipExtremeEntries(row.day, heatwaves, coldWaves, locale),
+        ])
+      ),
+    [coldWaves, heatwaves, locale, rows]
+  );
 
   useEffect(() => {
     const element = chartShellRef.current;
@@ -179,6 +195,7 @@ export function WeatherChart({
         <div className="min-w-[760px]" ref={chartShellRef}>
           {chartWidth > 0 ? (
             <LineChart
+              accessibilityLayer={false}
               data={rows}
               height={420}
               margin={{ bottom: 56, left: 8, right: 24, top: 16 }}
@@ -291,8 +308,16 @@ export function WeatherChart({
                   const visiblePayload = sortTooltipEntries(
                     payload?.filter((entry) => typeof entry.value === "number") ?? []
                   );
+                  const hoveredDay =
+                    typeof visiblePayload[0]?.payload?.day === "number"
+                      ? visiblePayload[0].payload.day
+                      : typeof label === "number"
+                        ? label
+                        : null;
+                  const extremeEntries =
+                    hoveredDay === null ? [] : (tooltipExtremeEntriesByDay.get(hoveredDay) ?? []);
 
-                  if (!active || !visiblePayload.length) {
+                  if (!active || (!visiblePayload.length && !extremeEntries.length)) {
                     return null;
                   }
 
@@ -320,6 +345,22 @@ export function WeatherChart({
                           </div>
                         ))}
                       </div>
+                      {extremeEntries.length > 0 ? (
+                        <div className="mt-2 border-t border-white/30 pt-2 dark:border-white/10">
+                          <div className="grid gap-1">
+                            {extremeEntries.map((entry) => (
+                              <div className="flex items-center gap-2" key={entry.key}>
+                                <span
+                                  aria-hidden="true"
+                                  className="size-2 shrink-0 rounded-full"
+                                  style={{ backgroundColor: entry.color }}
+                                />
+                                <span>{entry.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
                     </div>
                   );
                 }}
@@ -611,6 +652,70 @@ export function sortTooltipEntries(entries: TooltipEntry[]) {
 
     return String(right.dataKey ?? right.name).localeCompare(String(left.dataKey ?? left.name));
   });
+}
+
+export function formatExtremeTooltipLabel(
+  kind: HeatwavePeriod["kind"] | ColdWavePeriod["kind"],
+  datasetLabel: string,
+  locale: Locale = "fr"
+) {
+  if (locale === "en") {
+    if (kind === "canicule") {
+      return `Scorching heat • ${datasetLabel}`;
+    }
+
+    if (kind === "vague_de_chaleur") {
+      return `Heat wave • ${datasetLabel}`;
+    }
+
+    if (kind === "grand_froid") {
+      return `Severe cold • ${datasetLabel}`;
+    }
+
+    return `Cold wave • ${datasetLabel}`;
+  }
+
+  if (kind === "canicule") {
+    return `Canicule • ${datasetLabel}`;
+  }
+
+  if (kind === "vague_de_chaleur") {
+    return `Vague de chaleur • ${datasetLabel}`;
+  }
+
+  if (kind === "grand_froid") {
+    return `Grand froid • ${datasetLabel}`;
+  }
+
+  return `Vague de froid • ${datasetLabel}`;
+}
+
+export function getTooltipExtremeEntries(
+  day: number,
+  heatwaves: HeatwavePeriod[],
+  coldWaves: ColdWavePeriod[],
+  locale: Locale = "fr"
+): TooltipExtremeEntry[] {
+  const heatEntries = heatwaves
+    .filter((heatwave) => day >= heatwave.startDay && day <= heatwave.endDay)
+    .map((heatwave) => ({
+      color: getHeatwaveFill(heatwave.kind),
+      key: `heat-${heatwave.datasetId}-${heatwave.start}`,
+      label: formatExtremeTooltipLabel(heatwave.kind, heatwave.datasetLabel, locale),
+      startDay: heatwave.startDay,
+    }));
+  const coldEntries = coldWaves
+    .filter((coldWave) => day >= coldWave.startDay && day <= coldWave.endDay)
+    .map((coldWave) => ({
+      color: getColdWaveFill(coldWave.kind),
+      key: `cold-${coldWave.datasetId}-${coldWave.start}`,
+      label: formatExtremeTooltipLabel(coldWave.kind, coldWave.datasetLabel, locale),
+      startDay: coldWave.startDay,
+    }));
+
+  return [...heatEntries, ...coldEntries]
+    .sort((left, right) => left.startDay - right.startDay || left.label.localeCompare(right.label))
+    .map(({ color, key, label }) => ({ color, key, label }));
 }
 
 export function getHeatwaveFill(kind: HeatwavePeriod["kind"]) {
