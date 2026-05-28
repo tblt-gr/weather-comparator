@@ -40,6 +40,22 @@ test("getForecastDateRangeForPeriod returns the future slice starting today", ()
   );
 });
 
+test("getForecastDateRangeForPeriod caps the future slice to the forecast horizon", () => {
+  assert.deepEqual(
+    getForecastDateRangeForPeriod({
+      period: {
+        startDate: "2025-05-20",
+        endDate: "2025-07-30",
+      },
+      today: "2025-05-25",
+    }),
+    {
+      startDate: "2025-05-25",
+      endDate: "2025-06-09",
+    }
+  );
+});
+
 test("mergeArchiveAndForecastWeather preserves forecast precedence and markers on overlapping days", () => {
   const archive: OpenMeteoArchiveResponse = {
     daily: {

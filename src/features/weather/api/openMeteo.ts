@@ -7,6 +7,7 @@ import {
   CLIMATE_NORMAL_END_YEAR,
   CLIMATE_NORMAL_START_YEAR,
 } from "@/features/weather/logic/climateNormalYears";
+import { getForecastDateRangeForPeriod } from "@/features/weather/logic/forecastWeather";
 import type { City } from "@/features/weather/types";
 
 type GeocodingResult = {
@@ -137,17 +138,17 @@ export async function fetchForecastWeather({
   today?: string;
   timeoutMs?: number;
 }): Promise<OpenMeteoArchiveResponse> {
-  const startDate = period.startDate > today ? period.startDate : today;
+  const range = getForecastDateRangeForPeriod({ period, today });
 
-  if (startDate > period.endDate) {
+  if (range === null) {
     return createEmptyDailyWeatherResponse();
   }
 
   const params = new URLSearchParams({
     latitude: String(city.latitude),
     longitude: String(city.longitude),
-    start_date: startDate,
-    end_date: period.endDate,
+    start_date: range.startDate,
+    end_date: range.endDate,
     daily: "temperature_2m_max,temperature_2m_min",
     timezone: "Europe/Paris",
   });

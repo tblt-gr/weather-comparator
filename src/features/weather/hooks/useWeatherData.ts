@@ -132,7 +132,14 @@ export async function fetchWeatherDataset({
       throw error;
     }
 
-    return normalizeWeatherData({ offsetYears, range, response: archiveResponse });
+    return normalizeWeatherData({
+      offsetYears,
+      range: {
+        startDate: range.startDate,
+        endDate: period.endDate,
+      },
+      response: archiveResponse,
+    });
   }
 }
 
@@ -212,105 +219,42 @@ export function useWeatherData({
   offsets: number[];
   period: DatePeriod;
 }) {
-  const archiveQueries = useQueries({
+  const queries = useQueries({
     queries:
       city === null
         ? []
         : offsets.map((offsetYears) => ({
             queryKey: getWeatherQueryKey(city, period, offsetYears),
             enabled: isValidDatePeriod(period) && getComparableDateRangeByOffset({ offsetYears, period }) !== null,
-            queryFn: async ({ signal }: { signal: AbortSignal }) => {
-              const range = getComparableDateRangeByOffset({
-                offsetYears,
-                period,
-              });
-
-              if (range === null) {
-                return {
-                  id: offsetYears === 0 ? "current" : `minus-${offsetYears}`,
-                  label: "",
-                  offsetYears,
-                  values: [],
-                } satisfies WeatherYearDataset;
-              }
-
-              const archiveResponse = await fetchHistoricalWeather({
+            queryFn: ({ signal }: { signal: AbortSignal }) =>
+              fetchWeatherDataset({
                 city,
                 offsetYears,
                 period,
                 signal,
-              });
-
-              return normalizeWeatherData({ offsetYears, range, response: archiveResponse });
-            },
+              }),
             staleTime: 1000 * 60 * 60 * 24,
           })),
   });
 
-  const [forecastQuery] = useQueries({
-    queries:
-      city === null ||
-      !offsets.includes(0) ||
-      !isValidDatePeriod(period) ||
-      getComparableDateRangeByOffset({ offsetYears: 0, period }) === null
-        ? []
-        : [
-            {
-              queryKey: [
-                "weather-forecast",
-                city.id,
-                period.startDate,
-                period.endDate,
-              ] as const,
-              queryFn: async ({ signal }: { signal: AbortSignal }) => {
-                const forecastRange = getForecastDateRangeForPeriod({
-                  period,
-                  today: formatToday(new Date()),
-                });
-
-                if (forecastRange === null) {
-                  return null;
-                }
-
-                return fetchForecastWeather({
-                  city,
-                  period: forecastRange,
-                  signal,
-                });
-              },
-              staleTime: 1000 * 60 * 60 * 24,
-            },
-          ],
-  });
-
-  const data = archiveQueries
+  const data = queries
     .map((query) => query.data)
     .filter((dataset): dataset is WeatherYearDataset => Boolean(dataset))
-    .map((dataset) =>
-      dataset.id === "current"
-        ? mergeCurrentDatasetWithForecast({
-            currentDataset: dataset,
-            forecastResponse: forecastQuery?.data ?? undefined,
-            period,
-          }) ?? dataset
-        : dataset
-    )
     .sort((a, b) => a.offsetYears - b.offsetYears);
 
   const errorMessage = aggregateWeatherQueryErrors(
-    archiveQueries.map((query, index) => ({
+    queries.map((query, index) => ({
       error: query.error,
       offsetYears: offsets[index] ?? 0,
     }))
   );
-  const isArchiveLoading = archiveQueries.some((query) => query.isLoading);
+  const isLoadingQueries = queries.some((query) => query.isLoading);
 
   return {
     data,
-    isLoading: data.length === 0 && isArchiveLoading,
-    isFetching:
-      archiveQueries.some((query) => query.isFetching) || Boolean(forecastQuery?.isFetching),
-    isError: archiveQueries.some((query) => query.isError),
+    isLoading: data.length === 0 && isLoadingQueries,
+    isFetching: queries.some((query) => query.isFetching),
+    isError: queries.some((query) => query.isError),
     error: errorMessage,
   };
 }

@@ -185,6 +185,8 @@ test("fetchWeatherDataset falls back to archive data when the forecast request f
     [
       { date: "2025-05-24", tmax: 22, isForecast: false },
       { date: "2025-05-25", tmax: 23, isForecast: false },
+      { date: "2025-05-26", tmax: null, isForecast: false },
+      { date: "2025-05-27", tmax: null, isForecast: false },
     ]
   );
 

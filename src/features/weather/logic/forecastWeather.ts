@@ -1,6 +1,8 @@
 import type { OpenMeteoArchiveResponse } from "@/features/weather/api/openMeteo";
 import type { DatePeriod } from "@/features/weather/logic/dates";
 
+const FORECAST_MAX_DAYS_AHEAD = 15;
+
 export function getForecastDateRangeForPeriod({
   period,
   today,
@@ -9,14 +11,16 @@ export function getForecastDateRangeForPeriod({
   today: string;
 }): DatePeriod | null {
   const startDate = period.startDate > today ? period.startDate : today;
+  const maxEndDate = addDays(today, FORECAST_MAX_DAYS_AHEAD);
+  const endDate = period.endDate < maxEndDate ? period.endDate : maxEndDate;
 
-  if (startDate > period.endDate) {
+  if (startDate > endDate) {
     return null;
   }
 
   return {
     startDate,
-    endDate: period.endDate,
+    endDate,
   };
 }
 
@@ -66,4 +70,11 @@ export function mergeArchiveAndForecastWeather({
       is_forecast: sortedDates.map((date) => daily.get(date)?.isForecast ?? false),
     },
   };
+}
+
+function addDays(date: string, days: number) {
+  const nextDate = new Date(`${date}T00:00:00.000Z`);
+  nextDate.setUTCDate(nextDate.getUTCDate() + days);
+
+  return nextDate.toISOString().slice(0, 10);
 }

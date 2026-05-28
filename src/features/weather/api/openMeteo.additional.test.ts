@@ -220,7 +220,7 @@ test("fetchForecastWeather returns an empty payload when the period has no futur
     city: baseCity,
     period: {
       startDate: "2025-05-01",
-      endDate: "2025-05-25",
+      endDate: "2025-05-24",
     },
     today: "2025-05-25",
   });
@@ -236,7 +236,7 @@ test("fetchForecastWeather uses the forecast endpoint and future-only range", as
     const url = new URL(String(input));
     assert.equal(url.origin, "https://api.open-meteo.com");
     assert.equal(url.pathname, "/v1/forecast");
-    assert.equal(url.searchParams.get("start_date"), "2025-05-26");
+    assert.equal(url.searchParams.get("start_date"), "2025-05-25");
     assert.equal(url.searchParams.get("end_date"), "2025-05-30");
     assert.equal(url.searchParams.get("daily"), "temperature_2m_max,temperature_2m_min");
     assert.equal(url.searchParams.get("timezone"), "Europe/Paris");
@@ -249,6 +249,27 @@ test("fetchForecastWeather uses the forecast endpoint and future-only range", as
     period: {
       startDate: "2025-05-20",
       endDate: "2025-05-30",
+    },
+    today: "2025-05-25",
+  });
+
+  mock.restoreAll();
+});
+
+test("fetchForecastWeather caps the request to the supported forecast horizon", async () => {
+  mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    const url = new URL(String(input));
+    assert.equal(url.searchParams.get("start_date"), "2025-05-25");
+    assert.equal(url.searchParams.get("end_date"), "2025-06-09");
+
+    return new Response(JSON.stringify({ daily: { time: [] } }));
+  });
+
+  await fetchForecastWeather({
+    city: baseCity,
+    period: {
+      startDate: "2025-05-13",
+      endDate: "2025-07-30",
     },
     today: "2025-05-25",
   });
