@@ -18,8 +18,8 @@ export function getDefaultComparisonPeriod(today = new Date()): DatePeriod {
   const todayDate = formatLocalDate(today);
 
   return {
-    startDate: `${todayDate.slice(0, 8)}01`,
-    endDate: todayDate,
+    startDate: addDays(todayDate, -15),
+    endDate: addDays(todayDate, 15),
   };
 }
 

@@ -116,12 +116,12 @@ test("getInitialWeatherState computes the default period from the current date a
   const secondPeriod = getInitialWeatherState().period;
 
   assert.deepEqual(firstPeriod, {
-    startDate: "2026-05-01",
-    endDate: "2026-05-26",
+    startDate: "2026-05-11",
+    endDate: "2026-06-10",
   });
   assert.deepEqual(secondPeriod, {
-    startDate: "2026-05-01",
-    endDate: "2026-05-27",
+    startDate: "2026-05-12",
+    endDate: "2026-06-11",
   });
 });
 

@@ -52,6 +52,4 @@ export const fr: Translations = {
   "heatwave.days": "jours",
   "heatwave.avgMax": "Tmax moyenne",
   "chart.normalLine": "Normale 1991-2020",
-  "chart.observedSegment": "Observé",
-  "chart.forecastSegment": "Prévision sur la courbe de l'année en cours",
 };

@@ -7,10 +7,10 @@ import {
   buildChartRows,
   formatChartDateTick,
   formatTooltipDate,
+  getDisplayedForecastBoundaryDay,
   getForecastBoundaryDay,
   getHeatwaveFill,
   getTodayBoundaryDay,
-  hasForecastData,
   getMonthBoundaryDays,
 } from "./WeatherChart";
 
@@ -253,54 +253,8 @@ test("returns the first forecast boundary day for the current dataset", () => {
   );
 });
 
-test("detects when the current year dataset includes forecast values", () => {
-  assert.equal(
-    hasForecastData([
-      {
-        id: "current",
-        label: "2025",
-        offsetYears: 0,
-        values: [
-          {
-            date: "2025-06-01",
-            day: 1,
-            year: 2025,
-            tmax: 30,
-            tmin: 18,
-            isForecast: false,
-          },
-          {
-            date: "2025-06-02",
-            day: 2,
-            year: 2025,
-            tmax: 28,
-            tmin: 17,
-            isForecast: true,
-          },
-        ],
-      },
-    ]),
-    true
-  );
-
-  assert.equal(
-    hasForecastData([
-      {
-        id: "current",
-        label: "2025",
-        offsetYears: 0,
-        values: [
-          {
-            date: "2025-06-01",
-            day: 1,
-            year: 2025,
-            tmax: 30,
-            tmin: 18,
-            isForecast: false,
-          },
-        ],
-      },
-    ]),
-    false
-  );
+test("hides the forecast boundary when it overlaps today", () => {
+  assert.equal(getDisplayedForecastBoundaryDay(3, 3), null);
+  assert.equal(getDisplayedForecastBoundaryDay(3, 4), 4);
+  assert.equal(getDisplayedForecastBoundaryDay(null, 4), 4);
 });

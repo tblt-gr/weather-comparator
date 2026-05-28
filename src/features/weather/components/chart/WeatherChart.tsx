@@ -91,8 +91,10 @@ export function WeatherChart({
   );
   const monthBoundaryDays = useMemo(() => getMonthBoundaryDays(rows), [rows]);
   const todayBoundaryDay = useMemo(() => getTodayBoundaryDay(rows), [rows]);
-  const forecastBoundaryDay = useMemo(() => getForecastBoundaryDay(datasets), [datasets]);
-  const showForecastHint = useMemo(() => hasForecastData(datasets), [datasets]);
+  const forecastBoundaryDay = useMemo(
+    () => getDisplayedForecastBoundaryDay(todayBoundaryDay, getForecastBoundaryDay(datasets)),
+    [datasets, todayBoundaryDay]
+  );
   const visibleDatasets = useMemo(
     () => datasets.filter((dataset) => !hiddenSeries.includes(dataset.id)),
     [datasets, hiddenSeries]
@@ -349,24 +351,6 @@ export function WeatherChart({
           label: dataset.label,
         }))}
       />
-      {showForecastHint ? (
-        <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <span
-              aria-hidden="true"
-              className="block h-0.5 w-7 rounded-full bg-foreground/70"
-            />
-            <span>{t["chart.observedSegment"]}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span
-              aria-hidden="true"
-              className="block h-0.5 w-7 rounded-full border-t-2 border-dashed border-foreground/70"
-            />
-            <span>{t["chart.forecastSegment"]}</span>
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -428,10 +412,15 @@ export function getForecastBoundaryDay(datasets: WeatherYearDataset[]) {
   return typeof firstForecastDay === "number" ? firstForecastDay : null;
 }
 
-export function hasForecastData(datasets: WeatherYearDataset[]) {
-  const currentDataset = datasets.find((dataset) => dataset.id === "current");
+export function getDisplayedForecastBoundaryDay(
+  todayBoundaryDay: number | null,
+  forecastBoundaryDay: number | null
+) {
+  if (forecastBoundaryDay === null) {
+    return null;
+  }
 
-  return currentDataset?.values.some((value) => value.isForecast) ?? false;
+  return forecastBoundaryDay === todayBoundaryDay ? null : forecastBoundaryDay;
 }
 
 export function getMonthBoundaryDays(rows: ChartRow[]) {

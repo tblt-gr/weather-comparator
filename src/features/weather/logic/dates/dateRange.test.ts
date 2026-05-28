@@ -5,7 +5,17 @@ import {
   getAvailableComparisonOffsets,
   getComparableDateRange,
   getComparableDateRangeByOffset,
+  getDefaultComparisonPeriod,
 } from "./dateRange";
+
+test("returns a 31-day default period centered on today", () => {
+  const range = getDefaultComparisonPeriod(new Date("2026-05-28T12:00:00.000Z"));
+
+  assert.deepEqual(range, {
+    startDate: "2026-05-13",
+    endDate: "2026-06-12",
+  });
+});
 
 test("clamps the current year comparison range to today", () => {
   const range = getComparableDateRange({
