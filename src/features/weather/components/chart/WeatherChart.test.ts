@@ -81,7 +81,7 @@ test("uses red for canicules and orange for heatwaves", () => {
   assert.equal(getHeatwaveFill("vague_de_chaleur"), "oklch(0.74 0.18 62)");
 });
 
-test("splits a mixed extreme area at the forecast boundary day", () => {
+test("splits a mixed extreme area at the displayed forecast boundary day", () => {
   assert.deepEqual(
     getExtremeAreaSegments({
       startDay: 10,
@@ -90,8 +90,8 @@ test("splits a mixed extreme area at the forecast boundary day", () => {
       forecastStartDay: 12,
     }),
     [
-      { x1: 10, x2: 12, isForecast: false },
-      { x1: 12, x2: 14, isForecast: true },
+      { x1: 10, x2: 11, isForecast: false },
+      { x1: 11, x2: 14, isForecast: true },
     ]
   );
 });

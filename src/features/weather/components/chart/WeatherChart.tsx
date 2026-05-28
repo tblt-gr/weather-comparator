@@ -619,9 +619,11 @@ export function getExtremeAreaSegments(period: {
     return [{ x1: period.startDay, x2: period.endDay, isForecast: true }];
   }
 
+  const displayedForecastStartDay = Math.max(period.startDay, period.forecastStartDay - 1);
+
   return [
-    { x1: period.startDay, x2: period.forecastStartDay, isForecast: false },
-    { x1: period.forecastStartDay, x2: period.endDay, isForecast: true },
+    { x1: period.startDay, x2: displayedForecastStartDay, isForecast: false },
+    { x1: displayedForecastStartDay, x2: period.endDay, isForecast: true },
   ];
 }
 
