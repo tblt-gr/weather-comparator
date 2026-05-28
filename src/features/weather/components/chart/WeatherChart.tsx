@@ -69,6 +69,13 @@ type SeriesAnimation = {
 };
 
 const SERIES_ANIMATION_MS = 1500;
+const NORMALS_LINE_STROKE_DASHARRAY = "6 5";
+
+type NormalsLineConfig = {
+  isAnimationActive: boolean;
+  strokeDasharray: string;
+  strokeWidth: number;
+};
 
 export function WeatherChart({
   datasets,
@@ -113,6 +120,7 @@ export function WeatherChart({
     () => datasets.filter((dataset) => !hiddenSeries.includes(dataset.id)),
     [datasets, hiddenSeries]
   );
+  const normalsLineConfig = useMemo(() => getNormalsLineConfig(), []);
   const currentSeriesAnimation = useMemo(
     () => getCurrentSeriesAnimation(datasets.find((dataset) => dataset.id === "current")),
     [datasets]
@@ -393,14 +401,14 @@ export function WeatherChart({
               )}
               {showNormals ? (
                 <Line
-                  animationDuration={SERIES_ANIMATION_MS}
                   connectNulls={false}
                   dataKey="normal"
                   dot={false}
+                  isAnimationActive={normalsLineConfig.isAnimationActive}
                   name={t["chart.normalLine"]}
                   stroke="var(--muted-foreground)"
-                  strokeDasharray="6 5"
-                  strokeWidth={2}
+                  strokeDasharray={normalsLineConfig.strokeDasharray}
+                  strokeWidth={normalsLineConfig.strokeWidth}
                   type="monotone"
                 />
               ) : null}
@@ -534,6 +542,16 @@ export function getCurrentSeriesAnimation(
     observedDuration,
     forecastBegin: observedDuration,
     forecastDuration,
+  };
+}
+
+export function getNormalsLineConfig(): NormalsLineConfig {
+  return {
+    // Recharts animates line drawing with a solid stroke first, which makes dashed
+    // series briefly appear continuous. Keep normals dashed from the first frame.
+    isAnimationActive: false,
+    strokeDasharray: NORMALS_LINE_STROKE_DASHARRAY,
+    strokeWidth: 2,
   };
 }
 

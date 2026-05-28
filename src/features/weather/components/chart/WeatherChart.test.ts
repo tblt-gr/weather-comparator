@@ -14,6 +14,7 @@ import {
   getHeatwaveFill,
   getTodayBoundaryDay,
   getMonthBoundaryDays,
+  getNormalsLineConfig,
 } from "./WeatherChart";
 
 function stripDiacritics(value: string) {
@@ -360,4 +361,12 @@ test("starts the forecast animation immediately when the selected period has no 
       forecastDuration: 1500,
     }
   );
+});
+
+test("keeps the climate normals line dashed from the first frame", () => {
+  assert.deepEqual(getNormalsLineConfig(), {
+    isAnimationActive: false,
+    strokeDasharray: "6 5",
+    strokeWidth: 2,
+  });
 });
