@@ -7,6 +7,7 @@ import {
   buildChartRows,
   formatChartDateTick,
   formatTooltipDate,
+  getCurrentSeriesAnimation,
   getDisplayedForecastBoundaryDay,
   getForecastBoundaryDay,
   getHeatwaveFill,
@@ -257,4 +258,78 @@ test("hides the forecast boundary when it overlaps today", () => {
   assert.equal(getDisplayedForecastBoundaryDay(3, 3), null);
   assert.equal(getDisplayedForecastBoundaryDay(3, 4), 4);
   assert.equal(getDisplayedForecastBoundaryDay(null, 4), 4);
+});
+
+test("delays the forecast animation until the observed segment is fully drawn", () => {
+  assert.deepEqual(
+    getCurrentSeriesAnimation({
+      id: "current",
+      label: "2025",
+      offsetYears: 0,
+      values: [
+        {
+          date: "2025-06-01",
+          day: 1,
+          year: 2025,
+          tmax: 30,
+          tmin: 18,
+          isForecast: false,
+        },
+        {
+          date: "2025-06-02",
+          day: 2,
+          year: 2025,
+          tmax: 29,
+          tmin: 17,
+          isForecast: false,
+        },
+        {
+          date: "2025-06-03",
+          day: 3,
+          year: 2025,
+          tmax: 28,
+          tmin: 16,
+          isForecast: true,
+        },
+      ],
+    }),
+    {
+      observedDuration: 1000,
+      forecastBegin: 1000,
+      forecastDuration: 500,
+    }
+  );
+});
+
+test("starts the forecast animation immediately when the selected period has no observed segment", () => {
+  assert.deepEqual(
+    getCurrentSeriesAnimation({
+      id: "current",
+      label: "2025",
+      offsetYears: 0,
+      values: [
+        {
+          date: "2025-06-03",
+          day: 3,
+          year: 2025,
+          tmax: 28,
+          tmin: 16,
+          isForecast: true,
+        },
+        {
+          date: "2025-06-04",
+          day: 4,
+          year: 2025,
+          tmax: 27,
+          tmin: 15,
+          isForecast: true,
+        },
+      ],
+    }),
+    {
+      observedDuration: 0,
+      forecastBegin: 0,
+      forecastDuration: 1500,
+    }
+  );
 });

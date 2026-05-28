@@ -56,6 +56,14 @@ type ChartRow = {
   [year: string]: number | string | null | undefined;
 };
 
+type SeriesAnimation = {
+  observedDuration: number;
+  forecastBegin: number;
+  forecastDuration: number;
+};
+
+const SERIES_ANIMATION_MS = 1500;
+
 export function WeatherChart({
   datasets,
   temperatureMode,
@@ -98,6 +106,10 @@ export function WeatherChart({
   const visibleDatasets = useMemo(
     () => datasets.filter((dataset) => !hiddenSeries.includes(dataset.id)),
     [datasets, hiddenSeries]
+  );
+  const currentSeriesAnimation = useMemo(
+    () => getCurrentSeriesAnimation(datasets.find((dataset) => dataset.id === "current")),
+    [datasets]
   );
 
   useEffect(() => {
@@ -283,9 +295,11 @@ export function WeatherChart({
                 dataset.id === "current" ? (
                   <Fragment key={dataset.id}>
                     <Line
+                      animationDuration={currentSeriesAnimation.observedDuration}
                       connectNulls={false}
                       dataKey="currentObserved"
                       dot={false}
+                      isAnimationActive={currentSeriesAnimation.observedDuration > 0}
                       key="currentObserved"
                       name={dataset.label}
                       stroke={colors[dataset.id]}
@@ -294,9 +308,12 @@ export function WeatherChart({
                       type="monotone"
                     />
                     <Line
+                      animationBegin={currentSeriesAnimation.forecastBegin}
+                      animationDuration={currentSeriesAnimation.forecastDuration}
                       connectNulls={false}
                       dataKey="currentForecast"
                       dot={false}
+                      isAnimationActive={currentSeriesAnimation.forecastDuration > 0}
                       key="currentForecast"
                       legendType="none"
                       name={dataset.label}
@@ -309,6 +326,7 @@ export function WeatherChart({
                   </Fragment>
                 ) : (
                   <Line
+                    animationDuration={SERIES_ANIMATION_MS}
                     connectNulls={false}
                     dataKey={dataset.id}
                     dot={false}
@@ -323,6 +341,7 @@ export function WeatherChart({
               )}
               {showNormals ? (
                 <Line
+                  animationDuration={SERIES_ANIMATION_MS}
                   connectNulls={false}
                   dataKey="normal"
                   dot={false}
@@ -421,6 +440,49 @@ export function getDisplayedForecastBoundaryDay(
   }
 
   return forecastBoundaryDay === todayBoundaryDay ? null : forecastBoundaryDay;
+}
+
+export function getCurrentSeriesAnimation(
+  currentDataset?: WeatherYearDataset
+): SeriesAnimation {
+  if (!currentDataset) {
+    return {
+      observedDuration: 0,
+      forecastBegin: 0,
+      forecastDuration: 0,
+    };
+  }
+
+  const observedPointCount = currentDataset.values.filter((value) => !value.isForecast).length;
+  const forecastPointCount = currentDataset.values.filter((value) => value.isForecast).length;
+
+  if (observedPointCount === 0) {
+    return {
+      observedDuration: 0,
+      forecastBegin: 0,
+      forecastDuration: SERIES_ANIMATION_MS,
+    };
+  }
+
+  if (forecastPointCount === 0) {
+    return {
+      observedDuration: SERIES_ANIMATION_MS,
+      forecastBegin: SERIES_ANIMATION_MS,
+      forecastDuration: 0,
+    };
+  }
+
+  const totalPointCount = observedPointCount + forecastPointCount;
+  const observedDuration = Math.round(
+    (SERIES_ANIMATION_MS * observedPointCount) / totalPointCount
+  );
+  const forecastDuration = SERIES_ANIMATION_MS - observedDuration;
+
+  return {
+    observedDuration,
+    forecastBegin: observedDuration,
+    forecastDuration,
+  };
 }
 
 export function getMonthBoundaryDays(rows: ChartRow[]) {
