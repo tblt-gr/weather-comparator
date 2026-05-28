@@ -1,5 +1,5 @@
 <h2 align="center"><b>Weather Comparator</b></h2>
-<h4 align="center">Historical weather comparison dashboard - city search, multi-year charts, climate normals, and exports.</h4>
+<h4 align="center">Historical weather comparison dashboard - city search, multi-year charts, climate normals, extreme events, and exports.</h4>
 
 <p align="center">
 <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white" alt="Next.js 16"></a>
@@ -20,7 +20,7 @@
 </p>
 <hr>
 
-One-page weather analytics app for comparing daily temperatures across years. Search for a city, choose a month and reference year, overlay previous years, inspect heatwave periods, compare values against 1991-2020 climate normals, then export the chart or source data.
+One-page weather analytics app for comparing daily temperatures across years. Search for a city, choose a month and reference year, compare the current year with past years, inspect heatwave and cold-wave periods, surface climate normals, review extreme event years in the chart tooltip, and export the chart or source data.
 
 ## Screenshots
 
@@ -36,9 +36,14 @@ One-page weather analytics app for comparing daily temperatures across years. Se
 - **Interactive chart** - Recharts line chart with year visibility toggles
 - **Climate normals** - optional 1991-2020 seasonal baseline overlay
 - **Heatwave detection** - automatic highlight of hot periods in visible datasets
+- **Cold-wave overlays** - highlight cold periods across the compared datasets
+- **Extreme event tooltips** - show the years and labels of notable heat and cold events directly in the chart tooltip
+- **Tooltip sorting** - values are ordered from hottest to coldest for easier reading
 - **Climate summary** - monthly averages, anomalies, hot days, and tropical nights
 - **Exports** - PNG chart export and CSV data export
 - **Persistent city** - selected city stored locally for the next visit
+- **Bilingual UI** - full French and English coverage across the interface
+- **Accessible chart interactions** - keyboard-friendly chart behavior with cleaned-up focus handling
 - **Responsive UI** - desktop and mobile layout with light/dark theme support
 
 ## Stack
