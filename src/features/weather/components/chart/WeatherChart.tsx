@@ -13,6 +13,7 @@ import {
 } from "recharts";
 
 import { ChartLegend } from "./ChartLegend";
+import { formatLocalDate } from "@/features/weather/logic/dates";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Locale } from "@/lib/i18n/types";
 import type {
@@ -89,6 +90,7 @@ export function WeatherChart({
     [datasets, normals, temperatureMode]
   );
   const monthBoundaryDays = useMemo(() => getMonthBoundaryDays(rows), [rows]);
+  const todayBoundaryDay = useMemo(() => getTodayBoundaryDay(rows), [rows]);
   const forecastBoundaryDay = useMemo(() => getForecastBoundaryDay(datasets), [datasets]);
   const showForecastHint = useMemo(() => hasForecastData(datasets), [datasets]);
   const visibleDatasets = useMemo(
@@ -162,6 +164,16 @@ export function WeatherChart({
                   x={day}
                 />
               ))}
+              {todayBoundaryDay !== null ? (
+                <ReferenceLine
+                  ifOverflow="extendDomain"
+                  stroke="var(--foreground)"
+                  strokeDasharray="5 4"
+                  strokeOpacity={0.9}
+                  strokeWidth={1.5}
+                  x={todayBoundaryDay}
+                />
+              ) : null}
               {forecastBoundaryDay !== null ? (
                 <ReferenceLine
                   ifOverflow="extendDomain"
@@ -426,6 +438,12 @@ export function getMonthBoundaryDays(rows: ChartRow[]) {
   return rows
     .filter((row) => typeof row.label === "string" && row.label.slice(8, 10) === "01")
     .map((row) => row.day);
+}
+
+export function getTodayBoundaryDay(rows: ChartRow[], today = formatLocalDate(new Date())) {
+  const matchingRow = rows.find((row) => row.label === today);
+
+  return matchingRow?.day ?? null;
 }
 
 export function formatChartDateTick(value: string | number) {

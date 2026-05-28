@@ -9,6 +9,7 @@ import {
   formatTooltipDate,
   getForecastBoundaryDay,
   getHeatwaveFill,
+  getTodayBoundaryDay,
   hasForecastData,
   getMonthBoundaryDays,
 } from "./WeatherChart";
@@ -42,6 +43,33 @@ test("extracts month boundary days from chart rows", () => {
       { day: 33, label: "2026-02-02", tickLabel: "02/02/26" },
     ]),
     [1, 32]
+  );
+});
+
+test("returns today's chart day when today is within the displayed range", () => {
+  assert.equal(
+    getTodayBoundaryDay(
+      [
+        { day: 1, label: "2026-05-01", tickLabel: "01/05/26" },
+        { day: 2, label: "2026-05-02", tickLabel: "02/05/26" },
+        { day: 3, label: "2026-05-03", tickLabel: "03/05/26" },
+      ],
+      "2026-05-02"
+    ),
+    2
+  );
+});
+
+test("returns null when today is outside the displayed range", () => {
+  assert.equal(
+    getTodayBoundaryDay(
+      [
+        { day: 1, label: "2026-05-01", tickLabel: "01/05/26" },
+        { day: 2, label: "2026-05-02", tickLabel: "02/05/26" },
+      ],
+      "2026-05-03"
+    ),
+    null
   );
 });
 
