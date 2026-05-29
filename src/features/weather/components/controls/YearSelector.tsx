@@ -102,6 +102,7 @@ export function YearSelector({
         <Button
           aria-label={t["year.clearAriaLabel"]}
           className="absolute top-1/2 right-1 z-10 h-9 w-9 -translate-y-1/2"
+          disableActiveTranslation
           disabled={!canClear}
           onClick={(event) => {
             event.preventDefault();
