@@ -16,7 +16,7 @@ export function WeatherDashboardHeader({ city }: WeatherDashboardHeaderProps) {
 
   return (
     <header className="glass-panel overflow-hidden rounded-2xl">
-      <div className="h-[3px] bg-gradient-to-r from-primary/40 via-primary to-primary/20" />
+      <div className="h-0.75 bg-primary from-primary/40 via-primary to-primary/20" />
       <div className="flex flex-col gap-3 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-start gap-3">
           <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
