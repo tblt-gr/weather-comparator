@@ -39,7 +39,8 @@ For non-trivial changes:
 2. Propose a short plan.
 3. Make the smallest safe change.
 4. Run relevant validation.
-5. Summarize changed files and results.
+5. Summarize changed files (full path) and results.
+6. Give a commit message.
 
 Do not change package manager, introduce `any`, add deps without checking existing alternatives, move files unless required, bypass failing checks, or modify generated files.
 
