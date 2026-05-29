@@ -38,12 +38,9 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
   }
 
   return (
-    <div className="grid gap-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
-      <span className="text-sm font-medium">{t["period.start"]}</span>
-      <span className="text-sm font-medium">{t["period.end"]}</span>
-      <span aria-hidden="true" />
-
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
       <div className="min-w-0">
+        <span className="mb-1 block text-sm font-medium">{t["period.start"]}</span>
         <Input
           aria-describedby={errors.startDate ? "start-date-error" : undefined}
           aria-invalid={errors.startDate ? true : undefined}
@@ -64,6 +61,7 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
       </div>
 
       <div className="min-w-0">
+        <span className="mb-1 block text-sm font-medium">{t["period.end"]}</span>
         <Input
           aria-describedby={errors.endDate ? "end-date-error" : undefined}
           aria-invalid={errors.endDate ? true : undefined}
@@ -83,10 +81,10 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
         )}
       </div>
 
-      <div className="flex items-end">
+      <div className="flex items-end sm:col-span-2 lg:col-span-1">
         <Button
           aria-label={t["period.refreshAriaLabel"]}
-          className="h-11"
+          className="h-11 w-full lg:w-auto"
           disabled={!hasPendingChange}
           onClick={handleRefresh}
           type="button"

@@ -12,7 +12,7 @@ export function SeasonalNormalsToggle({ checked, onCheckedChange }: SeasonalNorm
   const { t } = useLocale();
 
   return (
-    <label className="flex h-11 cursor-pointer items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 text-sm font-medium transition-colors hover:bg-muted">
+    <label className="flex h-11 w-full cursor-pointer items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 text-sm font-medium transition-colors hover:bg-muted lg:w-auto">
       <Checkbox
         aria-label={t["normals.ariaLabel"]}
         checked={checked}

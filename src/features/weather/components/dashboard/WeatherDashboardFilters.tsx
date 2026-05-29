@@ -41,7 +41,7 @@ export function WeatherDashboardFilters({
   return (
     <section
       aria-label={t["app.filtersAriaLabel"]}
-      className="glass-panel grid gap-4 rounded-2xl p-4 lg:items-end lg:grid-cols-[minmax(240px,340px)_minmax(360px,520px)_1fr_auto]"
+      className="glass-panel grid gap-4 rounded-2xl p-4 lg:grid-cols-[minmax(240px,340px)_minmax(360px,1fr)] lg:items-end xl:grid-cols-[minmax(240px,340px)_minmax(360px,520px)_1fr_auto]"
     >
       <CitySearch key={city?.id ?? "empty"} city={city} onCityChange={onCityChange} />
       <PeriodPicker period={period} onPeriodChange={onPeriodChange} />
@@ -51,7 +51,7 @@ export function WeatherDashboardFilters({
         period={period}
         selectedOffsets={comparisonOffsets}
       />
-      <div className="flex flex-wrap items-end justify-end gap-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-end lg:justify-end">
         <TemperatureToggle onChange={onTemperatureModeChange} value={temperatureMode} />
         <SeasonalNormalsToggle checked={showNormals} onCheckedChange={onShowNormalsChange} />
       </div>
