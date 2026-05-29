@@ -73,6 +73,19 @@ type SeriesAnimation = {
   forecastDuration: number;
 };
 
+type CurrentObservedLineAnimation = {
+  animationDuration: number;
+  isAnimationActive: boolean;
+};
+
+type CurrentForecastLineAnimation = {
+  animationBegin: number;
+  animationDuration: number;
+  isAnimationActive: boolean;
+};
+
+type SeriesLineSignatures = Map<string, string>;
+
 type TooltipExtremeEntry = {
   key: string;
   label: string;
@@ -80,6 +93,7 @@ type TooltipExtremeEntry = {
 };
 
 const SERIES_ANIMATION_MS = 1500;
+const UPDATE_ANIMATION_MS = 400;
 const NORMALS_LINE_STROKE_DASHARRAY = "6 5";
 
 type NormalsLineConfig = {
@@ -133,9 +147,19 @@ export function WeatherChart({
     [datasets, hiddenSeries]
   );
   const normalsLineConfig = useMemo(() => getNormalsLineConfig(), []);
+  // Longest visible curve sets the reference speed; every series scales to it.
+  const referenceSegmentCount = useMemo(() => {
+    const maxPointCount = Math.max(0, ...visibleDatasets.map((dataset) => dataset.values.length));
+    return Math.max(0, maxPointCount - 1);
+  }, [visibleDatasets]);
   const currentSeriesAnimation = useMemo(
-    () => getCurrentSeriesAnimation(datasets.find((dataset) => dataset.id === "current")),
-    [datasets]
+    () =>
+      getCurrentSeriesAnimation(
+        datasets.find((dataset) => dataset.id === "current"),
+        referenceSegmentCount,
+        SERIES_ANIMATION_MS
+      ),
+    [datasets, referenceSegmentCount]
   );
   const chartAriaLabel = useMemo(
     () =>
@@ -152,6 +176,71 @@ export function WeatherChart({
       ),
     [coldWaves, heatwaves, locale, rows]
   );
+
+  // A line plays its full draw-in only when its key first appears (React mount).
+  // On later renders (Y-domain rescale, mode toggle, …) recharts re-animates the
+  // same line by morphing prev → new points; those lines are NOT "fresh" so they
+  // use the shorter UPDATE_ANIMATION_MS. Freshness = keys absent from the previous
+  // committed render. We track that in a ref (updated post-commit) rather than
+  // state on purpose: a state update would re-render with a new duration on a line
+  // whose animationId is unchanged, which restarts/replays its animation (see
+  // recharts JavascriptAnimate, whose effect deps include `begin` and `duration`).
+  const seriesLineKeys = useMemo(() => getSeriesLineKeys(visibleDatasets), [visibleDatasets]);
+  const seriesLineKeysDependency = useMemo(
+    () => getSeriesLineKeysDependency(seriesLineKeys),
+    [seriesLineKeys]
+  );
+  const seriesLineSignatures = useMemo(
+    () => getSeriesLineSignatures(visibleDatasets, temperatureMode),
+    [temperatureMode, visibleDatasets]
+  );
+  const lastCommittedLineSignaturesRef = useRef<SeriesLineSignatures>(new Map());
+  // Freshness is LOCKED to the data/signature version, not recomputed on every
+  // render. A spurious re-render (ResizeObserver width tick, parent update) keeps
+  // the same memo result, so the begin/duration props handed to a still-animating
+  // line stay byte-identical and recharts does not restart it mid-draw. Without
+  // this the forecast line lost its stagger delay whenever a re-render landed
+  // during the observed draw — the intermittent "starts at the same time" bug.
+  const freshLineKeys = useMemo(
+    // eslint-disable-next-line react-hooks/refs -- compare against the previous committed data version
+    () =>
+      getFreshSeriesKeysFromSignatures(
+        seriesLineSignatures,
+        lastCommittedLineSignaturesRef.current
+      ),
+    [seriesLineSignatures]
+  );
+  const currentObservedLineAnimation = useMemo(
+    () =>
+      getCurrentObservedLineAnimation({
+        currentSeriesAnimation,
+        freshLineKeys,
+        reducedMotion,
+        updateAnimationMs: UPDATE_ANIMATION_MS,
+      }),
+    [currentSeriesAnimation, freshLineKeys, reducedMotion]
+  );
+  const currentForecastLineAnimation = useMemo(
+    () =>
+      getCurrentForecastLineAnimation({
+        currentSeriesAnimation,
+        freshLineKeys,
+        reducedMotion,
+        updateAnimationMs: UPDATE_ANIMATION_MS,
+      }),
+    [currentSeriesAnimation, freshLineKeys, reducedMotion]
+  );
+
+  useEffect(() => {
+    // Only record keys once the lines are actually mounted (the LineChart is
+    // gated on chartWidth > 0). Marking them on the initial width=0 render would
+    // make the first real draw look "already seen", collapsing the current
+    // curve's two-part draw into a single desynced morph.
+    if (chartWidth <= 0) {
+      return;
+    }
+    lastCommittedLineSignaturesRef.current = new Map(seriesLineSignatures);
+  }, [chartWidth, seriesLineKeysDependency, seriesLineSignatures]);
 
   useEffect(() => {
     const element = chartShellRef.current;
@@ -437,12 +526,12 @@ export function WeatherChart({
                 dataset.id === "current" ? (
                   <Fragment key={dataset.id}>
                     <Line
-                      animationDuration={reducedMotion ? 0 : currentSeriesAnimation.observedDuration}
+                      animationDuration={currentObservedLineAnimation.animationDuration}
                       animationEasing="linear"
                       connectNulls={false}
                       dataKey="currentObserved"
                       dot={false}
-                      isAnimationActive={!reducedMotion && currentSeriesAnimation.observedDuration > 0}
+                      isAnimationActive={currentObservedLineAnimation.isAnimationActive}
                       key="currentObserved"
                       name={dataset.label}
                       stroke={colors[dataset.id]}
@@ -451,13 +540,13 @@ export function WeatherChart({
                       type="monotone"
                     />
                     <Line
-                      animationBegin={reducedMotion ? 0 : currentSeriesAnimation.forecastBegin}
-                      animationDuration={reducedMotion ? 0 : currentSeriesAnimation.forecastDuration}
+                      animationBegin={currentForecastLineAnimation.animationBegin}
+                      animationDuration={currentForecastLineAnimation.animationDuration}
                       animationEasing="linear"
                       connectNulls={false}
                       dataKey="currentForecast"
                       dot={false}
-                      isAnimationActive={!reducedMotion && currentSeriesAnimation.forecastDuration > 0}
+                      isAnimationActive={currentForecastLineAnimation.isAnimationActive}
                       key="currentForecast"
                       legendType="none"
                       name={dataset.label}
@@ -470,7 +559,16 @@ export function WeatherChart({
                   </Fragment>
                 ) : (
                   <Line
-                    animationDuration={reducedMotion ? 0 : SERIES_ANIMATION_MS}
+                    animationDuration={getSeriesAnimationDuration(
+                      dataset.id,
+                      freshLineKeys,
+                      reducedMotion,
+                      SERIES_ANIMATION_MS,
+                      UPDATE_ANIMATION_MS,
+                      Math.max(0, dataset.values.length - 1),
+                      referenceSegmentCount
+                    )}
+                    animationEasing="linear"
                     connectNulls={false}
                     dataKey={dataset.id}
                     dot={false}
@@ -586,8 +684,27 @@ export function getDisplayedForecastBoundaryDay(
   return forecastBoundaryDay === todayBoundaryDay ? null : forecastBoundaryDay;
 }
 
+// All curves must read at the same on-screen speed. Recharts reveals a line over
+// its own path length in `animationDuration`, so equal speed means duration must
+// scale with length. We budget by SEGMENT count and normalize every series to the
+// longest visible one (referenceSegmentCount): the longest takes `fullMs`, shorter
+// curves finish sooner but sweep at the identical segments-per-ms.
+export function getUniformDrawDuration(
+  segmentCount: number,
+  referenceSegmentCount: number,
+  fullMs: number
+): number {
+  if (referenceSegmentCount <= 0) {
+    return fullMs;
+  }
+
+  return Math.round((fullMs * segmentCount) / referenceSegmentCount);
+}
+
 export function getCurrentSeriesAnimation(
-  currentDataset?: WeatherYearDataset
+  currentDataset: WeatherYearDataset | undefined,
+  referenceSegmentCount: number,
+  fullMs: number
 ): SeriesAnimation {
   if (!currentDataset) {
     return {
@@ -600,42 +717,199 @@ export function getCurrentSeriesAnimation(
   const observedPointCount = currentDataset.values.filter((value) => !value.isForecast).length;
   const forecastPointCount = currentDataset.values.filter((value) => value.isForecast).length;
 
-  // Recharts draws each line over its own path length in `animationDuration`, so
-  // draw speed = pathLength / duration. Budget by SEGMENT count (not point count)
-  // to keep both halves at the same speed and read as one continuous stroke.
   // The observed line spans `observedPointCount - 1` segments. The forecast line
   // includes a bridge point to the last observed day, so it spans
   // `forecastPointCount` segments.
   const observedSegmentCount = Math.max(0, observedPointCount - 1);
   const forecastSegmentCount = forecastPointCount;
+  const totalSegmentCount = observedSegmentCount + forecastSegmentCount;
+
+  // Total budget is this curve's share of the longest series' full duration, so it
+  // draws at the same speed as every comparison curve.
+  const totalDuration = getUniformDrawDuration(totalSegmentCount, referenceSegmentCount, fullMs);
 
   if (observedSegmentCount === 0) {
     return {
       observedDuration: 0,
       forecastBegin: 0,
-      forecastDuration: forecastSegmentCount > 0 ? SERIES_ANIMATION_MS : 0,
+      forecastDuration: forecastSegmentCount > 0 ? totalDuration : 0,
     };
   }
 
   if (forecastSegmentCount === 0) {
     return {
-      observedDuration: SERIES_ANIMATION_MS,
-      forecastBegin: SERIES_ANIMATION_MS,
+      observedDuration: totalDuration,
+      forecastBegin: totalDuration,
       forecastDuration: 0,
     };
   }
 
-  const totalSegmentCount = observedSegmentCount + forecastSegmentCount;
-  const observedDuration = Math.round(
-    (SERIES_ANIMATION_MS * observedSegmentCount) / totalSegmentCount
-  );
-  const forecastDuration = SERIES_ANIMATION_MS - observedDuration;
+  // Split the total budget by segment share so both halves stay at that same speed
+  // and read as one continuous stroke.
+  const observedDuration = Math.round((totalDuration * observedSegmentCount) / totalSegmentCount);
+  const forecastDuration = totalDuration - observedDuration;
 
   return {
     observedDuration,
     forecastBegin: observedDuration,
     forecastDuration,
   };
+}
+
+export function getCurrentObservedLineAnimation({
+  currentSeriesAnimation,
+  freshLineKeys,
+  reducedMotion,
+  updateAnimationMs,
+}: {
+  currentSeriesAnimation: SeriesAnimation;
+  freshLineKeys: ReadonlySet<string>;
+  reducedMotion: boolean;
+  updateAnimationMs: number;
+}): CurrentObservedLineAnimation {
+  if (reducedMotion) {
+    return {
+      animationDuration: 0,
+      isAnimationActive: false,
+    };
+  }
+
+  if (!freshLineKeys.has("currentObserved")) {
+    return {
+      animationDuration: updateAnimationMs,
+      isAnimationActive: true,
+    };
+  }
+
+  return {
+    animationDuration: currentSeriesAnimation.observedDuration,
+    isAnimationActive: currentSeriesAnimation.observedDuration > 0,
+  };
+}
+
+export function getCurrentForecastLineAnimation({
+  currentSeriesAnimation,
+  freshLineKeys,
+  reducedMotion,
+  updateAnimationMs,
+}: {
+  currentSeriesAnimation: SeriesAnimation;
+  freshLineKeys: ReadonlySet<string>;
+  reducedMotion: boolean;
+  updateAnimationMs: number;
+}): CurrentForecastLineAnimation {
+  if (reducedMotion) {
+    return {
+      animationBegin: 0,
+      animationDuration: 0,
+      isAnimationActive: false,
+    };
+  }
+
+  if (!freshLineKeys.has("currentForecast")) {
+    return {
+      animationBegin: 0,
+      animationDuration: updateAnimationMs,
+      isAnimationActive: true,
+    };
+  }
+
+  return {
+    animationBegin: currentSeriesAnimation.forecastBegin,
+    animationDuration: currentSeriesAnimation.forecastDuration,
+    isAnimationActive: currentSeriesAnimation.forecastDuration > 0,
+  };
+}
+
+export function getSeriesLineKeys(datasets: WeatherYearDataset[]): string[] {
+  return datasets.flatMap((dataset) =>
+    dataset.id === "current" ? ["currentObserved", "currentForecast"] : [dataset.id]
+  );
+}
+
+export function getSeriesLineSignatures(
+  datasets: WeatherYearDataset[],
+  temperatureMode: TemperatureMode
+): SeriesLineSignatures {
+  return new Map(
+    datasets.flatMap((dataset) => {
+      if (dataset.id !== "current") {
+        return [
+          [
+            dataset.id,
+            buildSeriesLineSignature(dataset.id, dataset.values, temperatureMode, () => true),
+          ] as const,
+        ];
+      }
+
+      return [
+        [
+          "currentObserved",
+          buildSeriesLineSignature(
+            "currentObserved",
+            dataset.values,
+            temperatureMode,
+            (value) => !value.isForecast
+          ),
+        ] as const,
+        [
+          "currentForecast",
+          buildSeriesLineSignature(
+            "currentForecast",
+            dataset.values,
+            temperatureMode,
+            (value, index, values) =>
+              value.isForecast ||
+              (index === values.findIndex((entry) => entry.isForecast) - 1 && !value.isForecast)
+          ),
+        ] as const,
+      ];
+    })
+  );
+}
+
+export function getSeriesLineKeysDependency(keys: readonly string[]): string {
+  return JSON.stringify(keys);
+}
+
+export function getFreshSeriesKeys(
+  currentKeys: string[],
+  previousKeys: Iterable<string>
+): Set<string> {
+  const previous = new Set(previousKeys);
+
+  return new Set(currentKeys.filter((key) => !previous.has(key)));
+}
+
+export function getFreshSeriesKeysFromSignatures(
+  currentSignatures: ReadonlyMap<string, string>,
+  previousSignatures: ReadonlyMap<string, string>
+): Set<string> {
+  return new Set(
+    [...currentSignatures.entries()]
+      .filter(([key, signature]) => previousSignatures.get(key) !== signature)
+      .map(([key]) => key)
+  );
+}
+
+export function getSeriesAnimationDuration(
+  seriesId: string,
+  freshIds: ReadonlySet<string>,
+  reducedMotion: boolean,
+  fullMs: number,
+  updateMs: number,
+  seriesSegmentCount: number,
+  referenceSegmentCount: number
+): number {
+  if (reducedMotion) {
+    return 0;
+  }
+
+  if (!freshIds.has(seriesId)) {
+    return updateMs;
+  }
+
+  return getUniformDrawDuration(seriesSegmentCount, referenceSegmentCount, fullMs);
 }
 
 export function getNormalsLineConfig(): NormalsLineConfig {
@@ -646,6 +920,24 @@ export function getNormalsLineConfig(): NormalsLineConfig {
     strokeDasharray: NORMALS_LINE_STROKE_DASHARRAY,
     strokeWidth: 2,
   };
+}
+
+function buildSeriesLineSignature(
+  lineId: string,
+  values: WeatherYearDataset["values"],
+  temperatureMode: TemperatureMode,
+  includeValue: (
+    value: WeatherYearDataset["values"][number],
+    index: number,
+    values: WeatherYearDataset["values"]
+  ) => boolean
+) {
+  const points = values
+    .filter((value, index, allValues) => includeValue(value, index, allValues))
+    .map((value) => `${value.date}:${value[temperatureMode] ?? "null"}`)
+    .join("|");
+
+  return `${lineId}|${points}`;
 }
 
 export function getMonthBoundaryDays(rows: ChartRow[]) {

@@ -11,7 +11,16 @@ import {
   formatExtremeTooltipLabel,
   formatTooltipDate,
   getChartTickFontWeight,
+  getCurrentForecastLineAnimation,
+  getCurrentObservedLineAnimation,
   getCurrentSeriesAnimation,
+  getFreshSeriesKeysFromSignatures,
+  getSeriesAnimationDuration,
+  getSeriesLineSignatures,
+  getUniformDrawDuration,
+  getSeriesLineKeysDependency,
+  getSeriesLineKeys,
+  getFreshSeriesKeys,
   getExtremeAreaSegments,
   getTooltipExtremeEntries,
   getDisplayedForecastBoundaryDay,
@@ -429,7 +438,10 @@ test("delays the forecast animation until the observed segment is fully drawn", 
           isForecast: true,
         },
       ],
-    }),
+    },
+      2,
+      1500
+    ),
     {
       observedDuration: 750,
       forecastBegin: 750,
@@ -462,13 +474,225 @@ test("starts the forecast animation immediately when the selected period has no 
           isForecast: true,
         },
       ],
-    }),
+    },
+      2,
+      1500
+    ),
     {
       observedDuration: 0,
       forecastBegin: 0,
       forecastDuration: 1500,
     }
   );
+});
+
+test("keeps observed and forecast segments aligned on non-fresh rerenders", () => {
+  const currentSeriesAnimation = getCurrentSeriesAnimation(
+    {
+      id: "current",
+      label: "2025",
+      offsetYears: 0,
+      values: [
+        {
+          date: "2025-06-01",
+          day: 1,
+          year: 2025,
+          tmax: 30,
+          tmin: 18,
+          isForecast: false,
+        },
+        {
+          date: "2025-06-02",
+          day: 2,
+          year: 2025,
+          tmax: 29,
+          tmin: 17,
+          isForecast: false,
+        },
+        {
+          date: "2025-06-03",
+          day: 3,
+          year: 2025,
+          tmax: 28,
+          tmin: 16,
+          isForecast: true,
+        },
+      ],
+    },
+    2,
+    1500
+  );
+
+  assert.deepEqual(
+    getCurrentObservedLineAnimation({
+      currentSeriesAnimation,
+      freshLineKeys: new Set<string>(),
+      reducedMotion: false,
+      updateAnimationMs: 400,
+    }),
+    {
+      animationDuration: 400,
+      isAnimationActive: true,
+    }
+  );
+
+  assert.deepEqual(
+    getCurrentForecastLineAnimation({
+      currentSeriesAnimation,
+      freshLineKeys: new Set<string>(),
+      reducedMotion: false,
+      updateAnimationMs: 400,
+    }),
+    {
+      animationBegin: 0,
+      animationDuration: 400,
+      isAnimationActive: true,
+    }
+  );
+});
+
+test("scales the current curve down when it is shorter than the longest series", () => {
+  // 2 observed + 1 forecast = 2 segments, against a 4-segment reference: half speed budget.
+  assert.deepEqual(
+    getCurrentSeriesAnimation(
+      {
+        id: "current",
+        label: "2025",
+        offsetYears: 0,
+        values: [
+          { date: "2025-06-01", day: 1, year: 2025, tmax: 30, tmin: 18, isForecast: false },
+          { date: "2025-06-02", day: 2, year: 2025, tmax: 29, tmin: 17, isForecast: false },
+          { date: "2025-06-03", day: 3, year: 2025, tmax: 28, tmin: 16, isForecast: true },
+        ],
+      },
+      4,
+      1500
+    ),
+    {
+      observedDuration: 375,
+      forecastBegin: 375,
+      forecastDuration: 375,
+    }
+  );
+});
+
+test("gives every series the same per-segment speed via getUniformDrawDuration", () => {
+  // reference 4 segments over 1500ms -> 375ms/segment.
+  assert.equal(getUniformDrawDuration(4, 4, 1500), 1500);
+  assert.equal(getUniformDrawDuration(2, 4, 1500), 750);
+  assert.equal(getUniformDrawDuration(1, 4, 1500), 375);
+});
+
+test("falls back to the full duration when there is no reference segment", () => {
+  assert.equal(getUniformDrawDuration(0, 0, 1500), 1500);
+});
+
+test("plays the full draw-in for a fresh series key at the reference length", () => {
+  assert.equal(getSeriesAnimationDuration("minus-1", new Set(["minus-1"]), false, 1500, 400, 10, 10), 1500);
+});
+
+test("scales a fresh series shorter than the reference to keep equal speed", () => {
+  assert.equal(getSeriesAnimationDuration("minus-1", new Set(["minus-1"]), false, 1500, 400, 5, 10), 750);
+});
+
+test("uses the shorter update duration for a non-fresh series key", () => {
+  assert.equal(getSeriesAnimationDuration("minus-1", new Set(), false, 1500, 400, 10, 10), 400);
+});
+
+test("forces zero duration under reduced motion regardless of freshness", () => {
+  assert.equal(getSeriesAnimationDuration("minus-1", new Set(["minus-1"]), true, 1500, 400, 10, 10), 0);
+  assert.equal(getSeriesAnimationDuration("minus-1", new Set(), true, 1500, 400, 10, 10), 0);
+});
+
+test("treats the two current sub-lines as independent keys", () => {
+  const fresh = new Set<string>(["currentObserved"]);
+  assert.equal(getSeriesAnimationDuration("currentObserved", fresh, false, 1500, 400, 10, 10), 1500);
+  assert.equal(getSeriesAnimationDuration("currentForecast", fresh, false, 1500, 400, 10, 10), 400);
+});
+
+test("expands the current dataset into its two sub-line keys", () => {
+  const keys = getSeriesLineKeys([
+    { id: "current", label: "2025", offsetYears: 0, values: [] },
+    { id: "minus-1", label: "2024", offsetYears: 1, values: [] },
+  ]);
+  assert.deepEqual(keys, ["currentObserved", "currentForecast", "minus-1"]);
+});
+
+test("builds a stable dependency token from the series keys", () => {
+  assert.equal(
+    getSeriesLineKeysDependency(["currentObserved", "currentForecast", "minus-1"]),
+    '["currentObserved","currentForecast","minus-1"]'
+  );
+});
+
+test("changes the dependency token when the series key order changes", () => {
+  assert.notEqual(
+    getSeriesLineKeysDependency(["currentObserved", "currentForecast", "minus-1"]),
+    getSeriesLineKeysDependency(["minus-1", "currentObserved", "currentForecast"])
+  );
+});
+
+test("returns only the keys absent from the previous render", () => {
+  const fresh = getFreshSeriesKeys(
+    ["currentObserved", "currentForecast", "minus-1", "minus-3"],
+    ["currentObserved", "currentForecast", "minus-1"]
+  );
+  assert.deepEqual([...fresh], ["minus-3"]);
+});
+
+test("marks every key fresh when there was no previous render", () => {
+  const fresh = getFreshSeriesKeys(["currentObserved", "minus-1"], []);
+  assert.deepEqual([...fresh], ["currentObserved", "minus-1"]);
+});
+
+test("treats current sub-lines as fresh when their data signature changes", () => {
+  const previous = new Map([
+    ["currentObserved", "currentObserved|2025-06-01:30|2025-06-02:29"],
+    ["currentForecast", "currentForecast|2025-06-02:29|2025-06-03:28"],
+  ]);
+  const current = new Map([
+    ["currentObserved", "currentObserved|2025-07-01:31|2025-07-02:27"],
+    ["currentForecast", "currentForecast|2025-07-02:27|2025-07-03:25"],
+  ]);
+
+  assert.deepEqual([...getFreshSeriesKeysFromSignatures(current, previous)], [
+    "currentObserved",
+    "currentForecast",
+  ]);
+});
+
+test("keeps series non-fresh when only the visible set changes around unchanged current data", () => {
+  const datasets = [
+    {
+      id: "current",
+      label: "2025",
+      offsetYears: 0,
+      values: [
+        { date: "2025-06-01", day: 1, year: 2025, tmax: 30, tmin: 18, isForecast: false },
+        { date: "2025-06-02", day: 2, year: 2025, tmax: 29, tmin: 17, isForecast: false },
+        { date: "2025-06-03", day: 3, year: 2025, tmax: 28, tmin: 16, isForecast: true },
+      ],
+    },
+  ];
+  const previous = getSeriesLineSignatures(datasets, "tmax");
+  const current = getSeriesLineSignatures(
+    [
+      ...datasets,
+      {
+        id: "minus-1",
+        label: "2024",
+        offsetYears: 1,
+        values: [
+          { date: "2024-06-01", day: 1, year: 2024, tmax: 27, tmin: 16, isForecast: false },
+          { date: "2024-06-02", day: 2, year: 2024, tmax: 26, tmin: 15, isForecast: false },
+          { date: "2024-06-03", day: 3, year: 2024, tmax: 25, tmin: 14, isForecast: false },
+        ],
+      },
+    ],
+    "tmax"
+  );
+
+  assert.deepEqual([...getFreshSeriesKeysFromSignatures(current, previous)], ["minus-1"]);
 });
 
 test("keeps the climate normals line dashed from the first frame", () => {
