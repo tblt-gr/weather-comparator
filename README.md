@@ -25,7 +25,7 @@ One-page weather analytics app for comparing daily temperatures across years. Se
 ## Screenshots
 
 <p align="center">
-  <img src=".github/assets/screenshots/main.png" width="100%" alt="Hero and skills sections">
+  <img src=".github/assets/screenshots/main.png" width="100%" alt="Weather comparison dashboard screenshot">
 </p>
 
 ## Features
@@ -48,16 +48,16 @@ One-page weather analytics app for comparing daily temperatures across years. Se
 
 ## Stack
 
-| Layer      | Technology                                      |
-| ---------- | ----------------------------------------------- |
-| Framework  | Next.js 16 (App Router)                         |
-| Language   | TypeScript 5                                    |
-| UI         | React 19, Tailwind CSS 4, shadcn/ui, Radix UI   |
-| Charts     | Recharts 3                                      |
-| Data       | TanStack Query 5, Open-Meteo APIs               |
-| State      | Zustand 5, localStorage persistence             |
-| Export     | html-to-image, PapaParse                        |
-| Tooling    | pnpm, ESLint 9, Prettier 3                      |
+| Layer      | Technology                                           |
+| ---------- | ---------------------------------------------------- |
+| Framework  | Next.js 16.2 (App Router)                            |
+| Language   | TypeScript 5.9                                       |
+| UI         | React 19.2, Tailwind CSS 4.3, shadcn/ui, Radix UI    |
+| Charts     | Recharts 3.8                                         |
+| Data       | TanStack Query 5, Open-Meteo APIs                    |
+| State      | Zustand 5, localStorage persistence                  |
+| Export     | html-to-image, PapaParse                             |
+| Tooling    | pnpm 10, ESLint 9, Prettier 3                        |
 
 ## Quick Start
 
@@ -80,15 +80,22 @@ No API key is required. Weather Compare uses public Open-Meteo endpoints:
 
 ## Project Structure
 
-```
+```text
 src/
-├── app/          # Next.js app routes and global styling
-├── components/   # UI, chart, and weather dashboard components
-├── hooks/        # Data-fetching hooks
-├── lib/          # API clients, weather logic, and shared utilities
-├── store/        # Client-side dashboard state
-└── types/        # Shared TypeScript types
+├── app/                    # Next.js route shell, layout, providers
+├── components/ui/          # Reusable UI primitives
+├── features/weather/
+│   ├── api/                # Weather and geocoding data access
+│   ├── components/         # Dashboard, chart, controls, summary, export, extremes
+│   ├── hooks/              # Queries, URL sync, browser behavior
+│   ├── logic/              # Date handling, normalization, climate normals, extremes, exports
+│   ├── store/              # Zustand UI state only
+│   └── types/              # Weather domain types
+└── lib/                    # App-wide utilities such as i18n and theme
 ```
+
+The main route in `src/app/page.tsx` renders `WeatherDashboard` from
+`src/features/weather/components/dashboard`.
 
 ## Scripts
 
