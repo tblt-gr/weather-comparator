@@ -1,5 +1,7 @@
 "use client";
 
+import { Globe } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,11 +19,11 @@ export function LanguageSwitcher() {
       <DropdownMenuTrigger asChild>
         <Button
           aria-label={t["lang.ariaLabel"]}
-          className="h-11"
+          className="h-11 w-11"
           type="button"
           variant="outline"
         >
-          {locale === "fr" ? "FR" : "EN"}
+          <Globe aria-hidden="true" className="size-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
