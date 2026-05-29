@@ -9,7 +9,6 @@ export type Translations = {
   "state.loadError": string;
   "state.computingNormals": string;
   "state.chartLoading": string;
-  "state.weatherLoading": string;
   "state.chartNoData": string;
   "city.searchAriaLabel": string;
   "city.label": string;
