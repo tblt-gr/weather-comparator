@@ -76,15 +76,15 @@ export function HeatwaveOverlay({ heatwaves, colors = {} }: HeatwaveOverlayProps
   }
 
   return (
-    <div className="rounded-xl border border-orange-300/40 bg-orange-100/60 p-4 text-sm shadow-sm shadow-orange-900/5 dark:border-orange-300/20 dark:bg-orange-400/15 dark:shadow-orange-300/5">
-      <p className="font-semibold text-orange-950 dark:text-orange-100">{t["heatwave.sectionTitle"]}</p>
-      <div className="mt-3 grid gap-x-6 gap-y-4 text-orange-900 sm:grid-cols-2 lg:grid-cols-3 dark:text-orange-200">
+    <div className="glass-panel rounded-2xl p-4">
+      <h2 className="mb-5 font-semibold text-foreground">{t["heatwave.sectionTitle"]}</h2>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {groupedHeatwaves.map((group) => (
           <div
-            className="rounded-xl border border-orange-300/35 bg-orange-50/75 p-3 shadow-sm shadow-orange-900/5 backdrop-blur-sm dark:border-orange-200/15 dark:bg-orange-300/10 dark:shadow-orange-300/5"
+            className="rounded-xl border border-orange-300/40 bg-orange-100/60 p-4 shadow-sm shadow-orange-900/5 dark:border-orange-300/20 dark:bg-orange-400/15 dark:shadow-orange-300/5"
             key={group.year}
           >
-            <p className="mb-1.5 flex items-center gap-1.5 font-medium text-orange-950 dark:text-orange-100">
+            <p className="mb-1.5 flex items-center gap-1.5 font-semibold text-orange-950 dark:text-orange-100">
               {colors[group.heatwaves[0].datasetId] && (
                 <span
                   aria-hidden="true"
@@ -94,7 +94,7 @@ export function HeatwaveOverlay({ heatwaves, colors = {} }: HeatwaveOverlayProps
               )}
               {group.year}
             </p>
-            <ul className="grid gap-1.5">
+            <ul className="grid gap-1.5 text-orange-900 dark:text-orange-200">
               {group.heatwaves.map((heatwave) => (
                 <li className="flex gap-2" key={`${heatwave.datasetId}-${heatwave.start}`}>
                   <span
@@ -102,7 +102,7 @@ export function HeatwaveOverlay({ heatwaves, colors = {} }: HeatwaveOverlayProps
                     className="mt-1.5 size-2.5 shrink-0 rounded-full"
                     style={{ backgroundColor: getSeverityColor(heatwave.kind) }}
                   />
-                  <span>{formatHeatwaveSummary(heatwave, locale)}</span>
+                  <span className="text-sm">{formatHeatwaveSummary(heatwave, locale)}</span>
                 </li>
               ))}
             </ul>

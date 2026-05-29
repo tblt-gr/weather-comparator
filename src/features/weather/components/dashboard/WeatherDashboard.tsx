@@ -5,6 +5,8 @@ import { useMemo, useRef } from "react";
 import { WeatherDashboardFilters } from "./WeatherDashboardFilters";
 import { WeatherDashboardHeader } from "./WeatherDashboardHeader";
 import { EmptyState, WeatherDashboardPanel } from "./WeatherDashboardPanel";
+import { palette } from "@/features/weather/components/chart";
+import { ColdWaveOverlay, HeatwaveOverlay } from "@/features/weather/components/extremes";
 import { useClimateNormals } from "@/features/weather/hooks/useClimateNormals";
 import { useGeolocatedCity } from "@/features/weather/hooks/useGeolocatedCity";
 import { useWeatherData } from "@/features/weather/hooks/useWeatherData";
@@ -49,6 +51,12 @@ export function WeatherDashboard() {
   const visibleDatasets = useMemo(() => weather.data.filter((dataset) => !hiddenSeries.includes(dataset.id)), [hiddenSeries, weather.data]);
   const heatwaves = useMemo(() => detectHeatwaves(visibleDatasets), [visibleDatasets]);
   const coldWaves = useMemo(() => detectColdWaves(visibleDatasets), [visibleDatasets]);
+  const datasetColors = useMemo(
+    () => Object.fromEntries(
+      weather.data.map((dataset, index) => [dataset.id, palette[index % palette.length]])
+    ) as Record<string, string>,
+    [weather.data]
+  );
   const hasCity = city !== null;
 
   return (
@@ -71,22 +79,26 @@ export function WeatherDashboard() {
         {!hasCity ? (
           <EmptyState message={t["state.selectCity"]} />
         ) : (
-          <WeatherDashboardPanel
-            chartRef={chartRef}
-            coldWaves={coldWaves}
-            datasets={weather.data}
-            heatwaves={heatwaves}
-            hiddenSeries={hiddenSeries}
-            normals={normals.data}
-            onToggleSeries={toggleHiddenSeries}
-            shareUrl={shareUrl}
-            showNormals={showNormals}
-            temperatureMode={temperatureMode}
-            weatherError={weather.error}
-            weatherIsError={weather.isError}
-            weatherIsLoading={weather.isLoading}
-            weatherNormalsFetching={normals.isFetching}
-          />
+          <>
+            <WeatherDashboardPanel
+              chartRef={chartRef}
+              coldWaves={coldWaves}
+              datasets={weather.data}
+              heatwaves={heatwaves}
+              hiddenSeries={hiddenSeries}
+              normals={normals.data}
+              onToggleSeries={toggleHiddenSeries}
+              shareUrl={shareUrl}
+              showNormals={showNormals}
+              temperatureMode={temperatureMode}
+              weatherError={weather.error}
+              weatherIsError={weather.isError}
+              weatherIsLoading={weather.isLoading}
+              weatherNormalsFetching={normals.isFetching}
+            />
+            <HeatwaveOverlay colors={datasetColors} heatwaves={heatwaves} />
+            <ColdWaveOverlay colors={datasetColors} coldWaves={coldWaves} />
+          </>
         )}
       </div>
     </main>

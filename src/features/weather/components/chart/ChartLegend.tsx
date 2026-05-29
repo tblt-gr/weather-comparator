@@ -18,7 +18,7 @@ export function ChartLegend({ series, hiddenSeries, colors, onToggleSeries }: Ch
         return (
           <Button
             aria-pressed={!isHidden}
-            className={isHidden ? "opacity-50" : undefined}
+            className={isHidden ? "cursor-pointer opacity-50" : "cursor-pointer"}
             key={item.id}
             onClick={() => onToggleSeries(item.id)}
             size="sm"

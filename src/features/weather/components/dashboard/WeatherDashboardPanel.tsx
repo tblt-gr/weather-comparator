@@ -2,8 +2,7 @@
 
 import { useMemo, type RefObject } from "react";
 
-import { palette, WeatherChart } from "@/features/weather/components/chart";
-import { ColdWaveOverlay, HeatwaveOverlay } from "@/features/weather/components/extremes";
+import { WeatherChart } from "@/features/weather/components/chart";
 import { ExportButtons } from "@/features/weather/components/export";
 import { ClimateSummaryBar } from "@/features/weather/components/summary";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
@@ -46,13 +45,6 @@ export function WeatherDashboardPanel({
   const visibleDatasets = useMemo(
     () => datasets.filter((dataset) => !hiddenSeries.includes(dataset.id)),
     [datasets, hiddenSeries]
-  );
-  const datasetColors = useMemo(
-    () =>
-      Object.fromEntries(
-        datasets.map((dataset, index) => [dataset.id, palette[index % palette.length]])
-      ) as Record<string, string>,
-    [datasets]
   );
   const hasData = datasets.length > 0;
 
@@ -102,8 +94,6 @@ export function WeatherDashboardPanel({
           <p className="text-sm text-muted-foreground">{t["state.computingNormals"]}</p>
         ) : null}
 
-        <HeatwaveOverlay colors={datasetColors} heatwaves={heatwaves} />
-        <ColdWaveOverlay colors={datasetColors} coldWaves={coldWaves} />
       </div>
     </section>
   );
