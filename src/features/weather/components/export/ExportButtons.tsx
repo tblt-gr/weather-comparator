@@ -80,6 +80,7 @@ export function ExportButtons({ datasets, chartRef, shareUrl }: ExportButtonsPro
   return (
     <div className="flex flex-wrap gap-2">
       <Button
+        className="h-11"
         disabled={!canShareWeatherUrl(shareUrl)}
         onClick={() => {
           void handleShare();
@@ -91,6 +92,7 @@ export function ExportButtons({ datasets, chartRef, shareUrl }: ExportButtonsPro
         {shareLabel}
       </Button>
       <Button
+        className="h-11"
         disabled={!hasData}
         onClick={() => downloadCsv(datasets)}
         type="button"
@@ -100,6 +102,7 @@ export function ExportButtons({ datasets, chartRef, shareUrl }: ExportButtonsPro
         CSV
       </Button>
       <Button
+        className="h-11"
         disabled={!hasData}
         onClick={() => downloadPng(chartRef)}
         type="button"

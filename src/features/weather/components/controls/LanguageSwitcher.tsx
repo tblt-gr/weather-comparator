@@ -17,7 +17,7 @@ export function LanguageSwitcher() {
       <DropdownMenuTrigger asChild>
         <Button
           aria-label={t["lang.ariaLabel"]}
-          size="sm"
+          className="h-11"
           type="button"
           variant="outline"
         >

@@ -75,7 +75,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
       <span>{t["city.label"]}</span>
       <Command
         shouldFilter={false}
-        className="relative h-8 overflow-visible rounded-lg! border border-input bg-transparent p-0 shadow-none"
+        className="relative h-11 overflow-visible rounded-lg! border border-input bg-transparent p-0 shadow-none"
       >
         <CommandInput
           aria-label={t["city.searchAriaLabel"]}

@@ -20,6 +20,7 @@ export function ThemeToggle() {
     <Button
       aria-label={isDark ? t["theme.lightAriaLabel"] : t["theme.darkAriaLabel"]}
       onClick={toggleTheme}
+      className="h-11 w-11"
       size="icon"
       type="button"
       variant="outline"

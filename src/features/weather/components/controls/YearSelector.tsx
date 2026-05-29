@@ -24,7 +24,7 @@ type YearSelectorProps = {
   onClearOffsets: () => void;
 };
 
-const ITEM_HEIGHT = 32;
+const ITEM_HEIGHT = 40;
 const VISIBLE_ITEMS = 8;
 
 export function YearSelector({
@@ -63,7 +63,7 @@ export function YearSelector({
           <DropdownMenuTrigger asChild>
             <Button
               aria-label={t["year.dropdownAriaLabel"]}
-              className="h-8 flex-1 justify-between"
+              className="h-11 flex-1 justify-between"
               type="button"
               variant="outline"
             >
@@ -101,7 +101,7 @@ export function YearSelector({
         </DropdownMenu>
         <Button
           aria-label={t["year.clearAriaLabel"]}
-          className="shrink-0"
+          className="h-11 w-11 shrink-0"
           disabled={!canClear}
           onClick={onClearOffsets}
           size="icon"

@@ -15,7 +15,7 @@ export function TemperatureToggle({ value, onChange }: TemperatureToggleProps) {
   return (
     <div
       aria-label={t["temp.groupAriaLabel"]}
-      className="grid h-8 grid-cols-2 overflow-hidden rounded-lg border border-border bg-muted/50"
+      className="grid h-11 grid-cols-2 overflow-hidden rounded-lg border border-border bg-muted/50"
       role="group"
     >
       <Button

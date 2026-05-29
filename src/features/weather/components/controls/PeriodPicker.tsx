@@ -48,7 +48,7 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
           aria-describedby={errors.startDate ? "start-date-error" : undefined}
           aria-invalid={errors.startDate ? true : undefined}
           aria-label={t["period.startAriaLabel"]}
-          className="h-8"
+          className="h-11"
           onChange={(event) => {
             setLocalPeriod((prev) => ({ ...prev, startDate: event.target.value }));
             if (errors.startDate) setErrors((prev) => ({ ...prev, startDate: undefined }));
@@ -68,7 +68,7 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
           aria-describedby={errors.endDate ? "end-date-error" : undefined}
           aria-invalid={errors.endDate ? true : undefined}
           aria-label={t["period.endAriaLabel"]}
-          className="h-8"
+          className="h-11"
           onChange={(event) => {
             setLocalPeriod((prev) => ({ ...prev, endDate: event.target.value }));
             if (errors.endDate) setErrors((prev) => ({ ...prev, endDate: undefined }));
@@ -86,7 +86,7 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
       <div className="flex items-end">
         <Button
           aria-label={t["period.refreshAriaLabel"]}
-          className="h-8"
+          className="h-11"
           disabled={!hasPendingChange}
           onClick={handleRefresh}
           type="button"
