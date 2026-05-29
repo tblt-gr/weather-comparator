@@ -202,10 +202,10 @@ export function WeatherChart({
   // this the forecast line lost its stagger delay whenever a re-render landed
   // during the observed draw — the intermittent "starts at the same time" bug.
   const freshLineKeys = useMemo(
-    // eslint-disable-next-line react-hooks/refs -- compare against the previous committed data version
     () =>
       getFreshSeriesKeysFromSignatures(
         seriesLineSignatures,
+        // eslint-disable-next-line react-hooks/refs -- compare against the previous committed data version
         lastCommittedLineSignaturesRef.current
       ),
     [seriesLineSignatures]
@@ -724,28 +724,37 @@ export function getCurrentSeriesAnimation(
   const forecastSegmentCount = forecastPointCount;
   const totalSegmentCount = observedSegmentCount + forecastSegmentCount;
 
-  // Total budget is this curve's share of the longest series' full duration, so it
-  // draws at the same speed as every comparison curve.
-  const totalDuration = getUniformDrawDuration(totalSegmentCount, referenceSegmentCount, fullMs);
-
   if (observedSegmentCount === 0) {
     return {
       observedDuration: 0,
       forecastBegin: 0,
-      forecastDuration: forecastSegmentCount > 0 ? totalDuration : 0,
+      forecastDuration:
+        forecastSegmentCount > 0
+          ? getUniformDrawDuration(forecastSegmentCount, referenceSegmentCount, fullMs)
+          : 0,
     };
   }
 
   if (forecastSegmentCount === 0) {
+    const observedDuration = getUniformDrawDuration(
+      observedSegmentCount,
+      referenceSegmentCount,
+      fullMs
+    );
+
     return {
-      observedDuration: totalDuration,
-      forecastBegin: totalDuration,
+      observedDuration,
+      forecastBegin: observedDuration,
       forecastDuration: 0,
     };
   }
 
-  // Split the total budget by segment share so both halves stay at that same speed
-  // and read as one continuous stroke.
+  const totalDuration = getCompressedCurrentTotalDuration(
+    observedSegmentCount,
+    forecastSegmentCount,
+    referenceSegmentCount,
+    fullMs
+  );
   const observedDuration = Math.round((totalDuration * observedSegmentCount) / totalSegmentCount);
   const forecastDuration = totalDuration - observedDuration;
 
@@ -754,6 +763,26 @@ export function getCurrentSeriesAnimation(
     forecastBegin: observedDuration,
     forecastDuration,
   };
+}
+
+function getCompressedCurrentTotalDuration(
+  observedSegmentCount: number,
+  forecastSegmentCount: number,
+  referenceSegmentCount: number,
+  fullMs: number
+): number {
+  const totalDuration = getUniformDrawDuration(
+    observedSegmentCount + forecastSegmentCount,
+    referenceSegmentCount,
+    fullMs
+  );
+  const longestSegmentDuration = getUniformDrawDuration(
+    Math.max(observedSegmentCount, forecastSegmentCount),
+    referenceSegmentCount,
+    fullMs
+  );
+
+  return Math.round((totalDuration + longestSegmentDuration) / 2);
 }
 
 export function getCurrentObservedLineAnimation({

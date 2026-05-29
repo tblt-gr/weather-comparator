@@ -443,9 +443,9 @@ test("delays the forecast animation until the observed segment is fully drawn", 
       1500
     ),
     {
-      observedDuration: 750,
-      forecastBegin: 750,
-      forecastDuration: 750,
+      observedDuration: 563,
+      forecastBegin: 563,
+      forecastDuration: 562,
     }
   );
 });
@@ -552,7 +552,9 @@ test("keeps observed and forecast segments aligned on non-fresh rerenders", () =
 });
 
 test("scales the current curve down when it is shorter than the longest series", () => {
-  // 2 observed + 1 forecast = 2 segments, against a 4-segment reference: half speed budget.
+  // 2 observed + 1 forecast = 2 segments, against a 4-segment reference.
+  // The current series keeps its observed->forecast stagger, but its total
+  // budget is compressed to avoid reading slower than a single-line series.
   assert.deepEqual(
     getCurrentSeriesAnimation(
       {
@@ -569,11 +571,32 @@ test("scales the current curve down when it is shorter than the longest series",
       1500
     ),
     {
-      observedDuration: 375,
-      forecastBegin: 375,
-      forecastDuration: 375,
+      observedDuration: 282,
+      forecastBegin: 282,
+      forecastDuration: 281,
     }
   );
+});
+
+test("compresses the fresh current series total duration while keeping forecast staggered", () => {
+  const animation = getCurrentSeriesAnimation(
+    {
+      id: "current",
+      label: "2025",
+      offsetYears: 0,
+      values: [
+        { date: "2025-06-01", day: 1, year: 2025, tmax: 30, tmin: 18, isForecast: false },
+        { date: "2025-06-02", day: 2, year: 2025, tmax: 29, tmin: 17, isForecast: false },
+        { date: "2025-06-03", day: 3, year: 2025, tmax: 28, tmin: 16, isForecast: true },
+      ],
+    },
+    2,
+    1500
+  );
+
+  assert.equal(animation.forecastBegin, animation.observedDuration);
+  assert.equal(animation.forecastBegin > 0, true);
+  assert.equal(animation.observedDuration + animation.forecastDuration < 1500, true);
 });
 
 test("gives every series the same per-segment speed via getUniformDrawDuration", () => {
