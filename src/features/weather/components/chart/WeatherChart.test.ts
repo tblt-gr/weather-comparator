@@ -489,6 +489,15 @@ test("disables the recharts accessibility focus layer on the main chart", () => 
   assert.equal(source.includes('className="weather-chart-shell min-w-[760px]"'), true);
 });
 
+test("uses an equidistant x-axis interval to keep date ticks evenly spaced", () => {
+  const source = readFileSync(
+    path.join(process.cwd(), "src/features/weather/components/chart/WeatherChart.tsx"),
+    "utf8"
+  );
+
+  assert.equal(source.includes('interval="equidistantPreserveStart"'), true);
+});
+
 test("removes focus outline styles from recharts surfaces inside the chart shell", () => {
   const source = readFileSync(path.join(process.cwd(), "src/app/globals.css"), "utf8");
 

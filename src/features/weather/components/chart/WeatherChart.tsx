@@ -328,6 +328,7 @@ export function WeatherChart({
                 axisLine={false}
                 dataKey="day"
                 height={76}
+                interval="equidistantPreserveStart"
                 stroke="var(--muted-foreground)"
                 tick={renderXAxisTick}
                 tickLine={false}
