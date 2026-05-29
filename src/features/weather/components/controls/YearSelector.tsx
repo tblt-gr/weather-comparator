@@ -58,12 +58,12 @@ export function YearSelector({
   return (
     <div className="grid gap-1">
       <span className="text-sm font-medium">{t["year.label"]}</span>
-      <div className="flex items-stretch gap-2">
+      <div className="relative">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               aria-label={t["year.dropdownAriaLabel"]}
-              className="h-11 flex-1 justify-between"
+              className="h-11 w-full justify-between pr-12"
               type="button"
               variant="outline"
             >
@@ -71,7 +71,7 @@ export function YearSelector({
               <ChevronDown className="size-4 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-64 p-1">
+          <DropdownMenuContent align="start" className="w-(--radix-dropdown-menu-trigger-width) p-1">
             <div
               ref={setScrollElement}
               style={{ height: `${ITEM_HEIGHT * VISIBLE_ITEMS}px`, overflowY: "auto" }}
@@ -101,12 +101,16 @@ export function YearSelector({
         </DropdownMenu>
         <Button
           aria-label={t["year.clearAriaLabel"]}
-          className="h-11 w-11 shrink-0"
+          className="absolute top-1/2 right-1 z-10 h-9 w-9 -translate-y-1/2"
           disabled={!canClear}
-          onClick={onClearOffsets}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onClearOffsets();
+          }}
           size="icon"
           type="button"
-          variant="outline"
+          variant="ghost"
         >
           <X className="size-4" />
         </Button>
