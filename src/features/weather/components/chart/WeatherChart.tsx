@@ -360,7 +360,7 @@ export function WeatherChart({
                   }
 
                   return (
-                    <div className="rounded-xl border border-border/60 bg-popover/90 p-3 text-sm text-popover-foreground shadow-2xl shadow-primary/5 backdrop-blur-2xl dark:shadow-black/30">
+                    <div className="rounded-xl border border-border/60 bg-popover p-3 text-sm text-popover-foreground shadow-2xl shadow-primary/5 dark:shadow-black/30">
                       <p className="mb-2 font-medium">
                         {typeof visiblePayload[0]?.payload?.label === "string"
                           ? tooltipDateFormatter.format(
