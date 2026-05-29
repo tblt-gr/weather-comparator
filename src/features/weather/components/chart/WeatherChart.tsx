@@ -359,7 +359,7 @@ export function WeatherChart({
                   }
 
                   return (
-                    <div className="rounded-xl border border-white/40 bg-popover/90 p-3 text-sm text-popover-foreground shadow-2xl shadow-cyan-950/10 backdrop-blur-2xl dark:border-white/10 dark:shadow-black/30">
+                    <div className="rounded-xl border border-border/60 bg-popover/90 p-3 text-sm text-popover-foreground shadow-2xl shadow-primary/5 backdrop-blur-2xl dark:shadow-black/30">
                       <p className="mb-2 font-medium">
                         {typeof visiblePayload[0]?.payload?.label === "string"
                           ? tooltipDateFormatter.format(
@@ -383,7 +383,7 @@ export function WeatherChart({
                         ))}
                       </div>
                       {extremeEntries.length > 0 ? (
-                        <div className="mt-2 border-t border-white/30 pt-2 dark:border-white/10">
+                        <div className="mt-2 border-t border-border/60 pt-2">
                           <div className="grid gap-1">
                             {extremeEntries.map((entry) => (
                               <div className="flex items-center gap-2" key={entry.key}>
@@ -495,7 +495,7 @@ export function WeatherChart({
               ) : null}
             </LineChart>
           ) : (
-            <div className="flex h-[420px] items-center justify-center rounded-xl border border-dashed border-white/30 bg-white/25 text-sm text-muted-foreground backdrop-blur-xl dark:border-white/10 dark:bg-white/10">
+            <div className="flex h-[420px] items-center justify-center rounded-xl border border-dashed border-border/50 bg-muted/30 text-sm text-muted-foreground">
               {t["state.chartLoading"]}
             </div>
           )}

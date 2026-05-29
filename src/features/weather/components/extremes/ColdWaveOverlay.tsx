@@ -15,7 +15,7 @@ function getSeverityLabel(kind: ColdWavePeriod["kind"], locale: Locale) {
 }
 
 function getSeverityColor(kind: ColdWavePeriod["kind"]) {
-  return kind === "grand_froid" ? "bg-blue-700" : "bg-blue-500";
+  return kind === "grand_froid" ? "oklch(0.55 0.22 250)" : "oklch(0.68 0.18 230)";
 }
 
 export function formatColdWaveDateRange(
@@ -101,7 +101,8 @@ export function ColdWaveOverlay({ coldWaves, colors = {} }: ColdWaveOverlayProps
                 <li className="flex gap-2" key={`${coldWave.datasetId}-${coldWave.start}`}>
                   <span
                     aria-hidden="true"
-                    className={`mt-1.5 size-2.5 shrink-0 rounded-full ${getSeverityColor(coldWave.kind)}`}
+                    className="mt-1.5 size-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: getSeverityColor(coldWave.kind) }}
                   />
                   <span>{formatColdWaveSummary(coldWave, locale)}</span>
                 </li>

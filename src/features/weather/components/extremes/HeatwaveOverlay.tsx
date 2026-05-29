@@ -14,7 +14,7 @@ function getSeverityLabel(kind: HeatwavePeriod["kind"], locale: Locale) {
 }
 
 function getSeverityColor(kind: HeatwavePeriod["kind"]) {
-  return kind === "canicule" ? "bg-red-500" : "bg-orange-500";
+  return kind === "canicule" ? "oklch(0.62 0.24 28)" : "oklch(0.74 0.18 62)";
 }
 
 export function formatHeatwaveDateRange(
@@ -99,7 +99,8 @@ export function HeatwaveOverlay({ heatwaves, colors = {} }: HeatwaveOverlayProps
                 <li className="flex gap-2" key={`${heatwave.datasetId}-${heatwave.start}`}>
                   <span
                     aria-hidden="true"
-                    className={`mt-1.5 size-2.5 shrink-0 rounded-full ${getSeverityColor(heatwave.kind)}`}
+                    className="mt-1.5 size-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: getSeverityColor(heatwave.kind) }}
                   />
                   <span>{formatHeatwaveSummary(heatwave, locale)}</span>
                 </li>
