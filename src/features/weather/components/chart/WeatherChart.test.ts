@@ -431,9 +431,9 @@ test("delays the forecast animation until the observed segment is fully drawn", 
       ],
     }),
     {
-      observedDuration: 1000,
-      forecastBegin: 1000,
-      forecastDuration: 500,
+      observedDuration: 750,
+      forecastBegin: 750,
+      forecastDuration: 750,
     }
   );
 });

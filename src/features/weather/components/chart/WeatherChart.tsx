@@ -438,6 +438,7 @@ export function WeatherChart({
                   <Fragment key={dataset.id}>
                     <Line
                       animationDuration={reducedMotion ? 0 : currentSeriesAnimation.observedDuration}
+                      animationEasing="linear"
                       connectNulls={false}
                       dataKey="currentObserved"
                       dot={false}
@@ -452,6 +453,7 @@ export function WeatherChart({
                     <Line
                       animationBegin={reducedMotion ? 0 : currentSeriesAnimation.forecastBegin}
                       animationDuration={reducedMotion ? 0 : currentSeriesAnimation.forecastDuration}
+                      animationEasing="linear"
                       connectNulls={false}
                       dataKey="currentForecast"
                       dot={false}
@@ -598,15 +600,24 @@ export function getCurrentSeriesAnimation(
   const observedPointCount = currentDataset.values.filter((value) => !value.isForecast).length;
   const forecastPointCount = currentDataset.values.filter((value) => value.isForecast).length;
 
-  if (observedPointCount === 0) {
+  // Recharts draws each line over its own path length in `animationDuration`, so
+  // draw speed = pathLength / duration. Budget by SEGMENT count (not point count)
+  // to keep both halves at the same speed and read as one continuous stroke.
+  // The observed line spans `observedPointCount - 1` segments. The forecast line
+  // includes a bridge point to the last observed day, so it spans
+  // `forecastPointCount` segments.
+  const observedSegmentCount = Math.max(0, observedPointCount - 1);
+  const forecastSegmentCount = forecastPointCount;
+
+  if (observedSegmentCount === 0) {
     return {
       observedDuration: 0,
       forecastBegin: 0,
-      forecastDuration: SERIES_ANIMATION_MS,
+      forecastDuration: forecastSegmentCount > 0 ? SERIES_ANIMATION_MS : 0,
     };
   }
 
-  if (forecastPointCount === 0) {
+  if (forecastSegmentCount === 0) {
     return {
       observedDuration: SERIES_ANIMATION_MS,
       forecastBegin: SERIES_ANIMATION_MS,
@@ -614,9 +625,9 @@ export function getCurrentSeriesAnimation(
     };
   }
 
-  const totalPointCount = observedPointCount + forecastPointCount;
+  const totalSegmentCount = observedSegmentCount + forecastSegmentCount;
   const observedDuration = Math.round(
-    (SERIES_ANIMATION_MS * observedPointCount) / totalPointCount
+    (SERIES_ANIMATION_MS * observedSegmentCount) / totalSegmentCount
   );
   const forecastDuration = SERIES_ANIMATION_MS - observedDuration;
 
