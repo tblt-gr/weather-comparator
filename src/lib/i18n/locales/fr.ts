@@ -65,4 +65,6 @@ export const fr: Translations = {
   "heatwave.days": "jours",
   "heatwave.avgMax": "Tmax moyenne",
   "chart.normalLine": "Normale 1991-2020",
+  "chart.ariaDescription": "Graphique de températures. Séries : {series}",
+  "app.skipToContent": "Aller au contenu principal",
 };

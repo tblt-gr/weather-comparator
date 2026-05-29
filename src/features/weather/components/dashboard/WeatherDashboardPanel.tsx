@@ -126,7 +126,7 @@ function LoadingState() {
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="size-2 animate-bounce rounded-full bg-primary/50"
+            className="size-2 animate-bounce motion-reduce:animate-none rounded-full bg-primary/50"
             style={{ animationDelay: `${i * 120}ms` }}
           />
         ))}

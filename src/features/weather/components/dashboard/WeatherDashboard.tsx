@@ -52,7 +52,7 @@ export function WeatherDashboard() {
   const hasCity = city !== null;
 
   return (
-    <main className="app-ambient min-h-screen text-foreground">
+    <main id="main-content" className="app-ambient min-h-screen text-foreground">
       <div className="mx-auto flex w-full flex-col gap-4 px-4 py-6 sm:px-6 lg:px-8">
         <WeatherDashboardHeader city={city} />
         <WeatherDashboardFilters

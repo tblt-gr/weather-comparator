@@ -17,6 +17,7 @@ import {
 import { ChartLegend } from "./ChartLegend";
 import { formatLocalDate } from "@/features/weather/logic/dates";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { useReducedMotion } from "@/lib/useReducedMotion";
 import type { Locale } from "@/lib/i18n/types";
 import type {
   ClimateNormal,
@@ -98,6 +99,7 @@ export function WeatherChart({
   onToggleSeries,
 }: WeatherChartProps) {
   const { locale, t } = useLocale();
+  const reducedMotion = useReducedMotion();
   const tooltipDateFormatter = useMemo(
     () =>
       new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-GB", {
@@ -134,6 +136,11 @@ export function WeatherChart({
   const currentSeriesAnimation = useMemo(
     () => getCurrentSeriesAnimation(datasets.find((dataset) => dataset.id === "current")),
     [datasets]
+  );
+  const chartAriaLabel = useMemo(
+    () =>
+      t["chart.ariaDescription"].replace("{series}", datasets.map((d) => d.label).join(", ")),
+    [datasets, t]
   );
   const tooltipExtremeEntriesByDay = useMemo(
     () =>
@@ -219,7 +226,12 @@ export function WeatherChart({
   return (
     <div className="grid gap-4">
       <div className="overflow-x-auto">
-        <div className="weather-chart-shell min-w-[760px]" ref={chartShellRef}>
+        <div
+          aria-label={chartAriaLabel}
+          className="weather-chart-shell min-w-[760px]"
+          ref={chartShellRef}
+          role="img"
+        >
           {chartWidth > 0 ? (
             <LineChart
               accessibilityLayer={false}
@@ -424,11 +436,11 @@ export function WeatherChart({
                 dataset.id === "current" ? (
                   <Fragment key={dataset.id}>
                     <Line
-                      animationDuration={currentSeriesAnimation.observedDuration}
+                      animationDuration={reducedMotion ? 0 : currentSeriesAnimation.observedDuration}
                       connectNulls={false}
                       dataKey="currentObserved"
                       dot={false}
-                      isAnimationActive={currentSeriesAnimation.observedDuration > 0}
+                      isAnimationActive={!reducedMotion && currentSeriesAnimation.observedDuration > 0}
                       key="currentObserved"
                       name={dataset.label}
                       stroke={colors[dataset.id]}
@@ -437,12 +449,12 @@ export function WeatherChart({
                       type="monotone"
                     />
                     <Line
-                      animationBegin={currentSeriesAnimation.forecastBegin}
-                      animationDuration={currentSeriesAnimation.forecastDuration}
+                      animationBegin={reducedMotion ? 0 : currentSeriesAnimation.forecastBegin}
+                      animationDuration={reducedMotion ? 0 : currentSeriesAnimation.forecastDuration}
                       connectNulls={false}
                       dataKey="currentForecast"
                       dot={false}
-                      isAnimationActive={currentSeriesAnimation.forecastDuration > 0}
+                      isAnimationActive={!reducedMotion && currentSeriesAnimation.forecastDuration > 0}
                       key="currentForecast"
                       legendType="none"
                       name={dataset.label}
@@ -455,7 +467,7 @@ export function WeatherChart({
                   </Fragment>
                 ) : (
                   <Line
-                    animationDuration={SERIES_ANIMATION_MS}
+                    animationDuration={reducedMotion ? 0 : SERIES_ANIMATION_MS}
                     connectNulls={false}
                     dataKey={dataset.id}
                     dot={false}

@@ -65,4 +65,6 @@ export type Translations = {
   "heatwave.days": string;
   "heatwave.avgMax": string;
   "chart.normalLine": string;
+  "chart.ariaDescription": string;
+  "app.skipToContent": string;
 };
