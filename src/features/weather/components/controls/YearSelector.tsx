@@ -48,6 +48,9 @@ export function YearSelector({
   const canClear = canClearComparisonOffsets(selectedOffsets);
 
   const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
+  // TanStack Virtual is currently flagged as incompatible with React Compiler memoization.
+  // The hook usage is intentional here and local to this non-memoized dropdown.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: offsets.length,
     getScrollElement: () => scrollElement,
@@ -101,7 +104,7 @@ export function YearSelector({
         </DropdownMenu>
         <Button
           aria-label={t["year.clearAriaLabel"]}
-          className="absolute top-1/2 right-1 z-10 h-9 w-9 -translate-y-1/2"
+          className="absolute top-1/2 right-1 z-10 h-11 w-11 -translate-y-1/2"
           disableActiveTranslation
           disabled={!canClear}
           onClick={(event) => {

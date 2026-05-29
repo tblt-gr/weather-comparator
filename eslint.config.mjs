@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Local Codex skills and helper scripts are not part of the app source tree.
+    ".agents/**",
+    ".claude/**",
+    ".github/skills/**",
   ]),
 ]);
 

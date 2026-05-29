@@ -204,10 +204,3 @@ export async function fetchClimateNormalsRange({
 
   return (await response.json()) as OpenMeteoArchiveResponse;
 }
-
-function addDays(date: string, days: number) {
-  const nextDate = new Date(`${date}T00:00:00.000Z`);
-  nextDate.setUTCDate(nextDate.getUTCDate() + days);
-
-  return nextDate.toISOString().slice(0, 10);
-}
