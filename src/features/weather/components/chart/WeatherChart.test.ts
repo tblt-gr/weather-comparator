@@ -29,6 +29,7 @@ import {
   getTodayBoundaryDay,
   getMonthBoundaryDays,
   getNormalsLineConfig,
+  getVisibleTooltipEntries,
   sortTooltipEntries,
 } from "./WeatherChart";
 
@@ -66,6 +67,35 @@ test("sorts tooltip entries from highest to lowest temperature", () => {
       { dataKey: "currentForecast", graphicalItemId: "currentForecast", name: "2025 forecast", value: 30.5 },
     ]).map((entry) => entry.dataKey),
     ["currentObserved", "currentForecast", "normal", "minus-1"]
+  );
+});
+
+test("hides the current forecast bridge point from tooltip entries", () => {
+  assert.deepEqual(
+    getVisibleTooltipEntries([
+      {
+        dataKey: "currentObserved",
+        graphicalItemId: "currentObserved",
+        name: "2025",
+        payload: { day: 3 },
+        value: 30.5,
+      },
+      {
+        dataKey: "currentForecast",
+        graphicalItemId: "currentForecast",
+        name: "2025",
+        payload: { day: 3 },
+        value: 30.5,
+      },
+      {
+        dataKey: "minus-1",
+        graphicalItemId: "minus-1",
+        name: "2024",
+        payload: { day: 3 },
+        value: 24.1,
+      },
+    ]).map((entry) => entry.dataKey),
+    ["currentObserved", "minus-1"]
   );
 });
 

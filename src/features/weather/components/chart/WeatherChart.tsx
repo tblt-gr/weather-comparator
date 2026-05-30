@@ -432,9 +432,7 @@ export function WeatherChart({
               />
               <Tooltip
                 content={({ active, label, payload }) => {
-                  const visiblePayload = sortTooltipEntries(
-                    payload?.filter((entry) => typeof entry.value === "number") ?? []
-                  );
+                  const visiblePayload = getVisibleTooltipEntries(payload ?? []);
                   const hoveredDay =
                     typeof visiblePayload[0]?.payload?.day === "number"
                       ? visiblePayload[0].payload.day
@@ -1022,7 +1020,7 @@ export function formatTooltipDate(value: string | number, locale: Locale = "fr")
   return fmt.format(new Date(`${text}T00:00:00.000Z`));
 }
 
-export function sortTooltipEntries(entries: TooltipEntry[]) {
+export function sortTooltipEntries(entries: readonly TooltipEntry[]) {
   return [...entries].sort((left, right) => {
     const leftValue = typeof left.value === "number" ? left.value : Number.NEGATIVE_INFINITY;
     const rightValue = typeof right.value === "number" ? right.value : Number.NEGATIVE_INFINITY;
@@ -1033,6 +1031,43 @@ export function sortTooltipEntries(entries: TooltipEntry[]) {
 
     return String(right.dataKey ?? right.name).localeCompare(String(left.dataKey ?? left.name));
   });
+}
+
+export function getVisibleTooltipEntries(entries: readonly TooltipEntry[]) {
+  const numericEntries = entries.filter((entry) => typeof entry.value === "number");
+  const currentObservedValuesByDay = new Map<string, number>();
+
+  numericEntries.forEach((entry) => {
+    const dayKey = getTooltipEntryDayKey(entry);
+
+    if (
+      entry.dataKey === "currentObserved" &&
+      dayKey !== null &&
+      typeof entry.value === "number"
+    ) {
+      currentObservedValuesByDay.set(dayKey, entry.value);
+    }
+  });
+
+  return sortTooltipEntries(
+    numericEntries.filter((entry) => {
+      const dayKey = getTooltipEntryDayKey(entry);
+
+      return (
+        entry.dataKey !== "currentForecast" ||
+        dayKey === null ||
+        typeof entry.value !== "number" ||
+        currentObservedValuesByDay.get(dayKey) !== entry.value
+      );
+    })
+  );
+}
+
+function getTooltipEntryDayKey(entry: TooltipEntry) {
+  const payload = entry.payload as Record<string, unknown> | undefined;
+  const day = payload?.day;
+
+  return typeof day === "number" || typeof day === "string" ? String(day) : null;
 }
 
 export function formatExtremeTooltipLabel(
