@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Toaster } from "sonner";
 
 import { Providers } from "@/app/providers";
 import { getTranslations } from "@/lib/i18n/getTranslations";
@@ -56,6 +57,7 @@ export default async function RootLayout({
           {children}
         </Providers>
         <SpeedInsights />
+        <Toaster theme={theme} richColors position="bottom-right" />
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { toast } from "sonner";
 
 import { WeatherDashboardFilters } from "./WeatherDashboardFilters";
 import { WeatherDashboardHeader } from "./WeatherDashboardHeader";
@@ -47,6 +48,18 @@ export function WeatherDashboard() {
     period,
     temperatureMode,
   });
+  useEffect(() => {
+    if (weather.isError) {
+      toast.error(weather.error ?? t["state.loadError"]);
+    }
+  }, [weather.isError, weather.error, t]);
+
+  useEffect(() => {
+    if (weather.hasForecastWarning) {
+      toast.warning(t["forecast.unavailable"]);
+    }
+  }, [weather.hasForecastWarning, t]);
+
   const chartRef = useRef<HTMLDivElement | null>(null);
   const visibleDatasets = useMemo(() => weather.data.filter((dataset) => !hiddenSeries.includes(dataset.id)), [hiddenSeries, weather.data]);
   const heatwaves = useMemo(() => detectHeatwaves(visibleDatasets), [visibleDatasets]);

@@ -72,7 +72,7 @@ export async function fetchWeatherDataset({
   period: DatePeriod;
   signal: AbortSignal;
   today?: string;
-}) {
+}): Promise<WeatherYearDataset & { forecastFailed: boolean }> {
   const range = getComparableDateRangeByOffset({
     offsetYears,
     period,
@@ -85,7 +85,8 @@ export async function fetchWeatherDataset({
       label: "",
       offsetYears,
       values: [],
-    } satisfies WeatherYearDataset;
+      forecastFailed: false,
+    };
   }
 
   const archiveResponse = await fetchHistoricalWeather({
@@ -96,7 +97,7 @@ export async function fetchWeatherDataset({
   });
 
   if (offsetYears !== 0) {
-    return normalizeWeatherData({ offsetYears, range, response: archiveResponse });
+    return { ...normalizeWeatherData({ offsetYears, range, response: archiveResponse }), forecastFailed: false };
   }
 
   const forecastRange = getForecastDateRangeForPeriod({
@@ -105,7 +106,7 @@ export async function fetchWeatherDataset({
   });
 
   if (forecastRange === null) {
-    return normalizeWeatherData({ offsetYears, range, response: archiveResponse });
+    return { ...normalizeWeatherData({ offsetYears, range, response: archiveResponse }), forecastFailed: false };
   }
 
   try {
@@ -116,30 +117,36 @@ export async function fetchWeatherDataset({
       today,
     });
 
-    return normalizeWeatherData({
-      offsetYears,
-      range: {
-        startDate: range.startDate,
-        endDate: period.endDate,
-      },
-      response: mergeArchiveAndForecastWeather({
-        archive: archiveResponse,
-        forecast: forecastResponse,
+    return {
+      ...normalizeWeatherData({
+        offsetYears,
+        range: {
+          startDate: range.startDate,
+          endDate: period.endDate,
+        },
+        response: mergeArchiveAndForecastWeather({
+          archive: archiveResponse,
+          forecast: forecastResponse,
+        }),
       }),
-    });
+      forecastFailed: false,
+    };
   } catch (error) {
     if (!shouldIgnoreWeatherError({ stage: "forecast", offsetYears })) {
       throw error;
     }
 
-    return normalizeWeatherData({
-      offsetYears,
-      range: {
-        startDate: range.startDate,
-        endDate: period.endDate,
-      },
-      response: archiveResponse,
-    });
+    return {
+      ...normalizeWeatherData({
+        offsetYears,
+        range: {
+          startDate: range.startDate,
+          endDate: period.endDate,
+        },
+        response: archiveResponse,
+      }),
+      forecastFailed: true,
+    };
   }
 }
 
@@ -237,10 +244,15 @@ export function useWeatherData({
           })),
   });
 
-  const data = queries
+  const rawData = queries
     .map((query) => query.data)
-    .filter((dataset): dataset is WeatherYearDataset => Boolean(dataset))
+    .filter((dataset): dataset is WeatherYearDataset & { forecastFailed: boolean } => Boolean(dataset));
+
+  const data = rawData
+    .map(({ forecastFailed: _, ...dataset }) => dataset as WeatherYearDataset)
     .sort((a, b) => a.offsetYears - b.offsetYears);
+
+  const hasForecastWarning = rawData.some((d) => d.forecastFailed);
 
   const errorMessage = aggregateWeatherQueryErrors(
     queries.map((query, index) => ({
@@ -252,6 +264,7 @@ export function useWeatherData({
 
   return {
     data,
+    hasForecastWarning,
     isLoading: data.length === 0 && isLoadingQueries,
     isFetching: queries.some((query) => query.isFetching),
     isError: queries.some((query) => query.isError),

@@ -66,4 +66,5 @@ export const en: Translations = {
   "chart.normalLine": "Normal 1991–2020",
   "chart.ariaDescription": "Temperature chart. Series: {series}",
   "app.skipToContent": "Skip to main content",
+  "forecast.unavailable": "Forecast unavailable — future data could not be loaded.",
 };

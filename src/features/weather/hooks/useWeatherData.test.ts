@@ -176,6 +176,7 @@ test("fetchWeatherDataset falls back to archive data when the forecast request f
   });
 
   assert.equal(fetchMock.mock.callCount(), 2);
+  assert.equal(dataset.forecastFailed, true);
   assert.deepEqual(
     dataset.values.map((value) => ({
       date: value.date,

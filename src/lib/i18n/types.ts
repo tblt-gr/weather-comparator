@@ -66,4 +66,5 @@ export type Translations = {
   "chart.normalLine": string;
   "chart.ariaDescription": string;
   "app.skipToContent": string;
+  "forecast.unavailable": string;
 };
