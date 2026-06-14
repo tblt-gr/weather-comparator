@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "sonner";
 
 import { Providers } from "@/app/providers";
+import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { getTranslations } from "@/lib/i18n/getTranslations";
 import { DEFAULT_LOCALE, LOCALE_COOKIE_NAME } from "@/lib/i18n/locale";
 import { resolveLocale } from "@/lib/i18n/resolveLocale";
@@ -23,8 +24,21 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t["app.title"],
     description: t["app.subtitle"],
+    applicationName: t["app.title"],
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: t["app.title"],
+    },
   };
 }
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#eef1f5" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a1322" },
+  ],
+};
 
 export default async function RootLayout({
   children,
@@ -58,6 +72,7 @@ export default async function RootLayout({
         </Providers>
         <SpeedInsights />
         <Toaster theme={theme} richColors position="bottom-right" />
+        <ServiceWorkerRegister />
       </body>
     </html>
   );

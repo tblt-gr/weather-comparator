@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Weather Comparator">
+  <rect width="512" height="512" fill="#0d96c9" />
+  <g fill="none" stroke="#ffffff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="196" cy="196" r="58" fill="#ffffff" stroke="none" />
+    <g stroke-width="20">
+      <line x1="196" y1="92" x2="196" y2="116" />
+      <line x1="196" y1="276" x2="196" y2="300" />
+      <line x1="92" y1="196" x2="116" y2="196" />
+      <line x1="276" y1="196" x2="300" y2="196" />
+      <line x1="123" y1="123" x2="140" y2="140" />
+      <line x1="252" y1="252" x2="269" y2="269" />
+      <line x1="269" y1="123" x2="252" y2="140" />
+      <line x1="140" y1="252" x2="123" y2="269" />
+    </g>
+    <path d="M356 248 v108 a40 40 0 1 0 56 0 V248 a28 28 0 0 0 -56 0 Z" fill="#0d96c9" />
+    <line x1="384" y1="300" x2="384" y2="372" stroke-width="18" />
+    <circle cx="384" cy="384" r="20" fill="#ffffff" stroke="none" />
+  </g>
+</svg>
