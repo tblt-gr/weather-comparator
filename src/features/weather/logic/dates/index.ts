@@ -1,5 +1,6 @@
 export {
   eachDateInRange,
+  formatDisplayDate,
   formatLocalDate,
   getAvailableComparisonOffsets,
   getComparableDateRange,

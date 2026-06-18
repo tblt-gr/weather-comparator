@@ -87,8 +87,12 @@ export function getAvailableComparisonOffsets(
   return offsets;
 }
 
+export function formatDisplayDate(date: string) {
+  return `${date.slice(8, 10)}/${date.slice(5, 7)}/${date.slice(0, 4)}`;
+}
+
 export function getPeriodLabel(range: DatePeriod) {
-  return `${range.startDate} - ${range.endDate}`;
+  return `${formatDisplayDate(range.startDate)} - ${formatDisplayDate(range.endDate)}`;
 }
 
 export function eachDateInRange(range: DatePeriod) {

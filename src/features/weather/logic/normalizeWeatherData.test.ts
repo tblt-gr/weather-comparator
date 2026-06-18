@@ -24,7 +24,7 @@ test("normalizeWeatherData fills missing dates in the requested range", () => {
   });
 
   assert.equal(dataset.id, "current");
-  assert.equal(dataset.label, "2025-07-01 - 2025-07-03");
+  assert.equal(dataset.label, "01/07/2025 - 03/07/2025");
   assert.deepEqual(dataset.values, [
     {
       date: "2025-07-01",

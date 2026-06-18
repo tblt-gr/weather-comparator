@@ -15,7 +15,7 @@ import {
 } from "recharts";
 
 import { ChartLegend } from "./ChartLegend";
-import { formatLocalDate } from "@/features/weather/logic/dates";
+import { formatDisplayDate, formatLocalDate } from "@/features/weather/logic/dates";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import type { Locale } from "@/lib/i18n/types";
@@ -181,10 +181,10 @@ export function WeatherChart({
       new Map(
         rows.map((row) => [
           row.day,
-          getTooltipTropicalNightEntries(row.day, datasets, colors, t["chart.tropicalNight"]),
+          getTooltipTropicalNightEntries(row.day, visibleDatasets, colors, t["chart.tropicalNight"]),
         ])
       ),
-    [colors, datasets, rows, t]
+    [colors, rows, t, visibleDatasets]
   );
 
   // A line plays its full draw-in only when its key first appears (React mount).
@@ -1085,40 +1085,46 @@ function getTooltipEntryDayKey(entry: TooltipEntry) {
   return typeof day === "number" || typeof day === "string" ? String(day) : null;
 }
 
+export function formatExtremeDateRange(start: string, end: string) {
+  return start === end
+    ? formatDisplayDate(start)
+    : `${formatDisplayDate(start)} - ${formatDisplayDate(end)}`;
+}
+
 export function formatExtremeTooltipLabel(
   kind: HeatwavePeriod["kind"] | ColdWavePeriod["kind"],
-  datasetLabel: string,
+  detail: string,
   locale: Locale = "fr"
 ) {
   if (locale === "en") {
     if (kind === "canicule") {
-      return `Scorching heat • ${datasetLabel}`;
+      return `Scorching heat • ${detail}`;
     }
 
     if (kind === "vague_de_chaleur") {
-      return `Heat wave • ${datasetLabel}`;
+      return `Heat wave • ${detail}`;
     }
 
     if (kind === "grand_froid") {
-      return `Severe cold • ${datasetLabel}`;
+      return `Severe cold • ${detail}`;
     }
 
-    return `Cold wave • ${datasetLabel}`;
+    return `Cold wave • ${detail}`;
   }
 
   if (kind === "canicule") {
-    return `Canicule • ${datasetLabel}`;
+    return `Canicule • ${detail}`;
   }
 
   if (kind === "vague_de_chaleur") {
-    return `Vague de chaleur • ${datasetLabel}`;
+    return `Vague de chaleur • ${detail}`;
   }
 
   if (kind === "grand_froid") {
-    return `Grand froid • ${datasetLabel}`;
+    return `Grand froid • ${detail}`;
   }
 
-  return `Vague de froid • ${datasetLabel}`;
+  return `Vague de froid • ${detail}`;
 }
 
 export function getTooltipExtremeEntries(
@@ -1132,7 +1138,11 @@ export function getTooltipExtremeEntries(
     .map((heatwave) => ({
       color: getHeatwaveFill(heatwave.kind),
       key: `heat-${heatwave.datasetId}-${heatwave.start}`,
-      label: formatExtremeTooltipLabel(heatwave.kind, heatwave.datasetLabel, locale),
+      label: formatExtremeTooltipLabel(
+        heatwave.kind,
+        formatExtremeDateRange(heatwave.start, heatwave.end),
+        locale
+      ),
       startDay: heatwave.startDay,
     }));
   const coldEntries = coldWaves
@@ -1140,7 +1150,11 @@ export function getTooltipExtremeEntries(
     .map((coldWave) => ({
       color: getColdWaveFill(coldWave.kind),
       key: `cold-${coldWave.datasetId}-${coldWave.start}`,
-      label: formatExtremeTooltipLabel(coldWave.kind, coldWave.datasetLabel, locale),
+      label: formatExtremeTooltipLabel(
+        coldWave.kind,
+        formatExtremeDateRange(coldWave.start, coldWave.end),
+        locale
+      ),
       startDay: coldWave.startDay,
     }));
 
@@ -1156,12 +1170,15 @@ export function getTooltipTropicalNightEntries(
   tropicalNightLabel: string
 ): TooltipExtremeEntry[] {
   return datasets
-    .map((dataset) => ({ dataset, value: dataset.values.find((entry) => entry.day === day) }))
-    .filter(({ value }) => value?.tmin !== null && value?.tmin !== undefined && value.tmin >= 20)
-    .map(({ dataset }) => ({
+    .filter((dataset) => {
+      const value = dataset.values.find((entry) => entry.day === day);
+
+      return value?.tmin !== null && value?.tmin !== undefined && value.tmin >= 20;
+    })
+    .map((dataset) => ({
       color: colors[dataset.id],
       key: `tropical-night-${dataset.id}`,
-      label: `${tropicalNightLabel} • ${dataset.label}`,
+      label: tropicalNightLabel,
     }));
 }
 

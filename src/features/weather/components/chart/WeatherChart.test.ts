@@ -8,6 +8,7 @@ import test from "node:test";
 import {
   buildChartRows,
   formatChartDateTick,
+  formatExtremeDateRange,
   formatExtremeTooltipLabel,
   formatTooltipDate,
   getChartTickFontWeight,
@@ -53,7 +54,12 @@ test("formats tooltip dates as readable french dates without day number", () => 
   assert.equal(stripDiacritics(formatTooltipDate("1999-12-01")), "1 decembre");
 });
 
-test("formats extreme tooltip labels with severity and dataset year", () => {
+test("formats an extreme date range, collapsing single-day events", () => {
+  assert.equal(formatExtremeDateRange("2022-08-10", "2022-08-13"), "10/08/2022 - 13/08/2022");
+  assert.equal(formatExtremeDateRange("2022-08-10", "2022-08-10"), "10/08/2022");
+});
+
+test("formats extreme tooltip labels with severity and detail", () => {
   assert.equal(formatExtremeTooltipLabel("canicule", "2022", "fr"), "Canicule • 2022");
   assert.equal(formatExtremeTooltipLabel("vague_de_froid", "2021", "fr"), "Vague de froid • 2021");
   assert.equal(formatExtremeTooltipLabel("grand_froid", "2020", "en"), "Severe cold • 2020");
@@ -140,12 +146,12 @@ test("returns active extreme events for the hovered day", () => {
       {
         color: "oklch(0.62 0.24 28)",
         key: "heat-minus-3-2022-08-10",
-        label: "Canicule • 2022",
+        label: "Canicule • 10/08/2022 - 13/08/2022",
       },
       {
         color: "oklch(0.68 0.18 230)",
         key: "cold-minus-1-2024-01-10",
-        label: "Vague de froid • 2024",
+        label: "Vague de froid • 10/01/2024 - 12/01/2024",
       },
     ]
   );
@@ -212,8 +218,8 @@ test("returns a tropical night entry per dataset whose night stays at or above 2
       "Nuit tropicale"
     ),
     [
-      { color: "#aaa", key: "tropical-night-current", label: "Nuit tropicale • 2025" },
-      { color: "#bbb", key: "tropical-night-minus-1", label: "Nuit tropicale • 2024" },
+      { color: "#aaa", key: "tropical-night-current", label: "Nuit tropicale" },
+      { color: "#bbb", key: "tropical-night-minus-1", label: "Nuit tropicale" },
     ]
   );
 });

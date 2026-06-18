@@ -2,11 +2,24 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  formatDisplayDate,
   getAvailableComparisonOffsets,
   getComparableDateRange,
   getComparableDateRangeByOffset,
   getDefaultComparisonPeriod,
+  getPeriodLabel,
 } from "./dateRange";
+
+test("formats an ISO date as dd/mm/yyyy", () => {
+  assert.equal(formatDisplayDate("2026-06-18"), "18/06/2026");
+});
+
+test("builds a period label with dd/mm/yyyy dates", () => {
+  assert.equal(
+    getPeriodLabel({ startDate: "2026-06-01", endDate: "2026-06-18" }),
+    "01/06/2026 - 18/06/2026"
+  );
+});
 
 test("returns a 31-day default period centered on today", () => {
   const range = getDefaultComparisonPeriod(new Date("2026-05-28T12:00:00.000Z"));

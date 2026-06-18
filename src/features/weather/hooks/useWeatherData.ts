@@ -7,6 +7,7 @@ import { fetchForecastWeather, fetchHistoricalWeather } from "@/features/weather
 import {
   type DatePeriod,
   eachDateInRange,
+  formatDisplayDate,
   getComparableDateRangeByOffset,
 } from "@/features/weather/logic/dates";
 import {
@@ -181,7 +182,7 @@ export function mergeCurrentDatasetWithForecast({
 
   return {
     ...currentDataset,
-    label: `${firstDate} - ${period.endDate}`,
+    label: `${formatDisplayDate(firstDate)} - ${formatDisplayDate(period.endDate)}`,
     values: eachDateInRange({ startDate: firstDate, endDate: period.endDate }).map((date, index) => {
       const forecastValue = forecastByDate.get(date);
 
