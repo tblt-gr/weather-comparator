@@ -23,6 +23,7 @@ import {
   getFreshSeriesKeys,
   getExtremeAreaSegments,
   getTooltipExtremeEntries,
+  getTooltipTropicalNightEntries,
   getDisplayedForecastBoundaryDay,
   getForecastBoundaryDay,
   getHeatwaveFill,
@@ -173,6 +174,47 @@ test("ignores extreme events that do not cover the hovered day", () => {
       "fr"
     ),
     []
+  );
+});
+
+test("returns a tropical night entry per dataset whose night stays at or above 20 on the hovered day", () => {
+  assert.deepEqual(
+    getTooltipTropicalNightEntries(
+      2,
+      [
+        {
+          id: "current",
+          label: "2025",
+          offsetYears: 0,
+          values: [
+            { date: "2025-07-01", day: 1, year: 2025, tmax: 31, tmin: 19, isForecast: false },
+            { date: "2025-07-02", day: 2, year: 2025, tmax: 33, tmin: 21, isForecast: false },
+          ],
+        },
+        {
+          id: "minus-1",
+          label: "2024",
+          offsetYears: 1,
+          values: [
+            { date: "2024-07-02", day: 2, year: 2024, tmax: 30, tmin: 20, isForecast: false },
+          ],
+        },
+        {
+          id: "minus-2",
+          label: "2023",
+          offsetYears: 2,
+          values: [
+            { date: "2023-07-02", day: 2, year: 2023, tmax: 28, tmin: 18, isForecast: false },
+          ],
+        },
+      ],
+      { current: "#aaa", "minus-1": "#bbb", "minus-2": "#ccc" },
+      "Nuit tropicale"
+    ),
+    [
+      { color: "#aaa", key: "tropical-night-current", label: "Nuit tropicale • 2025" },
+      { color: "#bbb", key: "tropical-night-minus-1", label: "Nuit tropicale • 2024" },
+    ]
   );
 });
 

@@ -65,6 +65,7 @@ export const en: Translations = {
   "heatwave.avgMax": "avg Tmax",
   "chart.normalLine": "Normal 1991–2020",
   "chart.ariaDescription": "Temperature chart. Series: {series}",
+  "chart.tropicalNight": "Tropical night",
   "app.skipToContent": "Skip to main content",
   "forecast.unavailable": "Forecast unavailable — future data could not be loaded.",
 };

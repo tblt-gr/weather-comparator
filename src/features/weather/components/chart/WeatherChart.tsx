@@ -176,6 +176,16 @@ export function WeatherChart({
       ),
     [coldWaves, heatwaves, locale, rows]
   );
+  const tooltipTropicalNightsByDay = useMemo(
+    () =>
+      new Map(
+        rows.map((row) => [
+          row.day,
+          getTooltipTropicalNightEntries(row.day, datasets, colors, t["chart.tropicalNight"]),
+        ])
+      ),
+    [colors, datasets, rows, t]
+  );
 
   // A line plays its full draw-in only when its key first appears (React mount).
   // On later renders (Y-domain rescale, mode toggle, …) recharts re-animates the
@@ -440,7 +450,12 @@ export function WeatherChart({
                         ? label
                         : null;
                   const extremeEntries =
-                    hoveredDay === null ? [] : (tooltipExtremeEntriesByDay.get(hoveredDay) ?? []);
+                    hoveredDay === null
+                      ? []
+                      : [
+                          ...(tooltipExtremeEntriesByDay.get(hoveredDay) ?? []),
+                          ...(tooltipTropicalNightsByDay.get(hoveredDay) ?? []),
+                        ];
 
                   if (!active || (!visiblePayload.length && !extremeEntries.length)) {
                     return null;
@@ -1132,6 +1147,22 @@ export function getTooltipExtremeEntries(
   return [...heatEntries, ...coldEntries]
     .sort((left, right) => left.startDay - right.startDay || left.label.localeCompare(right.label))
     .map(({ color, key, label }) => ({ color, key, label }));
+}
+
+export function getTooltipTropicalNightEntries(
+  day: number,
+  datasets: WeatherYearDataset[],
+  colors: Record<string, string>,
+  tropicalNightLabel: string
+): TooltipExtremeEntry[] {
+  return datasets
+    .map((dataset) => ({ dataset, value: dataset.values.find((entry) => entry.day === day) }))
+    .filter(({ value }) => value?.tmin !== null && value?.tmin !== undefined && value.tmin >= 20)
+    .map(({ dataset }) => ({
+      color: colors[dataset.id],
+      key: `tropical-night-${dataset.id}`,
+      label: `${tropicalNightLabel} • ${dataset.label}`,
+    }));
 }
 
 export function getHeatwaveFill(kind: HeatwavePeriod["kind"]) {
