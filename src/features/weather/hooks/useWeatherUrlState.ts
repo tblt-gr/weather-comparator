@@ -3,10 +3,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import {
-  parseWeatherUrlState,
-  serializeWeatherUrlState,
-} from "@/features/weather/logic/urlState";
+import { parseWeatherUrlState, serializeWeatherUrlState } from "@/features/weather/logic/urlState";
 import { useWeatherStore } from "@/features/weather/store";
 
 type WeatherUrlStoreSlice = {
@@ -73,11 +70,24 @@ export function useWeatherUrlState() {
   }, [currentSearch, hydrateFromUrl, period]);
 
   useEffect(() => {
-    if (!hasHydratedRef.current || !shouldReplaceWeatherUrl(currentSearch, nextSearch)) {
+    if (!hasHydratedRef.current) {
+      return;
+    }
+2
+    const latest = useWeatherStore.getState();
+    const freshNextSearch = buildWeatherUrlSearch({
+      city: latest.city,
+      comparisonOffsets: latest.comparisonOffsets,
+      period: latest.period,
+      showNormals: latest.showNormals,
+      temperatureMode: latest.temperatureMode,
+    });
+
+    if (!shouldReplaceWeatherUrl(currentSearch, freshNextSearch)) {
       return;
     }
 
-    const nextUrl = nextSearch ? `${pathname}?${nextSearch}` : pathname;
+    const nextUrl = freshNextSearch ? `${pathname}?${freshNextSearch}` : pathname;
     router.replace(nextUrl, { scroll: false });
   }, [currentSearch, nextSearch, pathname, router]);
 
