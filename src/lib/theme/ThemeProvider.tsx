@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useSyncExternalStore } from "react";
 
-import { parseTheme, THEME_COOKIE_NAME, type Theme } from "@/lib/theme/theme";
+import { parseTheme, THEME_COLORS, THEME_COOKIE_NAME, type Theme } from "@/lib/theme/theme";
 
 type ThemeContextValue = {
   setTheme: (theme: Theme) => void;
@@ -47,6 +47,9 @@ export function ThemeProvider({
   function setTheme(nextTheme: Theme) {
     document.cookie = `${THEME_COOKIE_NAME}=${nextTheme}; path=/; max-age=31536000; samesite=lax`;
     document.documentElement.classList.toggle("dark", nextTheme === "dark");
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute("content", THEME_COLORS[nextTheme]);
     window.dispatchEvent(new Event("theme-change"));
   }
 

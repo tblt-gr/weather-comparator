@@ -8,7 +8,7 @@ import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { getTranslations } from "@/lib/i18n/getTranslations";
 import { DEFAULT_LOCALE, LOCALE_COOKIE_NAME } from "@/lib/i18n/locale";
 import { resolveLocale } from "@/lib/i18n/resolveLocale";
-import { parseTheme, THEME_COOKIE_NAME } from "@/lib/theme/theme";
+import { parseTheme, THEME_COLORS, THEME_COOKIE_NAME } from "@/lib/theme/theme";
 
 import "./globals.css";
 
@@ -33,13 +33,15 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#eef1f5" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a1322" },
-  ],
-  viewportFit: "cover",
-};
+export async function generateViewport(): Promise<Viewport> {
+  const cookieStore = await cookies();
+  const theme = parseTheme(cookieStore.get(THEME_COOKIE_NAME)?.value);
+
+  return {
+    themeColor: THEME_COLORS[theme],
+    viewportFit: "cover",
+  };
+}
 
 export default async function RootLayout({
   children,
