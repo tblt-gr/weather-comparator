@@ -124,10 +124,12 @@
 
     body {
         @apply bg-background text-foreground;
+        padding-bottom: env(safe-area-inset-bottom);
     }
 
     html {
         @apply font-sans;
+        background: var(--background);
     }
 }
 
