@@ -31,6 +31,8 @@ export type Translations = {
   "year.clearAriaLabel": string;
   "normals.label": string;
   "normals.ariaLabel": string;
+  "normals.infoAriaLabel": string;
+  "normals.description": string;
   "extremes.filtersAriaLabel": string;
   "extremes.criteriaAriaLabel": string;
   "extremes.criteria.canicule": string;

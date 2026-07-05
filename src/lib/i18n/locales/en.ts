@@ -31,6 +31,9 @@ export const en: Translations = {
   "year.clearAriaLabel": "Clear comparison periods",
   "normals.label": "Climate normal",
   "normals.ariaLabel": "Show climate normal",
+  "normals.infoAriaLabel": "About the climate normal",
+  "normals.description":
+    "Average of daily maximum and minimum temperatures computed over the 1991–2020 reference period.",
   "extremes.filtersAriaLabel": "Show extreme episodes",
   "extremes.criteriaAriaLabel": "Temperature criteria",
   "extremes.criteria.canicule": "Tmax ≥ 33 °C and Tmin ≥ 21 °C for at least 3 consecutive days.",
