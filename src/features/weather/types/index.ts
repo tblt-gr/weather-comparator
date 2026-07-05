@@ -3,6 +3,7 @@ export type {
   ClimateNormal,
   ColdWavePeriod,
   DailyTemperature,
+  ExtremeKind,
   HeatwavePeriod,
   TemperatureMode,
   WeatherYearDataset,

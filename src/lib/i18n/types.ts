@@ -31,6 +31,12 @@ export type Translations = {
   "year.clearAriaLabel": string;
   "normals.label": string;
   "normals.ariaLabel": string;
+  "extremes.filtersAriaLabel": string;
+  "extremes.criteriaAriaLabel": string;
+  "extremes.criteria.canicule": string;
+  "extremes.criteria.vague_de_chaleur": string;
+  "extremes.criteria.vague_de_froid": string;
+  "extremes.criteria.grand_froid": string;
   "temp.groupAriaLabel": string;
   "theme.lightAriaLabel": string;
   "theme.darkAriaLabel": string;

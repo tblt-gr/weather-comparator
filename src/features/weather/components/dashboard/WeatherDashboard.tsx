@@ -14,6 +14,7 @@ import { useWeatherData } from "@/features/weather/hooks/useWeatherData";
 import { useWeatherUrlState } from "@/features/weather/hooks/useWeatherUrlState";
 import { detectColdWaves, detectHeatwaves } from "@/features/weather/logic/extremes";
 import { useWeatherStore } from "@/features/weather/store";
+import type { ExtremeKind } from "@/features/weather/types";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export function WeatherDashboard() {
@@ -23,6 +24,7 @@ export function WeatherDashboard() {
     comparisonOffsets,
     temperatureMode,
     hiddenSeries,
+    hiddenExtremeKinds,
     showNormals,
     setCity,
     setPeriod,
@@ -30,6 +32,7 @@ export function WeatherDashboard() {
     clearComparisonOffsets,
     setTemperatureMode,
     toggleHiddenSeries,
+    toggleExtremeKind,
     setShowNormals,
   } = useWeatherStore();
   const { t } = useLocale();
@@ -63,8 +66,25 @@ export function WeatherDashboard() {
 
   const chartRef = useRef<HTMLDivElement | null>(null);
   const visibleDatasets = useMemo(() => weather.data.filter((dataset) => !hiddenSeries.includes(dataset.id)), [hiddenSeries, weather.data]);
-  const heatwaves = useMemo(() => detectHeatwaves(visibleDatasets), [visibleDatasets]);
-  const coldWaves = useMemo(() => detectColdWaves(visibleDatasets), [visibleDatasets]);
+  const detectedHeatwaves = useMemo(() => detectHeatwaves(visibleDatasets), [visibleDatasets]);
+  const detectedColdWaves = useMemo(() => detectColdWaves(visibleDatasets), [visibleDatasets]);
+  const availableExtremeKinds = useMemo<Record<ExtremeKind, boolean>>(
+    () => ({
+      canicule: detectedHeatwaves.some((heatwave) => heatwave.kind === "canicule"),
+      vague_de_chaleur: detectedHeatwaves.some((heatwave) => heatwave.kind === "vague_de_chaleur"),
+      vague_de_froid: detectedColdWaves.some((coldWave) => coldWave.kind === "vague_de_froid"),
+      grand_froid: detectedColdWaves.some((coldWave) => coldWave.kind === "grand_froid"),
+    }),
+    [detectedHeatwaves, detectedColdWaves]
+  );
+  const heatwaves = useMemo(
+    () => detectedHeatwaves.filter((heatwave) => !hiddenExtremeKinds.includes(heatwave.kind)),
+    [detectedHeatwaves, hiddenExtremeKinds]
+  );
+  const coldWaves = useMemo(
+    () => detectedColdWaves.filter((coldWave) => !hiddenExtremeKinds.includes(coldWave.kind)),
+    [detectedColdWaves, hiddenExtremeKinds]
+  );
   const datasetColors = useMemo(
     () => Object.fromEntries(
       weather.data.map((dataset, index) => [dataset.id, palette[index % palette.length]])
@@ -83,13 +103,16 @@ export function WeatherDashboard() {
         />
         <div className={filtersOpen ? "block" : "hidden lg:block"} id="dashboard-filters">
           <WeatherDashboardFilters
+            availableExtremeKinds={availableExtremeKinds}
             city={city}
             comparisonOffsets={comparisonOffsets}
+            hiddenExtremeKinds={hiddenExtremeKinds}
             onCityChange={setCity}
             onClearOffsets={clearComparisonOffsets}
             onPeriodChange={setPeriod}
             onShowNormalsChange={setShowNormals}
             onTemperatureModeChange={setTemperatureMode}
+            onToggleExtremeKind={toggleExtremeKind}
             onToggleOffset={toggleComparisonOffset}
             period={period}
             showNormals={showNormals}

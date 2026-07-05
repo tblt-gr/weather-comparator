@@ -7,7 +7,7 @@ import {
   getDefaultComparisonPeriod,
 } from "@/features/weather/logic/dates";
 import type { WeatherUrlState } from "@/features/weather/logic/urlState";
-import type { City, TemperatureMode } from "@/features/weather/types";
+import type { City, ExtremeKind, TemperatureMode } from "@/features/weather/types";
 
 const CITY_STORAGE_KEY = "weather-compare.city";
 
@@ -17,6 +17,7 @@ type WeatherState = {
   comparisonOffsets: number[];
   temperatureMode: TemperatureMode;
   hiddenSeries: string[];
+  hiddenExtremeKinds: ExtremeKind[];
   showNormals: boolean;
   setCity: (city: City | null) => void;
   setPeriod: (period: DatePeriod) => void;
@@ -24,6 +25,7 @@ type WeatherState = {
   clearComparisonOffsets: () => void;
   setTemperatureMode: (mode: TemperatureMode) => void;
   toggleHiddenSeries: (seriesId: string) => void;
+  toggleExtremeKind: (kind: ExtremeKind) => void;
   setShowNormals: (showNormals: boolean) => void;
   hydrateFromUrl: (state: WeatherUrlState) => void;
 };
@@ -67,6 +69,7 @@ export function getInitialWeatherState(): Omit<
   | "clearComparisonOffsets"
   | "setTemperatureMode"
   | "toggleHiddenSeries"
+  | "toggleExtremeKind"
   | "setShowNormals"
   | "hydrateFromUrl"
 > {
@@ -76,6 +79,7 @@ export function getInitialWeatherState(): Omit<
     comparisonOffsets: [],
     temperatureMode: "tmax",
     hiddenSeries: [],
+    hiddenExtremeKinds: [],
     showNormals: false,
   };
 }
@@ -109,6 +113,12 @@ export const useWeatherStore = create<WeatherState>((set) => ({
       hiddenSeries: state.hiddenSeries.includes(seriesId)
         ? state.hiddenSeries.filter((hiddenSeriesId) => hiddenSeriesId !== seriesId)
         : [...state.hiddenSeries, seriesId],
+    })),
+  toggleExtremeKind: (kind) =>
+    set((state) => ({
+      hiddenExtremeKinds: state.hiddenExtremeKinds.includes(kind)
+        ? state.hiddenExtremeKinds.filter((hiddenKind) => hiddenKind !== kind)
+        : [...state.hiddenExtremeKinds, kind],
     })),
   setShowNormals: (showNormals) => set({ showNormals }),
   hydrateFromUrl: (state) => {

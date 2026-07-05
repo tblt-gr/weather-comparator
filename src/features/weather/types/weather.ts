@@ -48,6 +48,8 @@ export type HeatwavePeriod = {
 
 export type ColdWaveKind = "vague_de_froid" | "grand_froid";
 
+export type ExtremeKind = HeatwaveKind | ColdWaveKind;
+
 export type ColdWavePeriod = {
   datasetId: string;
   datasetLabel: string;
