@@ -186,7 +186,7 @@ function StatCard({
         : "text-foreground";
 
   return (
-    <div className="glass-card min-w-36 rounded-xl px-3 py-2">
+    <div className="glass-card min-w-28 rounded-xl px-3 py-2 sm:min-w-36">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className={`mt-0.5 text-base font-semibold tabular-nums ${valueClass}`}>{value}</p>
     </div>

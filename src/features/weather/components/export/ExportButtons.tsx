@@ -1,10 +1,16 @@
 "use client";
 
-import { Download, FileDown, Link2 } from "lucide-react";
+import { Download, FileDown, Link2, MoreVertical } from "lucide-react";
 import { useEffect, useState, type RefObject } from "react";
 import { toPng } from "html-to-image";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { exportWeatherCsv } from "@/features/weather/logic/exports";
 import type { WeatherYearDataset } from "@/features/weather/types";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
@@ -78,40 +84,43 @@ export function ExportButtons({ datasets, chartRef, shareUrl }: ExportButtonsPro
   });
 
   return (
-    <div className="flex flex-wrap gap-2">
-      <Button
-        className="h-11"
-        disabled={!canShareWeatherUrl(shareUrl)}
-        onClick={() => {
-          void handleShare();
-        }}
-        type="button"
-        variant="outline"
-      >
-        <Link2 />
-        {shareLabel}
-      </Button>
-      <Button
-        className="h-11"
-        disabled={!hasData}
-        onClick={() => downloadCsv(datasets)}
-        type="button"
-        variant="outline"
-      >
-        <FileDown />
-        CSV
-      </Button>
-      <Button
-        className="h-11"
-        disabled={!hasData}
-        onClick={() => downloadPng(chartRef)}
-        type="button"
-        variant="outline"
-      >
-        <Download />
-        PNG
-      </Button>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          aria-label={t["export.menuLabel"]}
+          className="h-11 w-11 shrink-0"
+          type="button"
+          variant="outline"
+        >
+          <MoreVertical aria-hidden="true" className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem
+          disabled={!canShareWeatherUrl(shareUrl)}
+          onSelect={(event) => {
+            event.preventDefault();
+            void handleShare();
+          }}
+        >
+          <Link2 />
+          {shareLabel}
+        </DropdownMenuItem>
+        <DropdownMenuItem disabled={!hasData} onSelect={() => downloadCsv(datasets)}>
+          <FileDown />
+          CSV
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!hasData}
+          onSelect={() => {
+            void downloadPng(chartRef);
+          }}
+        >
+          <Download />
+          PNG
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 

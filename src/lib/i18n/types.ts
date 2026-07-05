@@ -41,6 +41,7 @@ export type Translations = {
   "share.button": string;
   "share.copied": string;
   "share.failed": string;
+  "export.menuLabel": string;
   "stats.periodAverage": string;
   "stats.normal": string;
   "stats.deviation": string;

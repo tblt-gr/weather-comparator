@@ -41,6 +41,7 @@ export const en: Translations = {
   "share.button": "Share",
   "share.copied": "Copied link",
   "share.failed": "Copy failed",
+  "export.menuLabel": "Export options",
   "stats.periodAverage": "Period average",
   "stats.normal": "Normal 1991–2020",
   "stats.deviation": "Deviation",
