@@ -14,11 +14,14 @@ const dateFormatter = new Intl.DateTimeFormat("en-CA", {
   year: "numeric",
 });
 
-export function getDefaultComparisonPeriod(today = new Date()): DatePeriod {
+export function getDefaultComparisonPeriod(
+  today = new Date(),
+  { compact = false }: { compact?: boolean } = {}
+): DatePeriod {
   const todayDate = formatLocalDate(today);
 
   return {
-    startDate: addDays(todayDate, -15),
+    startDate: addDays(todayDate, compact ? -2 : -15),
     endDate: addDays(todayDate, 15),
   };
 }

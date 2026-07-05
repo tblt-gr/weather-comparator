@@ -3,8 +3,19 @@
 import { useEffect, useMemo, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
+import { getDefaultComparisonPeriod } from "@/features/weather/logic/dates";
 import { parseWeatherUrlState, serializeWeatherUrlState } from "@/features/weather/logic/urlState";
 import { useWeatherStore } from "@/features/weather/store";
+
+const MOBILE_MEDIA_QUERY = "(max-width: 1023px)";
+
+function isMobileViewport() {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return false;
+  }
+
+  return window.matchMedia(MOBILE_MEDIA_QUERY).matches;
+}
 
 type WeatherUrlStoreSlice = {
   city: ReturnType<typeof useWeatherStore.getState>["city"];
@@ -60,10 +71,17 @@ export function useWeatherUrlState() {
       return;
     }
 
-    const nextState = parseWeatherUrlState(new URLSearchParams(currentSearch), period);
+    const urlParams = new URLSearchParams(currentSearch);
+    const nextState = parseWeatherUrlState(urlParams, period);
 
     if (Object.keys(nextState).length > 0) {
       hydrateFromUrl(nextState);
+    }
+
+    const hasUrlPeriod = Boolean(urlParams.get("start") && urlParams.get("end"));
+
+    if (!hasUrlPeriod && isMobileViewport()) {
+      useWeatherStore.getState().setPeriod(getDefaultComparisonPeriod(new Date(), { compact: true }));
     }
 
     hasHydratedRef.current = true;
@@ -73,7 +91,7 @@ export function useWeatherUrlState() {
     if (!hasHydratedRef.current) {
       return;
     }
-2
+
     const latest = useWeatherStore.getState();
     const freshNextSearch = buildWeatherUrlSearch({
       city: latest.city,

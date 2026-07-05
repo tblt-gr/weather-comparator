@@ -30,6 +30,17 @@ test("returns a 31-day default period centered on today", () => {
   });
 });
 
+test("returns a compact default period starting 2 days before today", () => {
+  const range = getDefaultComparisonPeriod(new Date("2026-05-28T12:00:00.000Z"), {
+    compact: true,
+  });
+
+  assert.deepEqual(range, {
+    startDate: "2026-05-26",
+    endDate: "2026-06-12",
+  });
+});
+
 test("clamps the current year comparison range to today", () => {
   const range = getComparableDateRange({
     period: {
