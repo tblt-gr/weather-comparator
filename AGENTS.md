@@ -112,6 +112,7 @@ Rules:
 - non-components use camelCase or folder convention
 - keep components focused and composable
 - use existing shadcn primitives when possible
+- no useless comments
 
 ## Types
 
