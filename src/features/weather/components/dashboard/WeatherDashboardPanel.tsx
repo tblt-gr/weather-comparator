@@ -52,7 +52,7 @@ export function WeatherDashboardPanel({
   return (
     <section className="glass-panel rounded-2xl p-4">
       <div className="grid gap-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex items-center gap-3">
           <ClimateSummaryBar
             coldWaves={coldWaves}
             datasets={datasets}

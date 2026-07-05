@@ -41,7 +41,7 @@ export function ClimateSummaryBar({
   });
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1">
       {stats.map((stat) => (
         <StatCard key={stat.label} label={stat.label} tone={stat.tone} value={stat.value} />
       ))}
@@ -186,7 +186,7 @@ function StatCard({
         : "text-foreground";
 
   return (
-    <div className="glass-card min-w-28 rounded-xl px-3 py-2 sm:min-w-36">
+    <div className="glass-card w-28 shrink-0 rounded-xl px-3 py-2 sm:w-36">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className={`mt-0.5 text-base font-semibold tabular-nums ${valueClass}`}>{value}</p>
     </div>
