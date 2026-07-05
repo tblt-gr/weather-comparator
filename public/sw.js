@@ -1,4 +1,4 @@
-const CACHE = "weather-compare-v1";
+const CACHE = "weather-compare-v2";
 const OFFLINE_URLS = ["/"];
 
 self.addEventListener("install", (event) => {
@@ -30,8 +30,10 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE).then((cache) => cache.put(request, copy));
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE).then((cache) => cache.put(request, copy));
+          }
           return response;
         })
         .catch(() => caches.match(request).then((cached) => cached ?? caches.match("/")))
@@ -45,8 +47,10 @@ self.addEventListener("fetch", (event) => {
         return cached;
       }
       return fetch(request).then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE).then((cache) => cache.put(request, copy));
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE).then((cache) => cache.put(request, copy));
+        }
         return response;
       });
     })
