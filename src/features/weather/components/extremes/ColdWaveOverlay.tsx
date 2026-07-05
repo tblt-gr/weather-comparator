@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 
+import { EXTREME_KIND_COLORS } from "@/features/weather/logic/extremes";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Locale } from "@/lib/i18n/types";
 import type { ColdWavePeriod } from "@/features/weather/types";
@@ -15,7 +16,7 @@ function getSeverityLabel(kind: ColdWavePeriod["kind"], locale: Locale) {
 }
 
 function getSeverityColor(kind: ColdWavePeriod["kind"]) {
-  return kind === "grand_froid" ? "oklch(0.55 0.22 250)" : "oklch(0.68 0.18 230)";
+  return EXTREME_KIND_COLORS[kind];
 }
 
 export function formatColdWaveDateRange(

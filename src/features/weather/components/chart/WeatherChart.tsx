@@ -16,6 +16,7 @@ import {
 
 import { ChartLegend } from "./ChartLegend";
 import { formatDisplayDate, formatLocalDate } from "@/features/weather/logic/dates";
+import { EXTREME_KIND_COLORS } from "@/features/weather/logic/extremes";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import type { Locale } from "@/lib/i18n/types";
@@ -1183,11 +1184,11 @@ export function getTooltipTropicalNightEntries(
 }
 
 export function getHeatwaveFill(kind: HeatwavePeriod["kind"]) {
-  return kind === "canicule" ? "oklch(0.62 0.24 28)" : "oklch(0.74 0.18 62)";
+  return EXTREME_KIND_COLORS[kind];
 }
 
 export function getColdWaveFill(kind: ColdWavePeriod["kind"]) {
-  return kind === "grand_froid" ? "oklch(0.55 0.22 250)" : "oklch(0.68 0.18 230)";
+  return EXTREME_KIND_COLORS[kind];
 }
 
 export function getExtremeAreaSegments(period: {

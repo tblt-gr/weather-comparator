@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 
+import { EXTREME_KIND_COLORS } from "@/features/weather/logic/extremes";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Locale } from "@/lib/i18n/types";
 import type { HeatwavePeriod } from "@/features/weather/types";
@@ -14,7 +15,7 @@ function getSeverityLabel(kind: HeatwavePeriod["kind"], locale: Locale) {
 }
 
 function getSeverityColor(kind: HeatwavePeriod["kind"]) {
-  return kind === "canicule" ? "oklch(0.62 0.24 28)" : "oklch(0.74 0.18 62)";
+  return EXTREME_KIND_COLORS[kind];
 }
 
 export function formatHeatwaveDateRange(

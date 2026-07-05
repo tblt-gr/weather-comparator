@@ -11,6 +11,7 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { EXTREME_KIND_COLORS } from "@/features/weather/logic/extremes";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Translations } from "@/lib/i18n/types";
 import type { ExtremeKind } from "@/features/weather/types";
@@ -82,6 +83,11 @@ export function ExtremeFilters({ hiddenKinds, availableKinds, onToggleKind }: Ex
                 checked={isChecked}
                 disabled={!isAvailable}
                 onCheckedChange={() => onToggleKind(kind)}
+              />
+              <span
+                aria-hidden
+                className="size-2.5 shrink-0 rounded-full"
+                style={{ backgroundColor: EXTREME_KIND_COLORS[kind] }}
               />
               {t[labelKey]}
             </label>

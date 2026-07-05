@@ -1,3 +1,4 @@
+export { EXTREME_KIND_COLORS } from "@/features/weather/logic/extremes/extremeColors";
 export { buildColdWaveStats } from "@/features/weather/logic/extremes/coldWaves/coldWaveStats";
 export type { ColdWaveStats } from "@/features/weather/logic/extremes/coldWaves/coldWaveStats";
 export { detectColdWaves } from "@/features/weather/logic/extremes/coldWaves/detectColdWaves";
