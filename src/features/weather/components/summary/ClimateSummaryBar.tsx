@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+
 import { averageDatasetTemperature } from "@/features/weather/logic/calculateClimateNormals";
 import { buildColdWaveStats, buildHeatwaveStats } from "@/features/weather/logic/extremes";
 import type {
@@ -40,8 +42,41 @@ export function ClimateSummaryBar({
     t,
   });
 
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [fade, setFade] = useState({ start: false, end: false });
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) {
+      return;
+    }
+
+    const update = () => {
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      setFade({
+        start: el.scrollLeft > 1,
+        end: el.scrollLeft < maxScroll - 1,
+      });
+    };
+
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    const resizeObserver = new ResizeObserver(update);
+    resizeObserver.observe(el);
+
+    return () => {
+      el.removeEventListener("scroll", update);
+      resizeObserver.disconnect();
+    };
+  }, [stats.length]);
+
   return (
-    <div className="summary-scroll flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1 lg:flex-initial lg:flex-wrap lg:overflow-x-visible lg:pb-0">
+    <div
+      ref={scrollRef}
+      className="summary-scroll flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1 -mb-1 lg:mb-0 lg:flex-initial lg:flex-wrap lg:overflow-x-visible lg:pb-0"
+      data-fade-end={fade.end ? "true" : undefined}
+      data-fade-start={fade.start ? "true" : undefined}
+    >
       {stats.map((stat) => (
         <StatCard key={stat.label} label={stat.label} tone={stat.tone} value={stat.value} />
       ))}
