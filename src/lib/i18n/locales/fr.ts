@@ -4,6 +4,7 @@ export const fr: Translations = {
   "app.title": "Comparateur Météo",
   "app.subtitle": "Comparaison des températures quotidiennes",
   "app.filtersAriaLabel": "Filtres de comparaison",
+  "app.filtersToggleAriaLabel": "Afficher ou masquer les filtres",
   "state.selectCity": "Sélectionnez une ville pour afficher les données.",
   "state.noData": "Aucune donnée disponible pour cette période.",
   "state.loadError": "Impossible de charger les données météo.",

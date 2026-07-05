@@ -1,7 +1,8 @@
 "use client";
 
-import { Thermometer } from "lucide-react";
+import { Menu, Thermometer, X } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/features/weather/components/controls";
 import { ThemeToggle } from "@/features/weather/components/controls";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
@@ -9,9 +10,11 @@ import type { City } from "@/features/weather/types";
 
 type WeatherDashboardHeaderProps = {
   city: City | null;
+  filtersOpen: boolean;
+  onToggleFilters: () => void;
 };
 
-export function WeatherDashboardHeader({ city }: WeatherDashboardHeaderProps) {
+export function WeatherDashboardHeader({ city, filtersOpen, onToggleFilters }: WeatherDashboardHeaderProps) {
   const { t } = useLocale();
 
   return (
@@ -35,9 +38,23 @@ export function WeatherDashboardHeader({ city }: WeatherDashboardHeaderProps) {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 justify-end">
-          <LanguageSwitcher />
-          <ThemeToggle />
+        <div className="flex items-center gap-2 justify-between lg:justify-end">
+          <Button
+            aria-controls="dashboard-filters"
+            aria-expanded={filtersOpen}
+            aria-label={t["app.filtersToggleAriaLabel"]}
+            className="h-11 w-11 lg:hidden"
+            onClick={onToggleFilters}
+            size="icon"
+            type="button"
+            variant="outline"
+          >
+            {filtersOpen ? <X className="size-4" /> : <Menu className="size-4" />}
+          </Button>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </header>

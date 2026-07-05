@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { WeatherDashboardFilters } from "./WeatherDashboardFilters";
@@ -34,6 +34,7 @@ export function WeatherDashboard() {
   } = useWeatherStore();
   const { t } = useLocale();
   const shareUrl = useWeatherUrlState();
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useGeolocatedCity();
 
@@ -75,20 +76,26 @@ export function WeatherDashboard() {
   return (
     <main id="main-content" className="app-ambient min-h-screen text-foreground">
       <div className="mx-auto flex w-full flex-col gap-4 px-4 py-6 sm:px-6 lg:px-8">
-        <WeatherDashboardHeader city={city} />
-        <WeatherDashboardFilters
+        <WeatherDashboardHeader
           city={city}
-          comparisonOffsets={comparisonOffsets}
-          onCityChange={setCity}
-          onClearOffsets={clearComparisonOffsets}
-          onPeriodChange={setPeriod}
-          onShowNormalsChange={setShowNormals}
-          onTemperatureModeChange={setTemperatureMode}
-          onToggleOffset={toggleComparisonOffset}
-          period={period}
-          showNormals={showNormals}
-          temperatureMode={temperatureMode}
+          filtersOpen={filtersOpen}
+          onToggleFilters={() => setFiltersOpen((open) => !open)}
         />
+        <div className={filtersOpen ? "block" : "hidden lg:block"} id="dashboard-filters">
+          <WeatherDashboardFilters
+            city={city}
+            comparisonOffsets={comparisonOffsets}
+            onCityChange={setCity}
+            onClearOffsets={clearComparisonOffsets}
+            onPeriodChange={setPeriod}
+            onShowNormalsChange={setShowNormals}
+            onTemperatureModeChange={setTemperatureMode}
+            onToggleOffset={toggleComparisonOffset}
+            period={period}
+            showNormals={showNormals}
+            temperatureMode={temperatureMode}
+          />
+        </div>
         {!hasCity ? (
           <EmptyState message={t["state.selectCity"]} />
         ) : (

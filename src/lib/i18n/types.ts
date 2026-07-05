@@ -4,6 +4,7 @@ export type Translations = {
   "app.title": string;
   "app.subtitle": string;
   "app.filtersAriaLabel": string;
+  "app.filtersToggleAriaLabel": string;
   "state.selectCity": string;
   "state.noData": string;
   "state.loadError": string;
