@@ -181,4 +181,58 @@
         background: oklch(0.148 0.025 260);
         border-color: var(--border);
     }
+
+    .summary-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: transparent transparent;
+    }
+
+    .summary-scroll:hover,
+    .summary-scroll:focus-within {
+        scrollbar-color: oklch(0.55 0.03 240 / 45%) transparent;
+    }
+
+    .summary-scroll::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .summary-scroll::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .summary-scroll::-webkit-scrollbar-thumb {
+        background: transparent;
+        border-radius: 9999px;
+        transition: background 150ms ease;
+    }
+
+    .summary-scroll:hover::-webkit-scrollbar-thumb,
+    .summary-scroll:focus-within::-webkit-scrollbar-thumb {
+        background: oklch(0.55 0.03 240 / 45%);
+    }
+
+    .dark .summary-scroll:hover,
+    .dark .summary-scroll:focus-within {
+        scrollbar-color: oklch(0.85 0.02 240 / 40%) transparent;
+    }
+
+    .dark .summary-scroll:hover::-webkit-scrollbar-thumb,
+    .dark .summary-scroll:focus-within::-webkit-scrollbar-thumb {
+        background: oklch(0.85 0.02 240 / 40%);
+    }
+
+    @media (max-width: 1023px) {
+        .summary-scroll {
+            -webkit-mask-image: linear-gradient(
+                    to right,
+                    black calc(100% - 2rem),
+                    transparent 100%
+            );
+            mask-image: linear-gradient(
+                    to right,
+                    black calc(100% - 2rem),
+                    transparent 100%
+            );
+        }
+    }
 }

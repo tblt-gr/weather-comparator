@@ -41,7 +41,7 @@ export function ClimateSummaryBar({
   });
 
   return (
-    <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1 lg:flex-initial lg:flex-wrap lg:overflow-x-visible lg:pb-0">
+    <div className="summary-scroll flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1 lg:flex-initial lg:flex-wrap lg:overflow-x-visible lg:pb-0">
       {stats.map((stat) => (
         <StatCard key={stat.label} label={stat.label} tone={stat.tone} value={stat.value} />
       ))}
