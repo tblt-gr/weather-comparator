@@ -1,7 +1,7 @@
 "use client";
 
 import { InfoIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -39,6 +39,8 @@ const EXTREME_KINDS: {
   },
 ];
 
+const subscribeNever = () => () => {};
+
 type ExtremeFiltersProps = {
   hiddenKinds: ExtremeKind[];
   availableKinds: Record<ExtremeKind, boolean>;
@@ -47,11 +49,11 @@ type ExtremeFiltersProps = {
 
 export function ExtremeFilters({ hiddenKinds, availableKinds, onToggleKind }: ExtremeFiltersProps) {
   const { t } = useLocale();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false
+  );
 
   return (
     <div

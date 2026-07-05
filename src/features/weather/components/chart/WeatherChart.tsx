@@ -216,7 +216,7 @@ export function WeatherChart({
     () =>
       getFreshSeriesKeysFromSignatures(
         seriesLineSignatures,
-        // eslint-disable-next-line react-hooks/refs -- compare against the previous committed data version
+        // compare against the previous committed data version
         lastCommittedLineSignaturesRef.current
       ),
     [seriesLineSignatures]

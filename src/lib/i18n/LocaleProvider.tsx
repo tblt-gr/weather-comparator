@@ -14,8 +14,15 @@ function subscribe(callback: () => void) {
   };
 }
 
+function readLocaleCookie(): string | null {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${LOCALE_COOKIE_NAME}=`);
+  if (parts.length === 2) return parts.pop()?.split(";").shift() ?? null;
+  return null;
+}
+
 function getSnapshot(): Locale {
-  return resolveLocale(localStorage.getItem(LOCALE_KEY), navigator.language, DEFAULT_LOCALE);
+  return resolveLocale(readLocaleCookie(), undefined, DEFAULT_LOCALE);
 }
 
 type LocaleContextValue = {
@@ -41,6 +48,13 @@ export function LocaleProvider({
     document.cookie = `${LOCALE_COOKIE_NAME}=${next}; path=/; max-age=31536000; samesite=lax`;
     window.dispatchEvent(new StorageEvent("storage", { key: LOCALE_KEY, newValue: next }));
   }
+
+  useEffect(() => {
+    if (readLocaleCookie() === null) {
+      const detected = resolveLocale(null, navigator.language, DEFAULT_LOCALE);
+      if (detected !== locale) setLocale(detected);
+    }
+  }, [locale]);
 
   useEffect(() => {
     document.documentElement.lang = locale;

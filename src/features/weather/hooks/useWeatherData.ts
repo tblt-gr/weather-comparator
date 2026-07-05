@@ -250,7 +250,11 @@ export function useWeatherData({
     .filter((dataset): dataset is WeatherYearDataset & { forecastFailed: boolean } => Boolean(dataset));
 
   const data = rawData
-    .map(({ forecastFailed: _, ...dataset }) => dataset as WeatherYearDataset)
+    .map((dataset) => {
+      const stripped = { ...dataset };
+      delete (stripped as { forecastFailed?: boolean }).forecastFailed;
+      return stripped as WeatherYearDataset;
+    })
     .sort((a, b) => a.offsetYears - b.offsetYears);
 
   const hasForecastWarning = rawData.some((d) => d.forecastFailed);
