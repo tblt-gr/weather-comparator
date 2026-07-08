@@ -12,9 +12,9 @@ test("classifies a hot spell as a canicule when it crosses the higher threshold 
       [32, 20],
     ]),
     buildDataset("minus-4", "2022", [
-      [33, 21],
-      [34, 21],
-      [35, 21],
+      [35, 20],
+      [36, 21],
+      [37, 22],
     ]),
   ];
 
@@ -37,7 +37,7 @@ test("does not classify a long heatwave as canicule when only one day crosses th
     buildDataset("minus-7", "2019", [
       [30, 20],
       [31, 20],
-      [33, 21],
+      [35, 20],
       [31, 20],
       [30, 20],
       [31, 20],
@@ -134,6 +134,32 @@ test("does not extend an episode past its real end even though the trailing aver
   assert.equal(heatwave?.duration, 3);
   assert.equal(heatwave?.startDay, 1);
   assert.equal(heatwave?.endDay, 3);
+});
+
+test("classifies as vague de chaleur when hot days above 35/20 are not three consecutive", () => {
+  const datasets: WeatherYearDataset[] = [
+    buildDataset("current", "2026", [
+      [30.1, 16.7],
+      [34.2, 17.9],
+      [32.3, 16.9],
+      [33.1, 18.6],
+      [35.7, 19.9],
+      [35, 20.1],
+      [35.6, 20.4],
+      [37.8, 18.9],
+      [37.6, 20.6],
+      [34.6, 21.3],
+      [34.6, 23.4],
+      [33.4, 23],
+      [30.5, 21.8],
+    ]),
+  ];
+
+  const heatwaves = detectHeatwaves(datasets);
+
+  assert.equal(heatwaves.length, 1);
+  assert.equal(heatwaves[0].kind, "vague_de_chaleur");
+  assert.equal(heatwaves[0].duration, 13);
 });
 
 test("detects a forecast-only heatwave and marks it as forecast", () => {

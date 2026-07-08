@@ -36,7 +36,7 @@ export const fr: Translations = {
     "Moyenne des températures maximales et minimales calculée sur la période de référence 1991–2020.",
   "extremes.filtersAriaLabel": "Afficher les épisodes extrêmes",
   "extremes.criteriaAriaLabel": "Critères de température",
-  "extremes.criteria.canicule": "Tmax ≥ 33 °C et Tmin ≥ 21 °C pendant au moins 3 jours consécutifs.",
+  "extremes.criteria.canicule": "Tmax ≥ 35 °C et Tmin ≥ 20 °C pendant au moins 3 jours consécutifs.",
   "extremes.criteria.vague_de_chaleur": "Tmax ≥ 30 °C pendant au moins 3 jours consécutifs.",
   "extremes.criteria.vague_de_froid": "Tmin ≤ -5 °C et Tmax ≤ 0 °C pendant au moins 3 jours consécutifs.",
   "extremes.criteria.grand_froid": "Tmin ≤ -10 °C ou Tmax ≤ -5 °C pendant au moins 3 jours consécutifs.",

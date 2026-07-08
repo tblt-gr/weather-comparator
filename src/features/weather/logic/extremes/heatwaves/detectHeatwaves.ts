@@ -20,8 +20,8 @@ const ROLLING_WINDOW = 3;
 export function detectHeatwaves(
   datasets: WeatherYearDataset[],
   thresholdHeatwaveMax = 30,
-  thresholdCaniculeMax = 33,
-  thresholdCaniculeMin = 21,
+  thresholdCaniculeMax = 35,
+  thresholdCaniculeMin = 20,
   minimumDuration = 3
 ): HeatwavePeriod[] {
   const heatwaves: HeatwavePeriod[] = [];
