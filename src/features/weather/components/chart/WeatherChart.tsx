@@ -507,7 +507,8 @@ export function WeatherChart({
                 }}
               />
               {heatwaves.map((heatwave) => {
-                return getExtremeAreaSegments(heatwave).map((segment) => (
+                const bridgeToDay = getExtremeBridgeDay(heatwave, heatwaves);
+                return getExtremeAreaSegments(heatwave, bridgeToDay).map((segment) => (
                   <ReferenceArea
                     fill={segment.isForecast ? `url(#${getExtremePatternId(heatwave.datasetId, heatwave.start, heatwave.kind, "heat")})` : getHeatwaveFill(heatwave.kind)}
                     fillOpacity={heatwave.kind === "canicule" ? 0.28 : 0.2}
@@ -522,7 +523,8 @@ export function WeatherChart({
                 ));
               })}
               {coldWaves.map((coldWave) => {
-                return getExtremeAreaSegments(coldWave).map((segment) => (
+                const bridgeToDay = getExtremeBridgeDay(coldWave, coldWaves);
+                return getExtremeAreaSegments(coldWave, bridgeToDay).map((segment) => (
                   <ReferenceArea
                     fill={segment.isForecast ? `url(#${getExtremePatternId(coldWave.datasetId, coldWave.start, coldWave.kind, "cold")})` : getColdWaveFill(coldWave.kind)}
                     fillOpacity={coldWave.kind === "grand_froid" ? 0.28 : 0.2}
@@ -1191,26 +1193,47 @@ export function getColdWaveFill(kind: ColdWavePeriod["kind"]) {
   return EXTREME_KIND_COLORS[kind];
 }
 
-export function getExtremeAreaSegments(period: {
-  startDay: number;
-  endDay: number;
-  includesForecast: boolean;
-  forecastStartDay: number | null;
-}): ExtremeAreaSegment[] {
+export function getExtremeAreaSegments(
+  period: {
+    startDay: number;
+    endDay: number;
+    includesForecast: boolean;
+    forecastStartDay: number | null;
+  },
+  bridgeToDay?: number | null
+): ExtremeAreaSegment[] {
+  // When a hot spell is split into adjacent vague de chaleur and canicule
+  // periods, each fills [startDay, endDay], leaving a one-day gap between the
+  // two bands. The earlier band extends up to its successor's start day so the
+  // boundary is filled with the earlier (less severe) color, with no gap.
+  const endDay = bridgeToDay ?? period.endDay;
+
   if (!period.includesForecast || period.forecastStartDay === null) {
-    return [{ x1: period.startDay, x2: period.endDay, isForecast: false }];
+    return [{ x1: period.startDay, x2: endDay, isForecast: false }];
   }
 
   if (period.forecastStartDay <= period.startDay) {
-    return [{ x1: period.startDay, x2: period.endDay, isForecast: true }];
+    return [{ x1: period.startDay, x2: endDay, isForecast: true }];
   }
 
   const displayedForecastStartDay = Math.max(period.startDay, period.forecastStartDay);
 
   return [
     { x1: period.startDay, x2: displayedForecastStartDay, isForecast: false },
-    { x1: displayedForecastStartDay, x2: period.endDay, isForecast: true },
+    { x1: displayedForecastStartDay, x2: endDay, isForecast: true },
   ];
+}
+
+export function getExtremeBridgeDay(
+  period: { datasetId: string; endDay: number },
+  periods: { datasetId: string; startDay: number }[]
+): number | null {
+  const successor = periods.find(
+    (candidate) =>
+      candidate.datasetId === period.datasetId && candidate.startDay === period.endDay + 1
+  );
+
+  return successor ? successor.startDay : null;
 }
 
 function getExtremePatternId(

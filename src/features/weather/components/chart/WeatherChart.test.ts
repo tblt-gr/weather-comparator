@@ -23,6 +23,7 @@ import {
   getSeriesLineKeys,
   getFreshSeriesKeys,
   getExtremeAreaSegments,
+  getExtremeBridgeDay,
   getTooltipExtremeEntries,
   getTooltipTropicalNightEntries,
   getDisplayedForecastBoundaryDay,
@@ -301,6 +302,44 @@ test("returns a single forecast segment for a forecast-only extreme area", () =>
     }),
     [{ x1: 10, x2: 14, isForecast: true }]
   );
+});
+
+test("extends an extreme area to the successor start day to bridge the gap between adjacent segments", () => {
+  assert.deepEqual(
+    getExtremeAreaSegments({ startDay: 1, endDay: 5, includesForecast: false, forecastStartDay: null }, 6),
+    [{ x1: 1, x2: 6, isForecast: false }]
+  );
+});
+
+test("extends only the last forecast sub-segment when bridging to a successor", () => {
+  assert.deepEqual(
+    getExtremeAreaSegments({ startDay: 1, endDay: 5, includesForecast: true, forecastStartDay: 3 }, 6),
+    [
+      { x1: 1, x2: 3, isForecast: false },
+      { x1: 3, x2: 6, isForecast: true },
+    ]
+  );
+});
+
+test("getExtremeBridgeDay returns the contiguous successor start day for the same dataset", () => {
+  const periods = [
+    { datasetId: "current", startDay: 1 },
+    { datasetId: "current", startDay: 6 },
+  ];
+
+  assert.equal(getExtremeBridgeDay({ datasetId: "current", endDay: 5 }, periods), 6);
+});
+
+test("getExtremeBridgeDay ignores contiguous days from a different dataset", () => {
+  const periods = [{ datasetId: "minus-1", startDay: 6 }];
+
+  assert.equal(getExtremeBridgeDay({ datasetId: "current", endDay: 5 }, periods), null);
+});
+
+test("getExtremeBridgeDay returns null when no segment immediately follows", () => {
+  const periods = [{ datasetId: "current", startDay: 8 }];
+
+  assert.equal(getExtremeBridgeDay({ datasetId: "current", endDay: 5 }, periods), null);
 });
 
 test("buildChartRows reuses matching day labels and temperatures across datasets", () => {
