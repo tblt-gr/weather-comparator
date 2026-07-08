@@ -53,27 +53,64 @@ export function detectHeatwaves(
         const avgTmin = window.reduce((total, value) => total + (value.tmin as number), 0) / ROLLING_WINDOW;
         return avgTmax >= thresholdCaniculeMax && avgTmin >= thresholdCaniculeMin;
       });
-      const isCanicule = findRuns(bridgedCanicule, minimumDuration).length > 0;
+      const caniculeRuns = findRuns(bridgedCanicule, minimumDuration);
 
-      const firstForecastDay = episode.find((value) => value.isForecast === true)?.day ?? null;
-
-      heatwaves.push({
-        datasetId: dataset.id,
-        datasetLabel: dataset.label,
-        kind: isCanicule ? "canicule" : "vague_de_chaleur",
-        start: episode[0].date,
-        end: episode[episode.length - 1].date,
-        startDay: episode[0].day,
-        endDay: episode[episode.length - 1].day,
-        duration: episode.length,
-        averageMax: episode.reduce((total, value) => total + (value.tmax as number), 0) / episode.length,
-        includesForecast: firstForecastDay !== null,
-        forecastStartDay: firstForecastDay,
+      // A vague de chaleur episode is split so only the days that genuinely
+      // meet the canicule criteria carry the "canicule" label; the surrounding
+      // hot days stay "vague de chaleur". Segments partition the episode with
+      // no day lost, even when a leftover vague stretch is shorter than the
+      // minimum duration (it is still part of the qualified episode).
+      segmentEpisode(episode.length, caniculeRuns).forEach(({ start: segStart, end: segEnd, kind }) => {
+        heatwaves.push(buildPeriod(dataset, episode.slice(segStart, segEnd + 1), kind));
       });
     });
   });
 
   return heatwaves;
+}
+
+function buildPeriod(
+  dataset: WeatherYearDataset,
+  days: DailyTemperature[],
+  kind: HeatwavePeriod["kind"]
+): HeatwavePeriod {
+  const firstForecastDay = days.find((value) => value.isForecast === true)?.day ?? null;
+
+  return {
+    datasetId: dataset.id,
+    datasetLabel: dataset.label,
+    kind,
+    start: days[0].date,
+    end: days[days.length - 1].date,
+    startDay: days[0].day,
+    endDay: days[days.length - 1].day,
+    duration: days.length,
+    averageMax: days.reduce((total, value) => total + (value.tmax as number), 0) / days.length,
+    includesForecast: firstForecastDay !== null,
+    forecastStartDay: firstForecastDay,
+  };
+}
+
+function segmentEpisode(
+  episodeLength: number,
+  caniculeRuns: [start: number, end: number][]
+): { start: number; end: number; kind: HeatwavePeriod["kind"] }[] {
+  const segments: { start: number; end: number; kind: HeatwavePeriod["kind"] }[] = [];
+  let cursor = 0;
+
+  caniculeRuns.forEach(([runStart, runEnd]) => {
+    if (runStart > cursor) {
+      segments.push({ start: cursor, end: runStart - 1, kind: "vague_de_chaleur" });
+    }
+    segments.push({ start: runStart, end: runEnd, kind: "canicule" });
+    cursor = runEnd + 1;
+  });
+
+  if (cursor <= episodeLength - 1) {
+    segments.push({ start: cursor, end: episodeLength - 1, kind: "vague_de_chaleur" });
+  }
+
+  return segments;
 }
 
 function crossesBothThresholds(value: DailyTemperature, thresholdMax: number, thresholdMin: number): boolean {

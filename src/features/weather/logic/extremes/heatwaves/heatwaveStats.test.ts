@@ -41,6 +41,32 @@ test("counts hot days, tropical nights, heatwaves and canicules across all selec
   });
 });
 
+test("counts a spell split into vague and canicule segments as a single canicule", () => {
+  const heatwaves: HeatwavePeriod[] = [
+    buildHeatwave({ kind: "vague_de_chaleur", start: "2026-07-06", end: "2026-07-12" }),
+    buildHeatwave({ kind: "canicule", start: "2026-07-13", end: "2026-07-15" }),
+    buildHeatwave({ kind: "vague_de_chaleur", start: "2026-07-16", end: "2026-07-16" }),
+  ];
+
+  const stats = buildHeatwaveStats(heatwaves, []);
+
+  assert.equal(stats.heatwaveCount, 0);
+  assert.equal(stats.caniculeCount, 1);
+});
+
+test("counts two separate spells independently", () => {
+  const heatwaves: HeatwavePeriod[] = [
+    buildHeatwave({ kind: "vague_de_chaleur", start: "2026-06-23", end: "2026-06-28" }),
+    buildHeatwave({ kind: "vague_de_chaleur", start: "2026-07-06", end: "2026-07-12" }),
+    buildHeatwave({ kind: "canicule", start: "2026-07-13", end: "2026-07-15" }),
+  ];
+
+  const stats = buildHeatwaveStats(heatwaves, []);
+
+  assert.equal(stats.heatwaveCount, 1);
+  assert.equal(stats.caniculeCount, 1);
+});
+
 function buildHeatwave(
   overrides: Pick<HeatwavePeriod, "kind" | "start" | "end">
 ): HeatwavePeriod {

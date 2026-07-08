@@ -162,6 +162,37 @@ test("classifies as vague de chaleur when hot days above 35/20 are not three con
   assert.equal(heatwaves[0].duration, 13);
 });
 
+test("splits an episode into vague de chaleur and canicule segments when only part crosses the canicule threshold", () => {
+  const datasets: WeatherYearDataset[] = [
+    buildDataset("current", "2026", [
+      [30, 16],
+      [34, 17],
+      [32, 16],
+      [33, 19],
+      [36, 21],
+      [37, 21],
+      [36, 22],
+      [33, 19],
+      [31, 18],
+    ]),
+  ];
+
+  const heatwaves = detectHeatwaves(datasets);
+
+  assert.deepEqual(
+    heatwaves.map((heatwave) => ({
+      kind: heatwave.kind,
+      startDay: heatwave.startDay,
+      endDay: heatwave.endDay,
+    })),
+    [
+      { kind: "vague_de_chaleur", startDay: 1, endDay: 4 },
+      { kind: "canicule", startDay: 5, endDay: 7 },
+      { kind: "vague_de_chaleur", startDay: 8, endDay: 9 },
+    ]
+  );
+});
+
 test("detects a forecast-only heatwave and marks it as forecast", () => {
   const datasets: WeatherYearDataset[] = [
     buildDataset("current", "2026", [
