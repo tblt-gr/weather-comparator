@@ -664,12 +664,12 @@ export function buildChartRows(
       const value = dataset.valuesByDay.get(day);
 
       if (dataset.id === "current") {
-        const shouldBridgeForecast =
-          dataset.firstForecastDay !== null && day === dataset.firstForecastDay - 1;
+        const isForecastBridgeDay =
+          dataset.firstForecastDay !== null && day === dataset.firstForecastDay;
 
-        row.currentObserved = value?.isForecast ? null : value?.[temperatureMode] ?? null;
-        row.currentForecast =
-          value?.isForecast || shouldBridgeForecast ? value?.[temperatureMode] ?? null : null;
+        row.currentObserved =
+          !value?.isForecast || isForecastBridgeDay ? value?.[temperatureMode] ?? null : null;
+        row.currentForecast = value?.isForecast ? value?.[temperatureMode] ?? null : null;
         return;
       }
 
@@ -1051,17 +1051,17 @@ export function sortTooltipEntries(entries: readonly TooltipEntry[]) {
 
 export function getVisibleTooltipEntries(entries: readonly TooltipEntry[]) {
   const numericEntries = entries.filter((entry) => typeof entry.value === "number");
-  const currentObservedValuesByDay = new Map<string, number>();
+  const currentForecastValuesByDay = new Map<string, number>();
 
   numericEntries.forEach((entry) => {
     const dayKey = getTooltipEntryDayKey(entry);
 
     if (
-      entry.dataKey === "currentObserved" &&
+      entry.dataKey === "currentForecast" &&
       dayKey !== null &&
       typeof entry.value === "number"
     ) {
-      currentObservedValuesByDay.set(dayKey, entry.value);
+      currentForecastValuesByDay.set(dayKey, entry.value);
     }
   });
 
@@ -1070,10 +1070,10 @@ export function getVisibleTooltipEntries(entries: readonly TooltipEntry[]) {
       const dayKey = getTooltipEntryDayKey(entry);
 
       return (
-        entry.dataKey !== "currentForecast" ||
+        entry.dataKey !== "currentObserved" ||
         dayKey === null ||
         typeof entry.value !== "number" ||
-        currentObservedValuesByDay.get(dayKey) !== entry.value
+        currentForecastValuesByDay.get(dayKey) !== entry.value
       );
     })
   );
@@ -1205,7 +1205,7 @@ export function getExtremeAreaSegments(period: {
     return [{ x1: period.startDay, x2: period.endDay, isForecast: true }];
   }
 
-  const displayedForecastStartDay = Math.max(period.startDay, period.forecastStartDay - 1);
+  const displayedForecastStartDay = Math.max(period.startDay, period.forecastStartDay);
 
   return [
     { x1: period.startDay, x2: displayedForecastStartDay, isForecast: false },

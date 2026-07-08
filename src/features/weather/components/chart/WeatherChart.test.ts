@@ -77,7 +77,7 @@ test("sorts tooltip entries from highest to lowest temperature", () => {
   );
 });
 
-test("hides the current forecast bridge point from tooltip entries", () => {
+test("hides the current observed bridge point from tooltip entries", () => {
   assert.deepEqual(
     getVisibleTooltipEntries([
       {
@@ -102,7 +102,7 @@ test("hides the current forecast bridge point from tooltip entries", () => {
         value: 24.1,
       },
     ]).map((entry) => entry.dataKey),
-    ["currentObserved", "minus-1"]
+    ["currentForecast", "minus-1"]
   );
 });
 
@@ -285,8 +285,8 @@ test("splits a mixed extreme area at the displayed forecast boundary day", () =>
       forecastStartDay: 12,
     }),
     [
-      { x1: 10, x2: 11, isForecast: false },
-      { x1: 11, x2: 14, isForecast: true },
+      { x1: 10, x2: 12, isForecast: false },
+      { x1: 12, x2: 14, isForecast: true },
     ]
   );
 });
@@ -380,7 +380,7 @@ test("buildChartRows reuses matching day labels and temperatures across datasets
   );
 });
 
-test("buildChartRows bridges the forecast segment from the last observed current-day value", () => {
+test("buildChartRows bridges the forecast segment from the first forecast current-day value", () => {
   assert.deepEqual(
     buildChartRows(
       [
@@ -425,14 +425,14 @@ test("buildChartRows bridges the forecast segment from the last observed current
         tickLabel: "01/06/25",
         normal: null,
         currentObserved: 30,
-        currentForecast: 30,
+        currentForecast: null,
       },
       {
         day: 2,
         label: "2025-06-02",
         tickLabel: "02/06/25",
         normal: null,
-        currentObserved: null,
+        currentObserved: 28,
         currentForecast: 28,
       },
       {
