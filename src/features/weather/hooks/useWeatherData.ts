@@ -22,7 +22,8 @@ import type { City, WeatherYearDataset } from "@/features/weather/types";
 export function getWeatherQueryKey(
   city: City,
   period: DatePeriod,
-  offsetYears: number
+  offsetYears: number,
+  showForecast: boolean
 ) {
   return [
     "weather",
@@ -30,7 +31,7 @@ export function getWeatherQueryKey(
     period.startDate,
     period.endDate,
     offsetYears,
-    offsetYears === 0 ? "forecast-aware" : "archive-only",
+    offsetYears === 0 ? (showForecast ? "forecast-on" : "forecast-off") : "archive-only",
   ] as const;
 }
 
@@ -67,12 +68,14 @@ export async function fetchWeatherDataset({
   period,
   signal,
   today,
+  showForecast = true,
 }: {
   city: City;
   offsetYears: number;
   period: DatePeriod;
   signal: AbortSignal;
   today?: string;
+  showForecast?: boolean;
 }): Promise<WeatherYearDataset & { forecastFailed: boolean }> {
   const range = getComparableDateRangeByOffset({
     offsetYears,
@@ -101,13 +104,22 @@ export async function fetchWeatherDataset({
     return { ...normalizeWeatherData({ offsetYears, range, response: archiveResponse }), forecastFailed: false };
   }
 
-  const forecastRange = getForecastDateRangeForPeriod({
-    period,
-    today: today ?? formatToday(new Date()),
-  });
+  const forecastRange = showForecast
+    ? getForecastDateRangeForPeriod({
+        period,
+        today: today ?? formatToday(new Date()),
+      })
+    : null;
 
   if (forecastRange === null) {
-    return { ...normalizeWeatherData({ offsetYears, range, response: archiveResponse }), forecastFailed: false };
+    return {
+      ...normalizeWeatherData({
+        offsetYears,
+        range: { startDate: range.startDate, endDate: period.endDate },
+        response: archiveResponse,
+      }),
+      forecastFailed: false,
+    };
   }
 
   try {
@@ -222,17 +234,19 @@ export function useWeatherData({
   city,
   offsets,
   period,
+  showForecast,
 }: {
   city: City | null;
   offsets: number[];
   period: DatePeriod;
+  showForecast: boolean;
 }) {
   const queries = useQueries({
     queries:
       city === null
         ? []
         : offsets.map((offsetYears) => ({
-            queryKey: getWeatherQueryKey(city, period, offsetYears),
+            queryKey: getWeatherQueryKey(city, period, offsetYears, showForecast),
             enabled: isValidDatePeriod(period) && getComparableDateRangeByOffset({ offsetYears, period }) !== null,
             queryFn: ({ signal }: { signal: AbortSignal }) =>
               fetchWeatherDataset({
@@ -240,6 +254,7 @@ export function useWeatherData({
                 offsetYears,
                 period,
                 signal,
+                showForecast,
               }),
             staleTime: 1000 * 60 * 60 * 24,
           })),

@@ -28,6 +28,7 @@ test("buildWeatherUrlSearch serializes canonical query params from store state",
       endDate: "2026-05-26",
     },
     showNormals: true,
+    showForecast: true,
     temperatureMode: "tmin",
   });
 

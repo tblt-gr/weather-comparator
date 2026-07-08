@@ -33,7 +33,8 @@ test("getWeatherQueryKey includes the fetch strategy for the current year only",
         country: "France",
       },
       period,
-      2
+      2,
+      true
     ),
     ["weather", "paris", "2025-05-01", "2025-05-25", 2, "archive-only"]
   );
@@ -48,30 +49,43 @@ test("getWeatherQueryKey includes the fetch strategy for the current year only",
         country: "France",
       },
       period,
-      2
+      2,
+      true
     ),
     ["weather", "paris", "2025-05-01", "2025-05-25", 2, "archive-only"]
   );
 });
 
-test("getWeatherQueryKey marks the current year query as forecast-aware", () => {
-  assert.deepEqual(
-    getWeatherQueryKey(
-      {
-        id: "paris",
-        name: "Paris",
-        latitude: 48.8566,
-        longitude: 2.3522,
-        country: "France",
-      },
-      {
-        startDate: "2025-05-01",
-        endDate: "2025-05-25",
-      },
-      0
-    ),
-    ["weather", "paris", "2025-05-01", "2025-05-25", 0, "forecast-aware"]
-  );
+test("getWeatherQueryKey encodes the forecast toggle for the current year", () => {
+  const city = {
+    id: "paris",
+    name: "Paris",
+    latitude: 48.8566,
+    longitude: 2.3522,
+    country: "France",
+  };
+  const period = {
+    startDate: "2025-05-01",
+    endDate: "2025-05-25",
+  };
+
+  assert.deepEqual(getWeatherQueryKey(city, period, 0, true), [
+    "weather",
+    "paris",
+    "2025-05-01",
+    "2025-05-25",
+    0,
+    "forecast-on",
+  ]);
+
+  assert.deepEqual(getWeatherQueryKey(city, period, 0, false), [
+    "weather",
+    "paris",
+    "2025-05-01",
+    "2025-05-25",
+    0,
+    "forecast-off",
+  ]);
 });
 
 test("aggregateWeatherQueryErrors preserves the offset that failed", () => {
@@ -244,6 +258,56 @@ test("fetchWeatherDataset keeps future forecast days in the current year dataset
       { date: "2025-05-25", tmax: 23, isForecast: false },
       { date: "2025-05-26", tmax: 24, isForecast: true },
       { date: "2025-05-27", tmax: 25, isForecast: true },
+    ]
+  );
+
+  mock.restoreAll();
+});
+
+test("fetchWeatherDataset skips the forecast fetch and returns archive-only when showForecast is false", async () => {
+  const fetchMock = mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    const url = String(input);
+
+    if (url.startsWith("https://archive-api.open-meteo.com")) {
+      return new Response(
+        JSON.stringify({
+          daily: {
+            time: ["2025-05-24", "2025-05-25"],
+            temperature_2m_max: [22, 23],
+            temperature_2m_min: [12, 13],
+          },
+        })
+      );
+    }
+
+    throw new Error("forecast should not be fetched");
+  });
+
+  const dataset = await fetchWeatherDataset({
+    city: baseCity,
+    offsetYears: 0,
+    period: {
+      startDate: "2025-05-24",
+      endDate: "2025-05-27",
+    },
+    signal: new AbortController().signal,
+    today: "2025-05-25",
+    showForecast: false,
+  });
+
+  assert.equal(fetchMock.mock.callCount(), 1);
+  assert.equal(dataset.forecastFailed, false);
+  assert.deepEqual(
+    dataset.values.map((value) => ({
+      date: value.date,
+      tmax: value.tmax,
+      isForecast: value.isForecast,
+    })),
+    [
+      { date: "2025-05-24", tmax: 22, isForecast: false },
+      { date: "2025-05-25", tmax: 23, isForecast: false },
+      { date: "2025-05-26", tmax: null, isForecast: false },
+      { date: "2025-05-27", tmax: null, isForecast: false },
     ]
   );
 

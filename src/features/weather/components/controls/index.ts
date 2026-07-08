@@ -1,5 +1,6 @@
 export { CitySearch } from "@/features/weather/components/controls/CitySearch";
 export { ExtremeFilters } from "@/features/weather/components/controls/ExtremeFilters";
+export { ForecastToggle } from "@/features/weather/components/controls/ForecastToggle";
 export { LanguageSwitcher } from "@/features/weather/components/controls/LanguageSwitcher";
 export { PeriodPicker } from "@/features/weather/components/controls/PeriodPicker";
 export { SeasonalNormalsToggle } from "@/features/weather/components/controls/SeasonalNormalsToggle";

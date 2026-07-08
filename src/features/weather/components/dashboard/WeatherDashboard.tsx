@@ -26,6 +26,7 @@ export function WeatherDashboard() {
     hiddenSeries,
     hiddenExtremeKinds,
     showNormals,
+    showForecast,
     setCity,
     setPeriod,
     toggleComparisonOffset,
@@ -34,6 +35,7 @@ export function WeatherDashboard() {
     toggleHiddenSeries,
     toggleExtremeKind,
     setShowNormals,
+    setShowForecast,
   } = useWeatherStore();
   const { t } = useLocale();
   const shareUrl = useWeatherUrlState();
@@ -45,6 +47,7 @@ export function WeatherDashboard() {
     city,
     offsets: [0, ...comparisonOffsets],
     period,
+    showForecast,
   });
   const normals = useClimateNormals({
     city,
@@ -110,11 +113,13 @@ export function WeatherDashboard() {
             onCityChange={setCity}
             onClearOffsets={clearComparisonOffsets}
             onPeriodChange={setPeriod}
+            onShowForecastChange={setShowForecast}
             onShowNormalsChange={setShowNormals}
             onTemperatureModeChange={setTemperatureMode}
             onToggleExtremeKind={toggleExtremeKind}
             onToggleOffset={toggleComparisonOffset}
             period={period}
+            showForecast={showForecast}
             showNormals={showNormals}
             temperatureMode={temperatureMode}
           />

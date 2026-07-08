@@ -85,6 +85,7 @@ test("serializeWeatherUrlState omits default values and canonicalizes compare or
       endDate: "2026-05-26",
     },
     showNormals: false,
+    showForecast: true,
     temperatureMode: "tmax",
   });
 
@@ -93,5 +94,25 @@ test("serializeWeatherUrlState omits default values and canonicalizes compare or
   assert.equal(params.get("end"), "2026-05-26");
   assert.equal(params.get("compare"), "1,3,5");
   assert.equal(params.has("normals"), false);
+  assert.equal(params.has("forecast"), false);
   assert.equal(params.has("temp"), false);
+});
+
+test("forecast param parses to false only when 0 and defaults to true when absent", () => {
+  assert.equal(parseWeatherUrlState(new URLSearchParams({ forecast: "0" })).showForecast, false);
+  assert.equal(parseWeatherUrlState(new URLSearchParams({ forecast: "1" })).showForecast, true);
+  assert.equal(parseWeatherUrlState(new URLSearchParams()).showForecast, undefined);
+});
+
+test("serializeWeatherUrlState emits forecast=0 only when forecast is off", () => {
+  const base = {
+    city: null,
+    comparisonOffsets: [],
+    period: { startDate: "2026-05-01", endDate: "2026-05-26" },
+    showNormals: false,
+    temperatureMode: "tmax" as const,
+  };
+
+  assert.equal(serializeWeatherUrlState({ ...base, showForecast: true }).has("forecast"), false);
+  assert.equal(serializeWeatherUrlState({ ...base, showForecast: false }).get("forecast"), "0");
 });

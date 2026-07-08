@@ -2,6 +2,7 @@
 
 import { CitySearch } from "@/features/weather/components/controls";
 import { ExtremeFilters } from "@/features/weather/components/controls";
+import { ForecastToggle } from "@/features/weather/components/controls";
 import { PeriodPicker } from "@/features/weather/components/controls";
 import { SeasonalNormalsToggle } from "@/features/weather/components/controls";
 import { TemperatureToggle } from "@/features/weather/components/controls";
@@ -15,6 +16,7 @@ type WeatherDashboardFiltersProps = {
   comparisonOffsets: number[];
   period: DatePeriod;
   showNormals: boolean;
+  showForecast: boolean;
   temperatureMode: TemperatureMode;
   hiddenExtremeKinds: ExtremeKind[];
   availableExtremeKinds: Record<ExtremeKind, boolean>;
@@ -24,6 +26,7 @@ type WeatherDashboardFiltersProps = {
   onClearOffsets: () => void;
   onTemperatureModeChange: (mode: TemperatureMode) => void;
   onShowNormalsChange: (showNormals: boolean) => void;
+  onShowForecastChange: (showForecast: boolean) => void;
   onToggleExtremeKind: (kind: ExtremeKind) => void;
 };
 
@@ -32,6 +35,7 @@ export function WeatherDashboardFilters({
   comparisonOffsets,
   period,
   showNormals,
+  showForecast,
   temperatureMode,
   hiddenExtremeKinds,
   availableExtremeKinds,
@@ -41,6 +45,7 @@ export function WeatherDashboardFilters({
   onClearOffsets,
   onTemperatureModeChange,
   onShowNormalsChange,
+  onShowForecastChange,
   onToggleExtremeKind,
 }: WeatherDashboardFiltersProps) {
   const { t } = useLocale();
@@ -61,6 +66,7 @@ export function WeatherDashboardFilters({
       <div className="grid gap-3 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-end lg:justify-end">
         <TemperatureToggle onChange={onTemperatureModeChange} value={temperatureMode} />
         <SeasonalNormalsToggle checked={showNormals} onCheckedChange={onShowNormalsChange} />
+        <ForecastToggle checked={showForecast} onCheckedChange={onShowForecastChange} />
       </div>
       <div className="lg:col-span-full xl:col-span-full">
         <ExtremeFilters

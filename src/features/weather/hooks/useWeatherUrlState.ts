@@ -22,6 +22,7 @@ type WeatherUrlStoreSlice = {
   comparisonOffsets: ReturnType<typeof useWeatherStore.getState>["comparisonOffsets"];
   period: ReturnType<typeof useWeatherStore.getState>["period"];
   showNormals: ReturnType<typeof useWeatherStore.getState>["showNormals"];
+  showForecast: ReturnType<typeof useWeatherStore.getState>["showForecast"];
   temperatureMode: ReturnType<typeof useWeatherStore.getState>["temperatureMode"];
 };
 
@@ -50,6 +51,7 @@ export function useWeatherUrlState() {
   const comparisonOffsets = useWeatherStore((state) => state.comparisonOffsets);
   const period = useWeatherStore((state) => state.period);
   const showNormals = useWeatherStore((state) => state.showNormals);
+  const showForecast = useWeatherStore((state) => state.showForecast);
   const temperatureMode = useWeatherStore((state) => state.temperatureMode);
   const hydrateFromUrl = useWeatherStore((state) => state.hydrateFromUrl);
   const hasHydratedRef = useRef(false);
@@ -61,9 +63,10 @@ export function useWeatherUrlState() {
         comparisonOffsets,
         period,
         showNormals,
+        showForecast,
         temperatureMode,
       }),
-    [city, comparisonOffsets, period, showNormals, temperatureMode]
+    [city, comparisonOffsets, period, showNormals, showForecast, temperatureMode]
   );
 
   useEffect(() => {
@@ -98,6 +101,7 @@ export function useWeatherUrlState() {
       comparisonOffsets: latest.comparisonOffsets,
       period: latest.period,
       showNormals: latest.showNormals,
+      showForecast: latest.showForecast,
       temperatureMode: latest.temperatureMode,
     });
 

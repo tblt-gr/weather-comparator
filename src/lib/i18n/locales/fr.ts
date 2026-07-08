@@ -79,4 +79,9 @@ export const fr: Translations = {
   "chart.tropicalNight": "Nuit tropicale",
   "app.skipToContent": "Aller au contenu principal",
   "forecast.unavailable": "Prévisions indisponibles — les données futures n'ont pas pu être chargées.",
+  "forecast.label": "Prévisions",
+  "forecast.ariaLabel": "Afficher les prévisions",
+  "forecast.description":
+    "Ajoute les prévisions à venir sur l'année de référence, à partir du meilleur modèle disponible (Météo-France pour la France).",
+  "forecast.infoAriaLabel": "À propos des prévisions",
 };

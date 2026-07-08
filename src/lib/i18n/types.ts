@@ -78,4 +78,8 @@ export type Translations = {
   "chart.tropicalNight": string;
   "app.skipToContent": string;
   "forecast.unavailable": string;
+  "forecast.label": string;
+  "forecast.ariaLabel": string;
+  "forecast.description": string;
+  "forecast.infoAriaLabel": string;
 };

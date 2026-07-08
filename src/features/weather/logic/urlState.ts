@@ -23,6 +23,7 @@ export type WeatherUrlState = {
   comparisonOffsets?: number[];
   period?: DatePeriod;
   showNormals?: boolean;
+  showForecast?: boolean;
   temperatureMode?: TemperatureMode;
 };
 
@@ -91,6 +92,7 @@ export function parseWeatherUrlState(
   const end = params.get("end");
   const compare = params.get("compare");
   const normals = params.get("normals");
+  const forecast = params.get("forecast");
   const temp = params.get("temp");
 
   if (cityParam) {
@@ -126,6 +128,10 @@ export function parseWeatherUrlState(
     nextState.showNormals = normals === "1";
   }
 
+  if (forecast !== null) {
+    nextState.showForecast = forecast !== "0";
+  }
+
   if (temp !== null) {
     nextState.temperatureMode = temp === "tmin" ? "tmin" : "tmax";
   }
@@ -138,6 +144,7 @@ export function serializeWeatherUrlState(state: {
   comparisonOffsets: number[];
   period: DatePeriod;
   showNormals: boolean;
+  showForecast: boolean;
   temperatureMode: TemperatureMode;
 }) {
   const params = new URLSearchParams();
@@ -164,6 +171,10 @@ export function serializeWeatherUrlState(state: {
 
   if (state.showNormals) {
     params.set("normals", "1");
+  }
+
+  if (!state.showForecast) {
+    params.set("forecast", "0");
   }
 
   if (state.temperatureMode !== "tmax") {

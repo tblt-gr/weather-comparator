@@ -45,6 +45,7 @@ function resetStore() {
     temperatureMode: initialState.temperatureMode,
     hiddenSeries: [...initialState.hiddenSeries],
     showNormals: initialState.showNormals,
+    showForecast: initialState.showForecast,
   });
 }
 
@@ -199,6 +200,27 @@ test("hydrateFromUrl updates URL-managed fields atomically without touching hidd
   assert.equal(useWeatherStore.getState().showNormals, true);
   assert.deepEqual(useWeatherStore.getState().hiddenSeries, ["current"]);
   assert.deepEqual(loadPersistedCity(), baseCity);
+});
+
+test("showForecast defaults to true and setShowForecast toggles it", () => {
+  assert.equal(getInitialWeatherState().showForecast, true);
+  assert.equal(useWeatherStore.getState().showForecast, true);
+
+  useWeatherStore.getState().setShowForecast(false);
+  assert.equal(useWeatherStore.getState().showForecast, false);
+
+  useWeatherStore.getState().setShowForecast(true);
+  assert.equal(useWeatherStore.getState().showForecast, true);
+});
+
+test("hydrateFromUrl applies showForecast", () => {
+  useWeatherStore.setState({ showForecast: true });
+
+  useWeatherStore.getState().hydrateFromUrl({ showForecast: false });
+  assert.equal(useWeatherStore.getState().showForecast, false);
+
+  useWeatherStore.getState().hydrateFromUrl({});
+  assert.equal(useWeatherStore.getState().showForecast, false);
 });
 
 test("toggleHiddenSeries adds and removes a series id", () => {

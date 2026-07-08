@@ -19,6 +19,7 @@ type WeatherState = {
   hiddenSeries: string[];
   hiddenExtremeKinds: ExtremeKind[];
   showNormals: boolean;
+  showForecast: boolean;
   setCity: (city: City | null) => void;
   setPeriod: (period: DatePeriod) => void;
   toggleComparisonOffset: (offsetYears: number) => void;
@@ -27,6 +28,7 @@ type WeatherState = {
   toggleHiddenSeries: (seriesId: string) => void;
   toggleExtremeKind: (kind: ExtremeKind) => void;
   setShowNormals: (showNormals: boolean) => void;
+  setShowForecast: (showForecast: boolean) => void;
   hydrateFromUrl: (state: WeatherUrlState) => void;
 };
 
@@ -71,6 +73,7 @@ export function getInitialWeatherState(): Omit<
   | "toggleHiddenSeries"
   | "toggleExtremeKind"
   | "setShowNormals"
+  | "setShowForecast"
   | "hydrateFromUrl"
 > {
   return {
@@ -81,6 +84,7 @@ export function getInitialWeatherState(): Omit<
     hiddenSeries: [],
     hiddenExtremeKinds: [],
     showNormals: false,
+    showForecast: true,
   };
 }
 
@@ -121,6 +125,7 @@ export const useWeatherStore = create<WeatherState>((set) => ({
         : [...state.hiddenExtremeKinds, kind],
     })),
   setShowNormals: (showNormals) => set({ showNormals }),
+  setShowForecast: (showForecast) => set({ showForecast }),
   hydrateFromUrl: (state) => {
     if (state.city !== undefined) {
       persistCity(state.city);
@@ -134,6 +139,7 @@ export const useWeatherStore = create<WeatherState>((set) => ({
         currentState.comparisonOffsets,
       temperatureMode: state.temperatureMode ?? currentState.temperatureMode,
       showNormals: state.showNormals ?? currentState.showNormals,
+      showForecast: state.showForecast ?? currentState.showForecast,
     }));
   },
 }));
