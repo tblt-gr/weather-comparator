@@ -110,7 +110,12 @@ function segmentEpisode(
     segments.push({ start: cursor, end: episodeLength - 1, kind: "vague_de_chaleur" });
   }
 
-  return segments;
+  // A single leftover day is not a "vague de chaleur" on its own; drop it so a
+  // lone hot day trailing (or leading) a canicule is not surfaced as its own
+  // one-day segment. Canicule segments are always at least the minimum duration.
+  return segments.filter(
+    (segment) => segment.kind !== "vague_de_chaleur" || segment.end > segment.start
+  );
 }
 
 function crossesBothThresholds(value: DailyTemperature, thresholdMax: number, thresholdMin: number): boolean {

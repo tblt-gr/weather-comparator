@@ -193,6 +193,38 @@ test("splits an episode into vague de chaleur and canicule segments when only pa
   );
 });
 
+test("drops a single trailing hot day instead of emitting a one-day vague de chaleur segment", () => {
+  const datasets: WeatherYearDataset[] = [
+    buildDataset("current", "2026", [
+      [30.1, 16.7],
+      [34.2, 17.9],
+      [31.5, 17.6],
+      [32.4, 18.9],
+      [35.8, 21.5],
+      [36.5, 20.5],
+      [37.2, 20],
+      [38.8, 21.1],
+      [39.9, 21.5],
+      [38.9, 21],
+      [33.1, 20.1],
+    ]),
+  ];
+
+  const heatwaves = detectHeatwaves(datasets);
+
+  assert.deepEqual(
+    heatwaves.map((heatwave) => ({
+      kind: heatwave.kind,
+      startDay: heatwave.startDay,
+      endDay: heatwave.endDay,
+    })),
+    [
+      { kind: "vague_de_chaleur", startDay: 1, endDay: 4 },
+      { kind: "canicule", startDay: 5, endDay: 10 },
+    ]
+  );
+});
+
 test("detects a forecast-only heatwave and marks it as forecast", () => {
   const datasets: WeatherYearDataset[] = [
     buildDataset("current", "2026", [
