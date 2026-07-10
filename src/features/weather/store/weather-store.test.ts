@@ -3,7 +3,12 @@ import test from "node:test";
 
 import type { City } from "@/features/weather/types";
 
-import { getInitialWeatherState, loadPersistedCity, useWeatherStore } from "./weather-store";
+import {
+  getInitialWeatherState,
+  loadPersistedCity,
+  loadPersistedForecastModel,
+  useWeatherStore,
+} from "./weather-store";
 
 const storage = new Map<string, string>();
 const originalWindow = globalThis.window;
@@ -87,6 +92,13 @@ test("getInitialWeatherState does not read the persisted city during initial ren
 
   assert.equal(useWeatherStore.getState().city, null);
   assert.equal(loadPersistedCity(), null);
+});
+
+test("getInitialWeatherState keeps the default forecast model to avoid a hydration mismatch", () => {
+  storage.set("weather-compare.forecastModel", "meteofrance_seamless");
+
+  assert.equal(getInitialWeatherState().forecastModel, "best_match");
+  assert.equal(loadPersistedForecastModel(), "meteofrance_seamless");
 });
 
 test("getInitialWeatherState computes the default period from the current date at call time", () => {

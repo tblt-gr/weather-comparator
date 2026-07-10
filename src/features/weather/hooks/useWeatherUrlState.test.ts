@@ -30,6 +30,7 @@ test("buildWeatherUrlSearch serializes canonical query params from store state",
     showNormals: true,
     showForecast: true,
     temperatureMode: "tmin",
+    forecastModel: "best_match",
   });
 
   assert.equal(

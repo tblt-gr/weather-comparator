@@ -24,6 +24,7 @@ type WeatherUrlStoreSlice = {
   showNormals: ReturnType<typeof useWeatherStore.getState>["showNormals"];
   showForecast: ReturnType<typeof useWeatherStore.getState>["showForecast"];
   temperatureMode: ReturnType<typeof useWeatherStore.getState>["temperatureMode"];
+  forecastModel: ReturnType<typeof useWeatherStore.getState>["forecastModel"];
 };
 
 export function buildWeatherUrlSearch(state: WeatherUrlStoreSlice) {
@@ -53,6 +54,7 @@ export function useWeatherUrlState() {
   const showNormals = useWeatherStore((state) => state.showNormals);
   const showForecast = useWeatherStore((state) => state.showForecast);
   const temperatureMode = useWeatherStore((state) => state.temperatureMode);
+  const forecastModel = useWeatherStore((state) => state.forecastModel);
   const hydrateFromUrl = useWeatherStore((state) => state.hydrateFromUrl);
   const hasHydratedRef = useRef(false);
   const currentSearch = searchParams.toString();
@@ -65,8 +67,9 @@ export function useWeatherUrlState() {
         showNormals,
         showForecast,
         temperatureMode,
+        forecastModel,
       }),
-    [city, comparisonOffsets, period, showNormals, showForecast, temperatureMode]
+    [city, comparisonOffsets, period, showNormals, showForecast, temperatureMode, forecastModel]
   );
 
   useEffect(() => {
@@ -103,6 +106,7 @@ export function useWeatherUrlState() {
       showNormals: latest.showNormals,
       showForecast: latest.showForecast,
       temperatureMode: latest.temperatureMode,
+      forecastModel: latest.forecastModel,
     });
 
     if (!shouldReplaceWeatherUrl(currentSearch, freshNextSearch)) {

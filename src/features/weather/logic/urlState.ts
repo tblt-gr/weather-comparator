@@ -7,7 +7,8 @@ import {
   isValidDatePeriod,
   validateDatePeriod,
 } from "@/features/weather/logic/dates";
-import type { City, TemperatureMode } from "@/features/weather/types";
+import { isForecastModel } from "@/features/weather/logic/weatherModels";
+import type { City, ForecastModel, TemperatureMode } from "@/features/weather/types";
 
 type EncodedCity = {
   admin1?: string;
@@ -25,6 +26,7 @@ export type WeatherUrlState = {
   showNormals?: boolean;
   showForecast?: boolean;
   temperatureMode?: TemperatureMode;
+  forecastModel?: ForecastModel;
 };
 
 export function encodeCityParam(city: City) {
@@ -94,6 +96,7 @@ export function parseWeatherUrlState(
   const normals = params.get("normals");
   const forecast = params.get("forecast");
   const temp = params.get("temp");
+  const fmodel = params.get("fmodel");
 
   if (cityParam) {
     const city = decodeCityParam(cityParam);
@@ -136,6 +139,10 @@ export function parseWeatherUrlState(
     nextState.temperatureMode = temp === "tmin" ? "tmin" : "tmax";
   }
 
+  if (fmodel !== null && isForecastModel(fmodel)) {
+    nextState.forecastModel = fmodel;
+  }
+
   return nextState;
 }
 
@@ -146,6 +153,7 @@ export function serializeWeatherUrlState(state: {
   showNormals: boolean;
   showForecast: boolean;
   temperatureMode: TemperatureMode;
+  forecastModel: ForecastModel;
 }) {
   const params = new URLSearchParams();
 
@@ -179,6 +187,10 @@ export function serializeWeatherUrlState(state: {
 
   if (state.temperatureMode !== "tmax") {
     params.set("temp", state.temperatureMode);
+  }
+
+  if (state.forecastModel !== "best_match") {
+    params.set("fmodel", state.forecastModel);
   }
 
   return params;

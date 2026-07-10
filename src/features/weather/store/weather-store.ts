@@ -7,15 +7,23 @@ import {
   getDefaultComparisonPeriod,
 } from "@/features/weather/logic/dates";
 import type { WeatherUrlState } from "@/features/weather/logic/urlState";
-import type { City, ExtremeKind, TemperatureMode } from "@/features/weather/types";
+import { isForecastModel } from "@/features/weather/logic/weatherModels";
+import type {
+  City,
+  ExtremeKind,
+  ForecastModel,
+  TemperatureMode,
+} from "@/features/weather/types";
 
 const CITY_STORAGE_KEY = "weather-compare.city";
+const FORECAST_MODEL_STORAGE_KEY = "weather-compare.forecastModel";
 
 type WeatherState = {
   city: City | null;
   period: DatePeriod;
   comparisonOffsets: number[];
   temperatureMode: TemperatureMode;
+  forecastModel: ForecastModel;
   hiddenSeries: string[];
   hiddenExtremeKinds: ExtremeKind[];
   showNormals: boolean;
@@ -25,6 +33,7 @@ type WeatherState = {
   toggleComparisonOffset: (offsetYears: number) => void;
   clearComparisonOffsets: () => void;
   setTemperatureMode: (mode: TemperatureMode) => void;
+  setForecastModel: (model: ForecastModel) => void;
   toggleHiddenSeries: (seriesId: string) => void;
   toggleExtremeKind: (kind: ExtremeKind) => void;
   setShowNormals: (showNormals: boolean) => void;
@@ -63,6 +72,24 @@ export function loadPersistedCity() {
   }
 }
 
+function persistForecastModel(model: ForecastModel) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(FORECAST_MODEL_STORAGE_KEY, model);
+}
+
+export function loadPersistedForecastModel(): ForecastModel {
+  if (typeof window === "undefined") {
+    return "best_match";
+  }
+
+  const raw = window.localStorage.getItem(FORECAST_MODEL_STORAGE_KEY);
+
+  return raw && isForecastModel(raw) ? raw : "best_match";
+}
+
 export function getInitialWeatherState(): Omit<
   WeatherState,
   | "setCity"
@@ -70,6 +97,7 @@ export function getInitialWeatherState(): Omit<
   | "toggleComparisonOffset"
   | "clearComparisonOffsets"
   | "setTemperatureMode"
+  | "setForecastModel"
   | "toggleHiddenSeries"
   | "toggleExtremeKind"
   | "setShowNormals"
@@ -81,6 +109,7 @@ export function getInitialWeatherState(): Omit<
     period: getDefaultComparisonPeriod(),
     comparisonOffsets: [],
     temperatureMode: "tmax",
+    forecastModel: "best_match",
     hiddenSeries: [],
     hiddenExtremeKinds: [],
     showNormals: false,
@@ -112,6 +141,10 @@ export const useWeatherStore = create<WeatherState>((set) => ({
       hiddenSeries: state.hiddenSeries.filter((seriesId) => !seriesId.startsWith("minus-")),
     })),
   setTemperatureMode: (temperatureMode) => set({ temperatureMode }),
+  setForecastModel: (forecastModel) => {
+    persistForecastModel(forecastModel);
+    set({ forecastModel });
+  },
   toggleHiddenSeries: (seriesId) =>
     set((state) => ({
       hiddenSeries: state.hiddenSeries.includes(seriesId)
@@ -131,6 +164,10 @@ export const useWeatherStore = create<WeatherState>((set) => ({
       persistCity(state.city);
     }
 
+    if (state.forecastModel !== undefined) {
+      persistForecastModel(state.forecastModel);
+    }
+
     set((currentState) => ({
       city: state.city ?? currentState.city,
       period: state.period ?? currentState.period,
@@ -138,6 +175,7 @@ export const useWeatherStore = create<WeatherState>((set) => ({
         state.comparisonOffsets?.slice().sort((left, right) => left - right) ??
         currentState.comparisonOffsets,
       temperatureMode: state.temperatureMode ?? currentState.temperatureMode,
+      forecastModel: state.forecastModel ?? currentState.forecastModel,
       showNormals: state.showNormals ?? currentState.showNormals,
       showForecast: state.showForecast ?? currentState.showForecast,
     }));

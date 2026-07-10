@@ -87,6 +87,7 @@ test("serializeWeatherUrlState omits default values and canonicalizes compare or
     showNormals: false,
     showForecast: true,
     temperatureMode: "tmax",
+    forecastModel: "best_match",
   });
 
   assert.equal(params.get("city"), encodeCityParam(paris));
@@ -96,6 +97,7 @@ test("serializeWeatherUrlState omits default values and canonicalizes compare or
   assert.equal(params.has("normals"), false);
   assert.equal(params.has("forecast"), false);
   assert.equal(params.has("temp"), false);
+  assert.equal(params.has("fmodel"), false);
 });
 
 test("forecast param parses to false only when 0 and defaults to true when absent", () => {
@@ -111,8 +113,32 @@ test("serializeWeatherUrlState emits forecast=0 only when forecast is off", () =
     period: { startDate: "2026-05-01", endDate: "2026-05-26" },
     showNormals: false,
     temperatureMode: "tmax" as const,
+    forecastModel: "best_match" as const,
   };
 
   assert.equal(serializeWeatherUrlState({ ...base, showForecast: true }).has("forecast"), false);
   assert.equal(serializeWeatherUrlState({ ...base, showForecast: false }).get("forecast"), "0");
+});
+
+test("forecast model param round-trips through serialize and parse", () => {
+  const params = serializeWeatherUrlState({
+    city: null,
+    comparisonOffsets: [],
+    period: { startDate: "2026-05-01", endDate: "2026-05-26" },
+    showNormals: false,
+    showForecast: true,
+    temperatureMode: "tmax",
+    forecastModel: "icon_seamless",
+  });
+
+  assert.equal(params.get("fmodel"), "icon_seamless");
+
+  const parsed = parseWeatherUrlState(params);
+  assert.equal(parsed.forecastModel, "icon_seamless");
+});
+
+test("parseWeatherUrlState ignores an invalid forecast model param", () => {
+  const parsed = parseWeatherUrlState(new URLSearchParams({ fmodel: "also_bad" }));
+
+  assert.equal(parsed.forecastModel, undefined);
 });
