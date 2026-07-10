@@ -40,6 +40,17 @@ export type Translations = {
   "extremes.criteria.vague_de_froid": string;
   "extremes.criteria.grand_froid": string;
   "temp.groupAriaLabel": string;
+  "forecastModel.ariaLabel": string;
+  "forecastModel.best_match": string;
+  "forecastModel.ecmwf_ifs025": string;
+  "forecastModel.gfs_seamless": string;
+  "forecastModel.icon_seamless": string;
+  "forecastModel.meteofrance_seamless": string;
+  "forecastModel.hint.best_match": string;
+  "forecastModel.hint.ecmwf_ifs025": string;
+  "forecastModel.hint.gfs_seamless": string;
+  "forecastModel.hint.icon_seamless": string;
+  "forecastModel.hint.meteofrance_seamless": string;
   "theme.lightAriaLabel": string;
   "theme.darkAriaLabel": string;
   "lang.ariaLabel": string;

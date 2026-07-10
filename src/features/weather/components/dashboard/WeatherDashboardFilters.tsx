@@ -2,14 +2,14 @@
 
 import { CitySearch } from "@/features/weather/components/controls";
 import { ExtremeFilters } from "@/features/weather/components/controls";
-import { ForecastToggle } from "@/features/weather/components/controls";
+import { ForecastControl } from "@/features/weather/components/controls";
 import { PeriodPicker } from "@/features/weather/components/controls";
 import { SeasonalNormalsToggle } from "@/features/weather/components/controls";
 import { TemperatureToggle } from "@/features/weather/components/controls";
 import { YearSelector } from "@/features/weather/components/controls";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { DatePeriod } from "@/features/weather/logic/dates";
-import type { City, ExtremeKind, TemperatureMode } from "@/features/weather/types";
+import type { City, ExtremeKind, ForecastModel, TemperatureMode } from "@/features/weather/types";
 
 type WeatherDashboardFiltersProps = {
   city: City | null;
@@ -18,6 +18,7 @@ type WeatherDashboardFiltersProps = {
   showNormals: boolean;
   showForecast: boolean;
   temperatureMode: TemperatureMode;
+  forecastModel: ForecastModel;
   hiddenExtremeKinds: ExtremeKind[];
   availableExtremeKinds: Record<ExtremeKind, boolean>;
   onCityChange: (city: City | null) => void;
@@ -27,6 +28,7 @@ type WeatherDashboardFiltersProps = {
   onTemperatureModeChange: (mode: TemperatureMode) => void;
   onShowNormalsChange: (showNormals: boolean) => void;
   onShowForecastChange: (showForecast: boolean) => void;
+  onForecastModelChange: (model: ForecastModel) => void;
   onToggleExtremeKind: (kind: ExtremeKind) => void;
 };
 
@@ -37,6 +39,7 @@ export function WeatherDashboardFilters({
   showNormals,
   showForecast,
   temperatureMode,
+  forecastModel,
   hiddenExtremeKinds,
   availableExtremeKinds,
   onCityChange,
@@ -46,6 +49,7 @@ export function WeatherDashboardFilters({
   onTemperatureModeChange,
   onShowNormalsChange,
   onShowForecastChange,
+  onForecastModelChange,
   onToggleExtremeKind,
 }: WeatherDashboardFiltersProps) {
   const { t } = useLocale();
@@ -53,22 +57,29 @@ export function WeatherDashboardFilters({
   return (
     <section
       aria-label={t["app.filtersAriaLabel"]}
-      className="glass-panel grid gap-4 rounded-2xl p-4 lg:grid-cols-[minmax(240px,340px)_minmax(360px,1fr)] lg:items-end xl:grid-cols-[minmax(240px,340px)_minmax(360px,520px)_1fr_auto]"
+      className="glass-panel flex flex-col gap-4 rounded-2xl p-4"
     >
-      <CitySearch key={city?.id ?? "empty"} city={city} onCityChange={onCityChange} />
-      <PeriodPicker period={period} onPeriodChange={onPeriodChange} />
-      <YearSelector
-        onClearOffsets={onClearOffsets}
-        onToggleOffset={onToggleOffset}
-        period={period}
-        selectedOffsets={comparisonOffsets}
-      />
-      <div className="grid gap-3 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-end lg:justify-end">
-        <TemperatureToggle onChange={onTemperatureModeChange} value={temperatureMode} />
-        <SeasonalNormalsToggle checked={showNormals} onCheckedChange={onShowNormalsChange} />
-        <ForecastToggle checked={showForecast} onCheckedChange={onShowForecastChange} />
+      <div className="grid gap-4 lg:grid-cols-[minmax(240px,340px)_minmax(360px,1fr)] lg:items-end xl:grid-cols-[minmax(240px,340px)_minmax(360px,520px)_1fr_auto]">
+        <CitySearch key={city?.id ?? "empty"} city={city} onCityChange={onCityChange} />
+        <PeriodPicker period={period} onPeriodChange={onPeriodChange} />
+        <YearSelector
+          onClearOffsets={onClearOffsets}
+          onToggleOffset={onToggleOffset}
+          period={period}
+          selectedOffsets={comparisonOffsets}
+        />
+        <div className="flex lg:justify-end">
+          <TemperatureToggle onChange={onTemperatureModeChange} value={temperatureMode} />
+        </div>
       </div>
-      <div className="lg:col-span-full xl:col-span-full">
+      <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center">
+        <SeasonalNormalsToggle checked={showNormals} onCheckedChange={onShowNormalsChange} />
+        <ForecastControl
+          checked={showForecast}
+          model={forecastModel}
+          onCheckedChange={onShowForecastChange}
+          onModelChange={onForecastModelChange}
+        />
         <ExtremeFilters
           availableKinds={availableExtremeKinds}
           hiddenKinds={hiddenExtremeKinds}

@@ -10,6 +10,7 @@ import { palette } from "@/features/weather/components/chart";
 import { ColdWaveOverlay, HeatwaveOverlay } from "@/features/weather/components/extremes";
 import { useClimateNormals } from "@/features/weather/hooks/useClimateNormals";
 import { useGeolocatedCity } from "@/features/weather/hooks/useGeolocatedCity";
+import { usePersistedForecastModel } from "@/features/weather/hooks/usePersistedForecastModel";
 import { useWeatherData } from "@/features/weather/hooks/useWeatherData";
 import { useWeatherUrlState } from "@/features/weather/hooks/useWeatherUrlState";
 import { detectColdWaves, detectHeatwaves } from "@/features/weather/logic/extremes";
@@ -23,6 +24,7 @@ export function WeatherDashboard() {
     period,
     comparisonOffsets,
     temperatureMode,
+    forecastModel,
     hiddenSeries,
     hiddenExtremeKinds,
     showNormals,
@@ -32,6 +34,7 @@ export function WeatherDashboard() {
     toggleComparisonOffset,
     clearComparisonOffsets,
     setTemperatureMode,
+    setForecastModel,
     toggleHiddenSeries,
     toggleExtremeKind,
     setShowNormals,
@@ -42,12 +45,14 @@ export function WeatherDashboard() {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   useGeolocatedCity();
+  usePersistedForecastModel();
 
   const weather = useWeatherData({
     city,
     offsets: [0, ...comparisonOffsets],
     period,
     showForecast,
+    forecastModel,
   });
   const normals = useClimateNormals({
     city,
@@ -110,8 +115,10 @@ export function WeatherDashboard() {
             city={city}
             comparisonOffsets={comparisonOffsets}
             hiddenExtremeKinds={hiddenExtremeKinds}
+            forecastModel={forecastModel}
             onCityChange={setCity}
             onClearOffsets={clearComparisonOffsets}
+            onForecastModelChange={setForecastModel}
             onPeriodChange={setPeriod}
             onShowForecastChange={setShowForecast}
             onShowNormalsChange={setShowNormals}
