@@ -15,7 +15,6 @@ import {
   Select,
   SelectContent,
   SelectItem,
-  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -88,13 +87,14 @@ export function ForecastControl({
           onValueChange={(next) => onModelChange(next as ForecastModel)}
           value={model}
         >
-          <SelectTrigger aria-label={t["forecastModel.ariaLabel"]} className="flex-1 lg:flex-none" size="sm">
+          <SelectTrigger
+            aria-label={t["forecastModel.ariaLabel"]}
+            className="h-11 flex-1 border-border bg-background hover:bg-muted dark:border-input dark:bg-input/30 dark:hover:bg-input/50 lg:flex-none"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent align="end">
-            <SelectItem value="best_match">{t["forecastModel.best_match"]}</SelectItem>
-            <SelectSeparator />
-            {FORECAST_MODELS.filter((option) => option !== "best_match").map((option) => (
+            {FORECAST_MODELS.map((option) => (
               <SelectItem key={option} value={option}>
                 {t[LABEL_KEYS[option]]}
               </SelectItem>
