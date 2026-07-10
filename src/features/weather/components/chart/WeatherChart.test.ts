@@ -865,6 +865,6 @@ test("uses an equidistant x-axis interval to keep date ticks evenly spaced", () 
 test("removes focus outline styles from recharts surfaces inside the chart shell", () => {
   const source = readFileSync(path.join(process.cwd(), "src/app/globals.css"), "utf8");
 
-  assert.equal(source.includes(".weather-chart-shell :is(.recharts-wrapper, .recharts-surface):focus"), true);
+  assert.equal(source.includes(".weather-chart-shell :focus"), true);
   assert.equal(source.includes("outline: none;"), true);
 });

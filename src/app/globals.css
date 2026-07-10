@@ -208,8 +208,8 @@
         border: 1px solid var(--border);
     }
 
-    .weather-chart-shell :is(.recharts-wrapper, .recharts-surface):focus,
-    .weather-chart-shell :is(.recharts-wrapper, .recharts-surface):focus-visible {
+    .weather-chart-shell :focus,
+    .weather-chart-shell :focus-visible {
         outline: none;
         box-shadow: none;
     }
