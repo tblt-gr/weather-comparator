@@ -9,6 +9,13 @@ export type City = {
 
 export type TemperatureMode = "tmax" | "tmin";
 
+export type ForecastModel =
+  | "best_match"
+  | "ecmwf_ifs025"
+  | "gfs_seamless"
+  | "icon_seamless"
+  | "meteofrance_seamless";
+
 export type DailyTemperature = {
   date: string;
   day: number;

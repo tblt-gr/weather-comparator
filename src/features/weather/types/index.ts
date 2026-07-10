@@ -4,6 +4,7 @@ export type {
   ColdWavePeriod,
   DailyTemperature,
   ExtremeKind,
+  ForecastModel,
   HeatwavePeriod,
   TemperatureMode,
   WeatherYearDataset,

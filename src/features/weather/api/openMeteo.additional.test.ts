@@ -277,6 +277,32 @@ test("fetchForecastWeather caps the request to the supported forecast horizon", 
   mock.restoreAll();
 });
 
+test("fetchForecastWeather forwards the forecast model only when not best_match", async () => {
+  let capturedModels: string | null = "unset";
+  mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    capturedModels = new URL(String(input)).searchParams.get("models");
+    return new Response(JSON.stringify({ daily: { time: [] } }));
+  });
+
+  await fetchForecastWeather({
+    city: baseCity,
+    period: { startDate: "2025-05-20", endDate: "2025-05-30" },
+    today: "2025-05-25",
+    forecastModel: "best_match",
+  });
+  assert.equal(capturedModels, null);
+
+  await fetchForecastWeather({
+    city: baseCity,
+    period: { startDate: "2025-05-20", endDate: "2025-05-30" },
+    today: "2025-05-25",
+    forecastModel: "meteofrance_seamless",
+  });
+  assert.equal(capturedModels, "meteofrance_seamless");
+
+  mock.restoreAll();
+});
+
 test("createWeatherRequestSignal aborts after the timeout when no parent signal is provided", async () => {
   const signal = createWeatherRequestSignal(undefined, 5);
 

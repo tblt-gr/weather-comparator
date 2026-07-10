@@ -43,3 +43,4 @@ export {
   serializeWeatherUrlState,
 } from "@/features/weather/logic/urlState";
 export type { WeatherUrlState } from "@/features/weather/logic/urlState";
+export { FORECAST_MODELS, isForecastModel } from "@/features/weather/logic/weatherModels";

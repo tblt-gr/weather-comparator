@@ -8,7 +8,7 @@ import {
   CLIMATE_NORMAL_START_YEAR,
 } from "@/features/weather/logic/climateNormalYears";
 import { getForecastDateRangeForPeriod } from "@/features/weather/logic/forecastWeather";
-import type { City } from "@/features/weather/types";
+import type { City, ForecastModel } from "@/features/weather/types";
 
 type GeocodingResult = {
   id: number;
@@ -131,12 +131,14 @@ export async function fetchForecastWeather({
   signal,
   today = formatLocalDate(new Date()),
   timeoutMs = FORECAST_REQUEST_TIMEOUT_MS,
+  forecastModel,
 }: {
   city: City;
   period: DatePeriod;
   signal?: AbortSignal;
   today?: string;
   timeoutMs?: number;
+  forecastModel?: ForecastModel;
 }): Promise<OpenMeteoArchiveResponse> {
   const range = getForecastDateRangeForPeriod({ period, today });
 
@@ -152,6 +154,10 @@ export async function fetchForecastWeather({
     daily: "temperature_2m_max,temperature_2m_min",
     timezone: "Europe/Paris",
   });
+
+  if (forecastModel && forecastModel !== "best_match") {
+    params.set("models", forecastModel);
+  }
 
   const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`, {
     signal: createWeatherRequestSignal(signal, timeoutMs),
