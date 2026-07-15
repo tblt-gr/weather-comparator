@@ -23,7 +23,14 @@ export function hasPendingPeriodChange(period: DatePeriod, localPeriod: DatePeri
 export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
   const { t } = useLocale();
   const [localPeriod, setLocalPeriod] = useState(period);
+  const [syncedPeriod, setSyncedPeriod] = useState(period);
   const [errors, setErrors] = useState<DatePeriodErrors>({});
+
+  if (period !== syncedPeriod) {
+    setSyncedPeriod(period);
+    setLocalPeriod(period);
+    setErrors({});
+  }
 
   const hasPendingChange = hasPendingPeriodChange(period, localPeriod);
 
