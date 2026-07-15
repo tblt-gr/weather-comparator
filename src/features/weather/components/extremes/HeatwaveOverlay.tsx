@@ -41,6 +41,16 @@ export function formatHeatwaveSummary(heatwave: HeatwavePeriod, locale: Locale =
   return `${label} ${dateRange} (${heatwave.duration} ${days}, ${avgMax} ${heatwave.averageMax.toFixed(1)} °C)`;
 }
 
+export function getHeatwaveDaysByKind(heatwaves: HeatwavePeriod[]) {
+  const totals = new Map<HeatwavePeriod["kind"], number>();
+
+  heatwaves.forEach((heatwave) => {
+    totals.set(heatwave.kind, (totals.get(heatwave.kind) ?? 0) + heatwave.duration);
+  });
+
+  return Array.from(totals, ([kind, days]) => ({ kind, days }));
+}
+
 export function groupHeatwavesByYear(heatwaves: HeatwavePeriod[]) {
   const groups = new Map<string, HeatwavePeriod[]>();
 
@@ -104,6 +114,20 @@ export function HeatwaveOverlay({ heatwaves, colors = {} }: HeatwaveOverlayProps
                     style={{ backgroundColor: getSeverityColor(heatwave.kind) }}
                   />
                   <span className="text-sm">{formatHeatwaveSummary(heatwave, locale)}</span>
+                </li>
+              ))}
+            </ul>
+            <hr className="my-3 border-orange-300/40 dark:border-orange-300/20" />
+            <ul className="mb-2 grid gap-1.5 text-sm text-orange-900 dark:text-orange-200">
+              {getHeatwaveDaysByKind(group.heatwaves).map(({ kind, days }) => (
+                <li className="flex items-center gap-1 text-sm" key={kind}>
+                  <span
+                    aria-hidden="true"
+                    className="inline-block size-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: getSeverityColor(kind) }}
+                  />
+                  Total {getSeverityLabel(kind, locale)}: {days}{" "}
+                  {locale === "fr" ? "jours" : "days"}
                 </li>
               ))}
             </ul>

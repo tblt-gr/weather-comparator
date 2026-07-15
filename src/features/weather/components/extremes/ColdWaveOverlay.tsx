@@ -44,6 +44,16 @@ export function formatColdWaveSummary(coldWave: ColdWavePeriod, locale: Locale =
   return `${label} ${dateRange} (${coldWave.duration} ${days}, ${avgMin} ${coldWave.averageMin.toFixed(1)} °C)`;
 }
 
+export function getColdWaveDaysByKind(coldWaves: ColdWavePeriod[]) {
+  const totals = new Map<ColdWavePeriod["kind"], number>();
+
+  coldWaves.forEach((coldWave) => {
+    totals.set(coldWave.kind, (totals.get(coldWave.kind) ?? 0) + coldWave.duration);
+  });
+
+  return Array.from(totals, ([kind, days]) => ({ kind, days }));
+}
+
 export function groupColdWavesByYear(coldWaves: ColdWavePeriod[]) {
   const groups = new Map<string, ColdWavePeriod[]>();
 
@@ -106,6 +116,20 @@ export function ColdWaveOverlay({ coldWaves, colors = {} }: ColdWaveOverlayProps
                     style={{ backgroundColor: getSeverityColor(coldWave.kind) }}
                   />
                   <span className="text-sm">{formatColdWaveSummary(coldWave, locale)}</span>
+                </li>
+              ))}
+            </ul>
+            <hr className="my-3 border-blue-300/40 dark:border-blue-300/20" />
+            <ul className="mb-2 grid gap-1.5 text-sm text-blue-900 dark:text-blue-200">
+              {getColdWaveDaysByKind(group.coldWaves).map(({ kind, days }) => (
+                <li className="flex items-center gap-1 text-sm" key={kind}>
+                  <span
+                    aria-hidden="true"
+                    className="inline-block size-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: getSeverityColor(kind) }}
+                  />
+                  Total {getSeverityLabel(kind, locale)}: {days}{" "}
+                  {locale === "fr" ? "jours" : "days"}
                 </li>
               ))}
             </ul>
