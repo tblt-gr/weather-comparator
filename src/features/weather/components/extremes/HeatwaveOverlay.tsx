@@ -3,15 +3,14 @@
 import { useMemo } from "react";
 
 import { EXTREME_KIND_COLORS } from "@/features/weather/logic/extremes";
+import { getTranslations } from "@/lib/i18n/getTranslations";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Locale } from "@/lib/i18n/types";
 import type { HeatwavePeriod } from "@/features/weather/types";
 
 function getSeverityLabel(kind: HeatwavePeriod["kind"], locale: Locale) {
-  if (locale === "en") {
-    return kind === "canicule" ? "Scorching heat" : "Heat wave";
-  }
-  return kind === "canicule" ? "Canicule" : "Vague de chaleur";
+  const t = getTranslations(locale);
+  return kind === "canicule" ? t["heatwave.canicule"] : t["heatwave.vagueLabel"];
 }
 
 function getSeverityColor(kind: HeatwavePeriod["kind"]) {
@@ -24,7 +23,7 @@ export function formatHeatwaveDateRange(
   locale: Locale = "fr"
 ): string {
   const dateLocale = locale === "fr" ? "fr-FR" : "en-GB";
-  const separator = locale === "fr" ? " à " : " to ";
+  const separator = getTranslations(locale)["heatwave.dateSeparator"];
   const fmt = new Intl.DateTimeFormat(dateLocale, {
     day: "2-digit",
     month: "long",
@@ -34,11 +33,10 @@ export function formatHeatwaveDateRange(
 }
 
 export function formatHeatwaveSummary(heatwave: HeatwavePeriod, locale: Locale = "fr"): string {
+  const t = getTranslations(locale);
   const label = getSeverityLabel(heatwave.kind, locale);
   const dateRange = formatHeatwaveDateRange(heatwave.start, heatwave.end, locale);
-  const days = locale === "fr" ? "jours" : "days";
-  const avgMax = locale === "fr" ? "Tmax moyenne" : "avg Tmax";
-  return `${label} ${dateRange} (${heatwave.duration} ${days}, ${avgMax} ${heatwave.averageMax.toFixed(1)} °C)`;
+  return `${label} ${dateRange} (${heatwave.duration} ${t["heatwave.days"]}, ${t["heatwave.avgMax"]} ${heatwave.averageMax.toFixed(1)} °C)`;
 }
 
 export function getHeatwaveDaysByKind(heatwaves: HeatwavePeriod[]) {
@@ -126,8 +124,8 @@ export function HeatwaveOverlay({ heatwaves, colors = {} }: HeatwaveOverlayProps
                     className="inline-block size-2.5 shrink-0 rounded-full"
                     style={{ backgroundColor: getSeverityColor(kind) }}
                   />
-                  Total {getSeverityLabel(kind, locale)}: {days}{" "}
-                  {locale === "fr" ? "jours" : "days"}
+                  {t["extremes.total"]} {getSeverityLabel(kind, locale)}: {days}{" "}
+                  {t["heatwave.days"]}
                 </li>
               ))}
             </ul>

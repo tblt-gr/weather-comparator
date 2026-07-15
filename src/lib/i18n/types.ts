@@ -29,6 +29,8 @@ export type Translations = {
   "year.nSelected": string;
   "year.dropdownAriaLabel": string;
   "year.clearAriaLabel": string;
+  "year.offsetSingular": string;
+  "year.offsetPlural": string;
   "normals.label": string;
   "normals.ariaLabel": string;
   "normals.infoAriaLabel": string;
@@ -72,6 +74,7 @@ export type Translations = {
   "stats.extremeColdNights": string;
   "stats.coldWaves": string;
   "stats.grandFroid": string;
+  "extremes.total": string;
   "coldwave.sectionTitle": string;
   "coldwave.grandFroid": string;
   "coldwave.vagueLabel": string;

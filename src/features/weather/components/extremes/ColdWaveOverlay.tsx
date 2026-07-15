@@ -3,16 +3,14 @@
 import { useMemo } from "react";
 
 import { EXTREME_KIND_COLORS } from "@/features/weather/logic/extremes";
+import { getTranslations } from "@/lib/i18n/getTranslations";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Locale } from "@/lib/i18n/types";
 import type { ColdWavePeriod } from "@/features/weather/types";
 
 function getSeverityLabel(kind: ColdWavePeriod["kind"], locale: Locale) {
-  if (locale === "en") {
-    return kind === "grand_froid" ? "Severe cold" : "Cold wave";
-  }
-
-  return kind === "grand_froid" ? "Grand froid" : "Vague de froid";
+  const t = getTranslations(locale);
+  return kind === "grand_froid" ? t["coldwave.grandFroid"] : t["coldwave.vagueLabel"];
 }
 
 function getSeverityColor(kind: ColdWavePeriod["kind"]) {
@@ -25,7 +23,7 @@ export function formatColdWaveDateRange(
   locale: Locale = "fr"
 ) {
   const dateLocale = locale === "fr" ? "fr-FR" : "en-GB";
-  const separator = locale === "fr" ? " au " : " to ";
+  const separator = getTranslations(locale)["coldwave.dateSeparator"];
   const formatter = new Intl.DateTimeFormat(dateLocale, {
     day: "2-digit",
     month: "long",
@@ -36,12 +34,11 @@ export function formatColdWaveDateRange(
 }
 
 export function formatColdWaveSummary(coldWave: ColdWavePeriod, locale: Locale = "fr") {
+  const t = getTranslations(locale);
   const label = getSeverityLabel(coldWave.kind, locale);
   const dateRange = formatColdWaveDateRange(coldWave.start, coldWave.end, locale);
-  const days = locale === "fr" ? "jours" : "days";
-  const avgMin = locale === "fr" ? "Tmin moyenne" : "avg Tmin";
 
-  return `${label} ${dateRange} (${coldWave.duration} ${days}, ${avgMin} ${coldWave.averageMin.toFixed(1)} °C)`;
+  return `${label} ${dateRange} (${coldWave.duration} ${t["coldwave.days"]}, ${t["coldwave.avgMin"]} ${coldWave.averageMin.toFixed(1)} °C)`;
 }
 
 export function getColdWaveDaysByKind(coldWaves: ColdWavePeriod[]) {
@@ -128,8 +125,8 @@ export function ColdWaveOverlay({ coldWaves, colors = {} }: ColdWaveOverlayProps
                     className="inline-block size-2.5 shrink-0 rounded-full"
                     style={{ backgroundColor: getSeverityColor(kind) }}
                   />
-                  Total {getSeverityLabel(kind, locale)}: {days}{" "}
-                  {locale === "fr" ? "jours" : "days"}
+                  {t["extremes.total"]} {getSeverityLabel(kind, locale)}: {days}{" "}
+                  {t["coldwave.days"]}
                 </li>
               ))}
             </ul>

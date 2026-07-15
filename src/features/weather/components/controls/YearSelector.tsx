@@ -14,6 +14,7 @@ import {
   type DatePeriod,
   getAvailableComparisonOffsets,
 } from "@/features/weather/logic/dates";
+import { getTranslations } from "@/lib/i18n/getTranslations";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Locale } from "@/lib/i18n/types";
 
@@ -136,17 +137,14 @@ export function formatComparisonOffsetLabel(
   offsetYears: number,
   locale: Locale = "fr"
 ) {
+  const t = getTranslations(locale);
   const startYear = Number(period.startDate.slice(0, 4)) - offsetYears;
   const endYear = Number(period.endDate.slice(0, 4)) - offsetYears;
   const yearLabel = startYear === endYear ? String(startYear) : `${startYear}-${endYear}`;
   const offsetLabel =
-    locale === "fr"
-      ? offsetYears === 1
-        ? "-1 an"
-        : `-${offsetYears} ans`
-      : offsetYears === 1
-        ? "-1 year"
-        : `-${offsetYears} years`;
+    offsetYears === 1
+      ? t["year.offsetSingular"]
+      : t["year.offsetPlural"].replace("{count}", String(offsetYears));
 
   return `${offsetLabel} (${yearLabel})`;
 }
