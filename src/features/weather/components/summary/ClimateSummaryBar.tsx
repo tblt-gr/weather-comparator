@@ -222,8 +222,12 @@ function StatCard({
 
   return (
     <div className="glass-card w-28 shrink-0 rounded-xl px-3 py-2 sm:w-36 lg:w-auto lg:min-w-36">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className={`mt-0.5 text-base font-semibold tabular-nums ${valueClass}`}>{value}</p>
+      <p className="truncate text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+        {label}
+      </p>
+      <p className={`mt-0.5 text-base font-semibold tracking-tight tabular-nums ${valueClass}`}>
+        {value}
+      </p>
     </div>
   );
 }

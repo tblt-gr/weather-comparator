@@ -109,7 +109,10 @@ export function WeatherDashboard() {
           filtersOpen={filtersOpen}
           onToggleFilters={() => setFiltersOpen((open) => !open)}
         />
-        <div className={filtersOpen ? "block" : "hidden lg:block"} id="dashboard-filters">
+        <div
+          className={`rise-in [--rise-delay:80ms] ${filtersOpen ? "block" : "hidden lg:block"}`}
+          id="dashboard-filters"
+        >
           <WeatherDashboardFilters
             availableExtremeKinds={availableExtremeKinds}
             city={city}

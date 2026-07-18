@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, type RefObject } from "react";
+import { MapPin } from "lucide-react";
 
 import { WeatherChart } from "@/features/weather/components/chart";
 import { ExportButtons } from "@/features/weather/components/export";
@@ -50,7 +51,7 @@ export function WeatherDashboardPanel({
   const hasData = datasets.length > 0;
 
   return (
-    <section className="glass-panel rounded-2xl p-4">
+    <section className="glass-panel rise-in rounded-2xl p-4 [--rise-delay:160ms] sm:p-5">
       <div className="grid gap-4">
         <div className="flex min-w-0 items-center gap-3 lg:justify-between">
           <ClimateSummaryBar
@@ -102,7 +103,13 @@ export function WeatherDashboardPanel({
 
 export function EmptyState({ message }: { message: string }) {
   return (
-    <div className="glass-card flex min-h-[360px] items-center justify-center rounded-xl border-dashed text-sm text-muted-foreground">
+    <div className="glass-card rise-in flex min-h-[360px] flex-col items-center justify-center gap-3 rounded-xl border-dashed text-sm text-muted-foreground [--rise-delay:160ms]">
+      <span
+        aria-hidden="true"
+        className="flex size-12 items-center justify-center rounded-full border border-primary/15 bg-primary/5 text-primary/70"
+      >
+        <MapPin className="size-5" />
+      </span>
       {message}
     </div>
   );
