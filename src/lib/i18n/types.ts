@@ -90,6 +90,9 @@ export type Translations = {
   "chart.normalLine": string;
   "chart.ariaDescription": string;
   "chart.tropicalNight": string;
+  "chart.enterFullscreen": string;
+  "chart.exitFullscreen": string;
+  "chart.tooltipHint": string;
   "app.skipToContent": string;
   "forecast.unavailable": string;
   "forecast.label": string;

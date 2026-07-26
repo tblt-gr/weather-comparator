@@ -850,7 +850,8 @@ test("disables the recharts accessibility focus layer on the main chart", () => 
   );
 
   assert.equal(source.includes("accessibilityLayer={false}"), true);
-  assert.equal(source.includes('className="weather-chart-shell min-w-[760px]"'), true);
+  assert.equal(source.includes('"weather-chart-shell"'), true);
+  assert.equal(source.includes('!isFullscreen && "min-w-[760px]"'), true);
 });
 
 test("uses an equidistant x-axis interval to keep date ticks evenly spaced", () => {
@@ -867,4 +868,38 @@ test("removes focus outline styles from recharts surfaces inside the chart shell
 
   assert.equal(source.includes(".weather-chart-shell :focus"), true);
   assert.equal(source.includes("outline: none;"), true);
+});
+
+test("exposes a fullscreen toggle whose label reflects the current state", () => {
+  const source = readFileSync(
+    path.join(process.cwd(), "src/features/weather/components/chart/WeatherChart.tsx"),
+    "utf8"
+  );
+
+  assert.equal(source.includes("onClick={toggleFullscreen}"), true);
+  assert.equal(
+    source.includes(
+      'aria-label={isFullscreen ? t["chart.exitFullscreen"] : t["chart.enterFullscreen"]}'
+    ),
+    true
+  );
+});
+
+test("pins the tooltip below the chart as a fixed panel on mobile", () => {
+  const source = readFileSync(
+    path.join(process.cwd(), "src/features/weather/components/chart/WeatherChart.tsx"),
+    "utf8"
+  );
+
+  // The floating card is suppressed on mobile; the tooltip payload is lifted
+  // into the fixed readout via the reporter instead.
+  assert.equal(source.includes("<MobileTooltipReporter"), true);
+  assert.equal(source.includes('variant="panel"'), true);
+});
+
+test("defines the fullscreen and forced-landscape chart styles", () => {
+  const source = readFileSync(path.join(process.cwd(), "src/app/globals.css"), "utf8");
+
+  assert.equal(source.includes(".chart-fullscreen {"), true);
+  assert.equal(source.includes(".chart-fullscreen-rotate {"), true);
 });

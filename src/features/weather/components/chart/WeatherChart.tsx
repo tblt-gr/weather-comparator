@@ -1,6 +1,16 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Fragment,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
+import { Maximize2, Minimize2, X } from "lucide-react";
 import {
   CartesianGrid,
   Line,
@@ -15,10 +25,14 @@ import {
 } from "recharts";
 
 import { ChartLegend } from "./ChartLegend";
+import { Button } from "@/components/ui/button";
 import { formatDisplayDate, formatLocalDate } from "@/features/weather/logic/dates";
 import { EXTREME_KIND_COLORS } from "@/features/weather/logic/extremes";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { useChartFullscreen } from "@/lib/useChartFullscreen";
+import { useIsMobile } from "@/lib/useIsMobile";
 import { useReducedMotion } from "@/lib/useReducedMotion";
+import { cn } from "@/lib/utils";
 import type { Locale } from "@/lib/i18n/types";
 import type {
   ClimateNormal,
@@ -96,6 +110,13 @@ type TooltipExtremeEntry = {
 const SERIES_ANIMATION_MS = 1500;
 const UPDATE_ANIMATION_MS = 400;
 const NORMALS_LINE_STROKE_DASHARRAY = "6 5";
+const CHART_HEIGHT = 420;
+const CHART_MIN_WIDTH = 760;
+
+type ActiveTooltip = {
+  label: string | number | undefined;
+  payload: readonly TooltipEntry[];
+};
 
 type NormalsLineConfig = {
   isAnimationActive: boolean;
@@ -125,7 +146,33 @@ export function WeatherChart({
     [locale]
   );
   const chartShellRef = useRef<HTMLDivElement | null>(null);
+  const chartViewportRef = useRef<HTMLDivElement | null>(null);
+  const fullscreenContainerRef = useRef<HTMLDivElement | null>(null);
   const [chartWidth, setChartWidth] = useState(0);
+  const [chartHeight, setChartHeight] = useState(0);
+  const isMobile = useIsMobile();
+  const {
+    active: isFullscreen,
+    needsRotation,
+    toggle: toggleFullscreen,
+  } = useChartFullscreen(fullscreenContainerRef, { lockLandscape: isMobile });
+  const [activeTooltip, setActiveTooltip] = useState<ActiveTooltip | null>(null);
+  const [scrollFade, setScrollFade] = useState({ start: false, end: false });
+
+  // In fullscreen the chart fills the measured viewport slot (the flex-1 area
+  // left after the tooltip readout), so it stays aligned to the screen height
+  // and shrinks instead of overlapping when the mobile readout grows tall.
+  const chartRenderWidth = isFullscreen ? chartWidth : Math.max(chartWidth, CHART_MIN_WIDTH);
+  const chartRenderHeight = isFullscreen ? chartHeight : CHART_HEIGHT;
+  const canRenderChart = chartWidth > 0 && (!isFullscreen || chartHeight > 0);
+
+  // The floating tooltip only reads well on the pointer; on touch it jitters and
+  // hides behind the finger, so mobile gets a fixed readout below the chart.
+  useEffect(() => {
+    if (!isMobile) {
+      setActiveTooltip(null);
+    }
+  }, [isMobile]);
   const colors = useMemo(
     () =>
       Object.fromEntries(
@@ -163,8 +210,7 @@ export function WeatherChart({
     [datasets, referenceSegmentCount]
   );
   const chartAriaLabel = useMemo(
-    () =>
-      t["chart.ariaDescription"].replace("{series}", datasets.map((d) => d.label).join(", ")),
+    () => t["chart.ariaDescription"].replace("{series}", datasets.map((d) => d.label).join(", ")),
     [datasets, t]
   );
   const tooltipExtremeEntriesByDay = useMemo(
@@ -182,7 +228,12 @@ export function WeatherChart({
       new Map(
         rows.map((row) => [
           row.day,
-          getTooltipTropicalNightEntries(row.day, visibleDatasets, colors, t["chart.tropicalNight"]),
+          getTooltipTropicalNightEntries(
+            row.day,
+            visibleDatasets,
+            colors,
+            t["chart.tropicalNight"]
+          ),
         ])
       ),
     [colors, rows, t, visibleDatasets]
@@ -253,32 +304,61 @@ export function WeatherChart({
     lastCommittedLineSignaturesRef.current = new Map(seriesLineSignatures);
   }, [chartWidth, seriesLineKeysDependency, seriesLineSignatures]);
 
+  // Mirrors the summary bar's edge-fade: mask the scrolled chart's left/right
+  // edges on mobile so the horizontal overflow reads as scrollable.
   useEffect(() => {
-    const element = chartShellRef.current;
+    const element = chartViewportRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    const update = () => {
+      const maxScroll = element.scrollWidth - element.clientWidth;
+      setScrollFade({
+        start: element.scrollLeft > 1,
+        end: element.scrollLeft < maxScroll - 1,
+      });
+    };
+
+    update();
+    element.addEventListener("scroll", update, { passive: true });
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+
+    return () => {
+      element.removeEventListener("scroll", update);
+      observer.disconnect();
+    };
+  }, [rows.length, isFullscreen]);
+
+  useEffect(() => {
+    const element = chartViewportRef.current;
     let frameId = 0;
 
     if (!element) {
       return;
     }
 
-    const updateWidth = () => {
+    const updateSize = () => {
       setChartWidth(element.clientWidth);
+      setChartHeight(element.clientHeight);
     };
 
-    const scheduleWidthUpdate = () => {
+    const scheduleSizeUpdate = () => {
       if (frameId !== 0) {
         return;
       }
 
       frameId = window.requestAnimationFrame(() => {
         frameId = 0;
-        updateWidth();
+        updateSize();
       });
     };
 
-    updateWidth();
+    updateSize();
 
-    const observer = new ResizeObserver(scheduleWidthUpdate);
+    const observer = new ResizeObserver(scheduleSizeUpdate);
     observer.observe(element);
 
     return () => {
@@ -288,6 +368,19 @@ export function WeatherChart({
       }
     };
   }, []);
+
+  // Toggling fullscreen adds/removes the shell's inline width. Re-measure
+  // synchronously here so the LineChart never renders a frame at the stale
+  // (fullscreen-sized) width before the async ResizeObserver catches up — that
+  // frame is the overflow flash seen when exiting fullscreen.
+  useLayoutEffect(() => {
+    const element = chartViewportRef.current;
+
+    if (element) {
+      setChartWidth(element.clientWidth);
+      setChartHeight(element.clientHeight);
+    }
+  }, [isFullscreen]);
 
   if (datasets.length === 0) {
     return (
@@ -325,298 +418,384 @@ export function WeatherChart({
 
   return (
     <div className="grid gap-4">
-      <div className="overflow-x-auto">
+      <div
+        className={cn(
+          // `min-w-0` lets this grid item shrink below the chart's min-content
+          // width so the inner `overflow-x-auto` owns the horizontal scroll
+          // instead of forcing the whole panel wider than the viewport.
+          "relative min-w-0",
+          isFullscreen && !needsRotation && "chart-fullscreen flex flex-col",
+          needsRotation && "chart-fullscreen-rotate flex flex-col"
+        )}
+        ref={fullscreenContainerRef}
+      >
         <div
-          aria-label={chartAriaLabel}
-          className="weather-chart-shell min-w-[760px]"
-          ref={chartShellRef}
-          role="img"
+          className={cn(
+            isFullscreen ? "min-h-0 flex-1 overflow-hidden" : "summary-scroll overflow-x-auto"
+          )}
+          data-fade-end={!isFullscreen && scrollFade.end ? "true" : undefined}
+          data-fade-start={!isFullscreen && scrollFade.start ? "true" : undefined}
+          ref={chartViewportRef}
         >
-          {chartWidth > 0 ? (
-            <LineChart
-              accessibilityLayer={false}
-              data={rows}
-              height={420}
-              margin={{ bottom: 56, left: 8, right: 24, top: 16 }}
-              width={Math.max(chartWidth, 760)}
-            >
-              <defs>
-                {heatwaves.map((heatwave) => (
-                  <pattern
-                    height="8"
-                    id={getExtremePatternId(heatwave.datasetId, heatwave.start, heatwave.kind, "heat")}
-                    key={getExtremePatternId(heatwave.datasetId, heatwave.start, heatwave.kind, "heat")}
-                    patternTransform="rotate(45)"
-                    patternUnits="userSpaceOnUse"
-                    width="8"
-                  >
-                    <rect fill={getHeatwaveFill(heatwave.kind)} height="8" opacity="0.14" width="8" x="0" y="0" />
-                    <line
-                      stroke={getHeatwaveFill(heatwave.kind)}
-                      strokeOpacity="0.6"
-                      strokeWidth="3"
-                      x1="0"
-                      x2="0"
-                      y1="0"
-                      y2="8"
-                    />
-                  </pattern>
+          <div
+            aria-label={chartAriaLabel}
+            className={cn("weather-chart-shell", !isFullscreen && "min-w-[760px]")}
+            ref={chartShellRef}
+            role="img"
+            style={isFullscreen ? { width: chartRenderWidth } : undefined}
+          >
+            {canRenderChart ? (
+              <LineChart
+                accessibilityLayer={false}
+                data={rows}
+                height={chartRenderHeight}
+                margin={{ bottom: isMobile ? 16 : 56, left: 8, right: 24, top: 16 }}
+                width={chartRenderWidth}
+              >
+                <defs>
+                  {heatwaves.map((heatwave) => (
+                    <pattern
+                      height="8"
+                      id={getExtremePatternId(
+                        heatwave.datasetId,
+                        heatwave.start,
+                        heatwave.kind,
+                        "heat"
+                      )}
+                      key={getExtremePatternId(
+                        heatwave.datasetId,
+                        heatwave.start,
+                        heatwave.kind,
+                        "heat"
+                      )}
+                      patternTransform="rotate(45)"
+                      patternUnits="userSpaceOnUse"
+                      width="8"
+                    >
+                      <rect
+                        fill={getHeatwaveFill(heatwave.kind)}
+                        height="8"
+                        opacity="0.14"
+                        width="8"
+                        x="0"
+                        y="0"
+                      />
+                      <line
+                        stroke={getHeatwaveFill(heatwave.kind)}
+                        strokeOpacity="0.6"
+                        strokeWidth="3"
+                        x1="0"
+                        x2="0"
+                        y1="0"
+                        y2="8"
+                      />
+                    </pattern>
+                  ))}
+                  {coldWaves.map((coldWave) => (
+                    <pattern
+                      height="8"
+                      id={getExtremePatternId(
+                        coldWave.datasetId,
+                        coldWave.start,
+                        coldWave.kind,
+                        "cold"
+                      )}
+                      key={getExtremePatternId(
+                        coldWave.datasetId,
+                        coldWave.start,
+                        coldWave.kind,
+                        "cold"
+                      )}
+                      patternTransform="rotate(45)"
+                      patternUnits="userSpaceOnUse"
+                      width="8"
+                    >
+                      <rect
+                        fill={getColdWaveFill(coldWave.kind)}
+                        height="8"
+                        opacity="0.14"
+                        width="8"
+                        x="0"
+                        y="0"
+                      />
+                      <line
+                        stroke={getColdWaveFill(coldWave.kind)}
+                        strokeOpacity="0.6"
+                        strokeWidth="3"
+                        x1="0"
+                        x2="0"
+                        y1="0"
+                        y2="8"
+                      />
+                    </pattern>
+                  ))}
+                </defs>
+                <CartesianGrid stroke="var(--border)" strokeDasharray="4 4" strokeOpacity={0.72} />
+                {monthBoundaryDays.map((day) => (
+                  <ReferenceLine
+                    ifOverflow="extendDomain"
+                    key={day}
+                    stroke="var(--border)"
+                    strokeOpacity={0.95}
+                    strokeWidth={1.5}
+                    x={day}
+                  />
                 ))}
-                {coldWaves.map((coldWave) => (
-                  <pattern
-                    height="8"
-                    id={getExtremePatternId(coldWave.datasetId, coldWave.start, coldWave.kind, "cold")}
-                    key={getExtremePatternId(coldWave.datasetId, coldWave.start, coldWave.kind, "cold")}
-                    patternTransform="rotate(45)"
-                    patternUnits="userSpaceOnUse"
-                    width="8"
-                  >
-                    <rect fill={getColdWaveFill(coldWave.kind)} height="8" opacity="0.14" width="8" x="0" y="0" />
-                    <line
-                      stroke={getColdWaveFill(coldWave.kind)}
-                      strokeOpacity="0.6"
-                      strokeWidth="3"
-                      x1="0"
-                      x2="0"
-                      y1="0"
-                      y2="8"
-                    />
-                  </pattern>
-                ))}
-              </defs>
-              <CartesianGrid stroke="var(--border)" strokeDasharray="4 4" strokeOpacity={0.72} />
-              {monthBoundaryDays.map((day) => (
+                {todayBoundaryDay !== null ? (
+                  <ReferenceLine
+                    ifOverflow="extendDomain"
+                    stroke="var(--foreground)"
+                    strokeDasharray="5 4"
+                    strokeOpacity={0.9}
+                    strokeWidth={1.5}
+                    x={todayBoundaryDay}
+                  />
+                ) : null}
+                {forecastBoundaryDay !== null ? (
+                  <ReferenceLine
+                    ifOverflow="extendDomain"
+                    stroke="var(--chart-1)"
+                    strokeDasharray="3 3"
+                    strokeOpacity={0.9}
+                    strokeWidth={1.5}
+                    x={forecastBoundaryDay}
+                  />
+                ) : null}
                 <ReferenceLine
                   ifOverflow="extendDomain"
-                  key={day}
-                  stroke="var(--border)"
-                  strokeOpacity={0.95}
-                  strokeWidth={1.5}
-                  x={day}
+                  label={{
+                    fill: "var(--muted-foreground)",
+                    fontSize: 11,
+                    position: "insideTopLeft",
+                    value: "0°C",
+                  }}
+                  stroke="var(--muted-foreground)"
+                  strokeDasharray="6 3"
+                  strokeOpacity={0.6}
+                  strokeWidth={1}
+                  y={0}
                 />
-              ))}
-              {todayBoundaryDay !== null ? (
-                <ReferenceLine
-                  ifOverflow="extendDomain"
-                  stroke="var(--foreground)"
-                  strokeDasharray="5 4"
-                  strokeOpacity={0.9}
-                  strokeWidth={1.5}
-                  x={todayBoundaryDay}
+                <XAxis
+                  axisLine={false}
+                  dataKey="day"
+                  height={76}
+                  interval="equidistantPreserveStart"
+                  stroke="var(--muted-foreground)"
+                  tick={renderXAxisTick}
+                  tickLine={false}
+                  tickMargin={14}
                 />
-              ) : null}
-              {forecastBoundaryDay !== null ? (
-                <ReferenceLine
-                  ifOverflow="extendDomain"
-                  stroke="var(--chart-1)"
-                  strokeDasharray="3 3"
-                  strokeOpacity={0.9}
-                  strokeWidth={1.5}
-                  x={forecastBoundaryDay}
+                <YAxis
+                  axisLine={false}
+                  stroke="var(--muted-foreground)"
+                  tickFormatter={(value) => `${value} °C`}
+                  tickLine={false}
+                  width={56}
                 />
-              ) : null}
-              <ReferenceLine
-                ifOverflow="extendDomain"
-                label={{ fill: "var(--muted-foreground)", fontSize: 11, position: "insideTopLeft", value: "0°C" }}
-                stroke="var(--muted-foreground)"
-                strokeDasharray="6 3"
-                strokeOpacity={0.6}
-                strokeWidth={1}
-                y={0}
-              />
-              <XAxis
-                axisLine={false}
-                dataKey="day"
-                height={76}
-                interval="equidistantPreserveStart"
-                stroke="var(--muted-foreground)"
-                tick={renderXAxisTick}
-                tickLine={false}
-                tickMargin={14}
-              />
-              <YAxis
-                axisLine={false}
-                stroke="var(--muted-foreground)"
-                tickFormatter={(value) => `${value} °C`}
-                tickLine={false}
-                width={56}
-              />
-              <Tooltip
-                content={({ active, label, payload }) => {
-                  const visiblePayload = getVisibleTooltipEntries(payload ?? []);
-                  const hoveredDay =
-                    typeof visiblePayload[0]?.payload?.day === "number"
-                      ? visiblePayload[0].payload.day
-                      : typeof label === "number"
-                        ? label
-                        : null;
-                  const extremeEntries =
-                    hoveredDay === null
-                      ? []
-                      : [
-                          ...(tooltipExtremeEntriesByDay.get(hoveredDay) ?? []),
-                          ...(tooltipTropicalNightsByDay.get(hoveredDay) ?? []),
-                        ];
-
-                  if (!active || (!visiblePayload.length && !extremeEntries.length)) {
-                    return null;
+                <Tooltip
+                  content={({ active, label, payload }) =>
+                    // On mobile the floating card is suppressed (it jitters and
+                    // hides behind the finger); the fixed readout below the chart
+                    // takes over while recharts still draws the cursor line. The
+                    // recharts@3 chart event state no longer carries the active
+                    // payload, so we lift it from the tooltip render prop instead.
+                    isMobile ? (
+                      <MobileTooltipReporter
+                        active={active ?? false}
+                        label={label}
+                        onChange={setActiveTooltip}
+                        payload={(payload ?? []) as readonly TooltipEntry[]}
+                      />
+                    ) : !active ? null : (
+                      <ChartTooltipCard
+                        dateFormatter={tooltipDateFormatter}
+                        extremeEntriesByDay={tooltipExtremeEntriesByDay}
+                        label={label}
+                        payload={payload ?? []}
+                        tropicalNightsByDay={tooltipTropicalNightsByDay}
+                        variant="floating"
+                      />
+                    )
                   }
-
-                  return (
-                    <div className="rounded-xl border border-border/60 bg-popover p-3 text-sm text-popover-foreground shadow-2xl shadow-primary/5 dark:shadow-black/30">
-                      <p className="mb-2 font-medium">
-                        {typeof visiblePayload[0]?.payload?.label === "string"
-                          ? tooltipDateFormatter.format(
-                              new Date(`${visiblePayload[0].payload.label}T00:00:00.000Z`)
-                            )
-                          : String(label)}
-                      </p>
-                      <div className="grid gap-1">
-                        {visiblePayload.map((entry) => (
-                          <div
-                            className="flex items-center justify-between gap-6"
-                            key={String(entry.dataKey ?? entry.name)}
-                          >
-                            <span style={{ color: entry.color }}>{entry.name}</span>
-                            <span className="font-medium">
-                              {typeof entry.value === "number"
-                                ? `${entry.value.toFixed(1)} °C`
-                                : "-"}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                      {extremeEntries.length > 0 ? (
-                        <div className="mt-2 border-t border-border/60 pt-2">
-                          <div className="grid gap-1">
-                            {extremeEntries.map((entry) => (
-                              <div className="flex items-center gap-2" key={entry.key}>
-                                <span
-                                  aria-hidden="true"
-                                  className="size-2 shrink-0 rounded-full"
-                                  style={{ backgroundColor: entry.color }}
-                                />
-                                <span>{entry.label}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ) : null}
-                    </div>
-                  );
-                }}
-              />
-              {heatwaves.map((heatwave) => {
-                const bridgeToDay = getExtremeBridgeDay(heatwave, heatwaves);
-                return getExtremeAreaSegments(heatwave, bridgeToDay).map((segment) => (
-                  <ReferenceArea
-                    fill={segment.isForecast ? `url(#${getExtremePatternId(heatwave.datasetId, heatwave.start, heatwave.kind, "heat")})` : getHeatwaveFill(heatwave.kind)}
-                    fillOpacity={heatwave.kind === "canicule" ? 0.28 : 0.2}
-                    ifOverflow="extendDomain"
-                    key={`${heatwave.datasetId}-${heatwave.start}-${segment.x1}-${segment.x2}`}
-                    stroke={getHeatwaveFill(heatwave.kind)}
-                    strokeDasharray={segment.isForecast ? "5 3" : undefined}
-                    strokeOpacity={heatwave.kind === "canicule" ? 0.65 : 0.45}
-                    x1={segment.x1}
-                    x2={segment.x2}
-                  />
-                ));
-              })}
-              {coldWaves.map((coldWave) => {
-                const bridgeToDay = getExtremeBridgeDay(coldWave, coldWaves);
-                return getExtremeAreaSegments(coldWave, bridgeToDay).map((segment) => (
-                  <ReferenceArea
-                    fill={segment.isForecast ? `url(#${getExtremePatternId(coldWave.datasetId, coldWave.start, coldWave.kind, "cold")})` : getColdWaveFill(coldWave.kind)}
-                    fillOpacity={coldWave.kind === "grand_froid" ? 0.28 : 0.2}
-                    ifOverflow="extendDomain"
-                    key={`${coldWave.datasetId}-${coldWave.start}-${segment.x1}-${segment.x2}`}
-                    stroke={getColdWaveFill(coldWave.kind)}
-                    strokeDasharray={segment.isForecast ? "5 3" : undefined}
-                    strokeOpacity={coldWave.kind === "grand_froid" ? 0.65 : 0.45}
-                    x1={segment.x1}
-                    x2={segment.x2}
-                  />
-                ));
-              })}
-              {visibleDatasets.map((dataset) =>
-                dataset.id === "current" ? (
-                  <Fragment key={dataset.id}>
-                    <Line
-                      animationDuration={currentObservedLineAnimation.animationDuration}
-                      animationEasing="linear"
-                      connectNulls={false}
-                      dataKey="currentObserved"
-                      dot={false}
-                      isAnimationActive={currentObservedLineAnimation.isAnimationActive}
-                      key="currentObserved"
-                      name={dataset.label}
-                      stroke={colors[dataset.id]}
-                      strokeOpacity={1}
-                      strokeWidth={3}
-                      type="monotone"
+                />
+                {heatwaves.map((heatwave) => {
+                  const bridgeToDay = getExtremeBridgeDay(heatwave, heatwaves);
+                  return getExtremeAreaSegments(heatwave, bridgeToDay).map((segment) => (
+                    <ReferenceArea
+                      fill={
+                        segment.isForecast
+                          ? `url(#${getExtremePatternId(heatwave.datasetId, heatwave.start, heatwave.kind, "heat")})`
+                          : getHeatwaveFill(heatwave.kind)
+                      }
+                      fillOpacity={heatwave.kind === "canicule" ? 0.28 : 0.2}
+                      ifOverflow="extendDomain"
+                      key={`${heatwave.datasetId}-${heatwave.start}-${segment.x1}-${segment.x2}`}
+                      stroke={getHeatwaveFill(heatwave.kind)}
+                      strokeDasharray={segment.isForecast ? "5 3" : undefined}
+                      strokeOpacity={heatwave.kind === "canicule" ? 0.65 : 0.45}
+                      x1={segment.x1}
+                      x2={segment.x2}
                     />
+                  ));
+                })}
+                {coldWaves.map((coldWave) => {
+                  const bridgeToDay = getExtremeBridgeDay(coldWave, coldWaves);
+                  return getExtremeAreaSegments(coldWave, bridgeToDay).map((segment) => (
+                    <ReferenceArea
+                      fill={
+                        segment.isForecast
+                          ? `url(#${getExtremePatternId(coldWave.datasetId, coldWave.start, coldWave.kind, "cold")})`
+                          : getColdWaveFill(coldWave.kind)
+                      }
+                      fillOpacity={coldWave.kind === "grand_froid" ? 0.28 : 0.2}
+                      ifOverflow="extendDomain"
+                      key={`${coldWave.datasetId}-${coldWave.start}-${segment.x1}-${segment.x2}`}
+                      stroke={getColdWaveFill(coldWave.kind)}
+                      strokeDasharray={segment.isForecast ? "5 3" : undefined}
+                      strokeOpacity={coldWave.kind === "grand_froid" ? 0.65 : 0.45}
+                      x1={segment.x1}
+                      x2={segment.x2}
+                    />
+                  ));
+                })}
+                {visibleDatasets.map((dataset) =>
+                  dataset.id === "current" ? (
+                    <Fragment key={dataset.id}>
+                      <Line
+                        animationDuration={currentObservedLineAnimation.animationDuration}
+                        animationEasing="linear"
+                        connectNulls={false}
+                        dataKey="currentObserved"
+                        dot={false}
+                        isAnimationActive={currentObservedLineAnimation.isAnimationActive}
+                        key="currentObserved"
+                        name={dataset.label}
+                        stroke={colors[dataset.id]}
+                        strokeOpacity={1}
+                        strokeWidth={3}
+                        type="monotone"
+                      />
+                      <Line
+                        animationBegin={currentForecastLineAnimation.animationBegin}
+                        animationDuration={currentForecastLineAnimation.animationDuration}
+                        animationEasing="linear"
+                        connectNulls={false}
+                        dataKey="currentForecast"
+                        dot={false}
+                        isAnimationActive={currentForecastLineAnimation.isAnimationActive}
+                        key="currentForecast"
+                        legendType="none"
+                        name={dataset.label}
+                        stroke={colors[dataset.id]}
+                        strokeDasharray="7 4"
+                        strokeOpacity={0.7}
+                        strokeWidth={3}
+                        type="monotone"
+                      />
+                    </Fragment>
+                  ) : (
                     <Line
-                      animationBegin={currentForecastLineAnimation.animationBegin}
-                      animationDuration={currentForecastLineAnimation.animationDuration}
+                      animationDuration={getSeriesAnimationDuration(
+                        dataset.id,
+                        freshLineKeys,
+                        reducedMotion,
+                        SERIES_ANIMATION_MS,
+                        UPDATE_ANIMATION_MS,
+                        Math.max(0, dataset.values.length - 1),
+                        referenceSegmentCount
+                      )}
                       animationEasing="linear"
                       connectNulls={false}
-                      dataKey="currentForecast"
+                      dataKey={dataset.id}
                       dot={false}
-                      isAnimationActive={currentForecastLineAnimation.isAnimationActive}
-                      key="currentForecast"
-                      legendType="none"
+                      key={dataset.id}
                       name={dataset.label}
                       stroke={colors[dataset.id]}
-                      strokeDasharray="7 4"
                       strokeOpacity={0.7}
-                      strokeWidth={3}
+                      strokeWidth={2}
                       type="monotone"
                     />
-                  </Fragment>
-                ) : (
+                  )
+                )}
+                {showNormals ? (
                   <Line
-                    animationDuration={getSeriesAnimationDuration(
-                      dataset.id,
-                      freshLineKeys,
-                      reducedMotion,
-                      SERIES_ANIMATION_MS,
-                      UPDATE_ANIMATION_MS,
-                      Math.max(0, dataset.values.length - 1),
-                      referenceSegmentCount
-                    )}
-                    animationEasing="linear"
                     connectNulls={false}
-                    dataKey={dataset.id}
+                    dataKey="normal"
                     dot={false}
-                    key={dataset.id}
-                    name={dataset.label}
-                    stroke={colors[dataset.id]}
-                    strokeOpacity={0.7}
-                    strokeWidth={2}
+                    isAnimationActive={normalsLineConfig.isAnimationActive}
+                    name={t["chart.normalLine"]}
+                    stroke="var(--muted-foreground)"
+                    strokeDasharray={normalsLineConfig.strokeDasharray}
+                    strokeWidth={normalsLineConfig.strokeWidth}
                     type="monotone"
                   />
-                )
-              )}
-              {showNormals ? (
-                <Line
-                  connectNulls={false}
-                  dataKey="normal"
-                  dot={false}
-                  isAnimationActive={normalsLineConfig.isAnimationActive}
-                  name={t["chart.normalLine"]}
-                  stroke="var(--muted-foreground)"
-                  strokeDasharray={normalsLineConfig.strokeDasharray}
-                  strokeWidth={normalsLineConfig.strokeWidth}
-                  type="monotone"
-                />
-              ) : null}
-            </LineChart>
-          ) : (
-            <div className="flex h-[420px] items-center justify-center rounded-xl border border-dashed border-border/50 bg-muted/30 text-sm text-muted-foreground">
-              {t["state.chartLoading"]}
-            </div>
-          )}
+                ) : null}
+              </LineChart>
+            ) : (
+              <div className="flex h-[420px] items-center justify-center rounded-xl border border-dashed border-border/50 bg-muted/30 text-sm text-muted-foreground">
+                {t["state.chartLoading"]}
+              </div>
+            )}
+          </div>
         </div>
+
+        {isMobile && !isFullscreen ? (
+          <div className="flex items-center pt-2">
+            {activeTooltip ? (
+              <ChartTooltipCard
+                dateFormatter={tooltipDateFormatter}
+                extremeEntriesByDay={tooltipExtremeEntriesByDay}
+                label={activeTooltip.label}
+                payload={activeTooltip.payload}
+                tropicalNightsByDay={tooltipTropicalNightsByDay}
+                variant="panel"
+              />
+            ) : (
+              <p className="w-full text-center text-xs text-muted-foreground">
+                {t["chart.tooltipHint"]}
+              </p>
+            )}
+          </div>
+        ) : null}
+
+        {isMobile && isFullscreen && activeTooltip ? (
+          <div className="absolute right-3 bottom-3 z-20 max-w-[min(20rem,calc(100%-1.5rem))]">
+            <div className="relative">
+              <ChartTooltipCard
+                dateFormatter={tooltipDateFormatter}
+                extremeEntriesByDay={tooltipExtremeEntriesByDay}
+                label={activeTooltip.label}
+                payload={activeTooltip.payload}
+                tropicalNightsByDay={tooltipTropicalNightsByDay}
+                variant="floating"
+              />
+              <Button
+                aria-label={t["dialog.close"]}
+                className="absolute -top-2 -right-2 size-6 rounded-full bg-background shadow-md"
+                onClick={() => setActiveTooltip(null)}
+                size="icon"
+                type="button"
+                variant="outline"
+              >
+                <X className="size-3" />
+              </Button>
+            </div>
+          </div>
+        ) : null}
+
+        <Button
+          aria-label={isFullscreen ? t["chart.exitFullscreen"] : t["chart.enterFullscreen"]}
+          className={cn(
+            "absolute top-3 z-10 size-9 shrink-0 rounded-full bg-background/80 shadow-md backdrop-blur",
+            isMobile && !isFullscreen ? "right-0" : "right-3"
+          )}
+          onClick={toggleFullscreen}
+          size="icon"
+          type="button"
+          variant="outline"
+        >
+          {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+        </Button>
       </div>
 
       <ChartLegend
@@ -628,6 +807,113 @@ export function WeatherChart({
           label: dataset.label,
         }))}
       />
+    </div>
+  );
+}
+
+function MobileTooltipReporter({
+  active,
+  label,
+  onChange,
+  payload,
+}: {
+  active: boolean;
+  label: string | number | undefined;
+  onChange: Dispatch<SetStateAction<ActiveTooltip | null>>;
+  payload: readonly TooltipEntry[];
+}) {
+  useEffect(() => {
+    if (!active || payload.length === 0) {
+      return;
+    }
+
+    // recharts hands a fresh payload array on every render; key the pinned
+    // readout off the day label so the functional update bails out when nothing
+    // changed and React never loops on setState.
+    onChange((prev) => (prev?.label === label ? prev : { label, payload }));
+  }, [active, label, onChange, payload]);
+
+  return null;
+}
+
+function ChartTooltipCard({
+  dateFormatter,
+  extremeEntriesByDay,
+  label,
+  payload,
+  tropicalNightsByDay,
+  variant,
+}: {
+  dateFormatter: Intl.DateTimeFormat;
+  extremeEntriesByDay: Map<number, TooltipExtremeEntry[]>;
+  label: string | number | undefined;
+  payload: readonly TooltipEntry[];
+  tropicalNightsByDay: Map<number, TooltipExtremeEntry[]>;
+  variant: "floating" | "panel";
+}) {
+  const visiblePayload = getVisibleTooltipEntries(payload);
+  const firstLabel = visiblePayload[0]?.payload?.label;
+  const hoveredDay =
+    typeof visiblePayload[0]?.payload?.day === "number"
+      ? visiblePayload[0].payload.day
+      : typeof label === "number"
+        ? label
+        : null;
+  const extremeEntries =
+    hoveredDay === null
+      ? []
+      : [
+          ...(extremeEntriesByDay.get(hoveredDay) ?? []),
+          ...(tropicalNightsByDay.get(hoveredDay) ?? []),
+        ];
+
+  if (!visiblePayload.length && !extremeEntries.length) {
+    return null;
+  }
+
+  return (
+    <div
+      className={cn(
+        "rounded-xl border border-border/60 bg-popover p-3 text-sm text-popover-foreground",
+        variant === "floating"
+          ? "shadow-2xl shadow-primary/5 dark:shadow-black/30"
+          : "w-full shadow-sm"
+      )}
+    >
+      <p className="mb-2 font-medium">
+        {typeof firstLabel === "string"
+          ? dateFormatter.format(new Date(`${firstLabel}T00:00:00.000Z`))
+          : String(label)}
+      </p>
+      <div className="grid gap-1">
+        {visiblePayload.map((entry) => (
+          <div
+            className="flex items-center justify-between gap-6"
+            key={String(entry.dataKey ?? entry.name)}
+          >
+            <span style={{ color: entry.color }}>{entry.name}</span>
+            <span className="font-medium">
+              {typeof entry.value === "number" ? `${entry.value.toFixed(1)} °C` : "-"}
+            </span>
+          </div>
+        ))}
+      </div>
+      {extremeEntries.length > 0 ? (
+        <div className="mt-2 border-t border-border/60 pt-2">
+          <div className="grid gap-1">
+            {extremeEntries.map((entry) => (
+              <div className="flex items-center gap-2" key={entry.key}>
+                <span
+                  aria-hidden="true"
+                  className="size-2 shrink-0 rounded-full"
+                  style={{ backgroundColor: entry.color }}
+                />
+                <span>{entry.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -670,8 +956,8 @@ export function buildChartRows(
           dataset.firstForecastDay !== null && day === dataset.firstForecastDay;
 
         row.currentObserved =
-          !value?.isForecast || isForecastBridgeDay ? value?.[temperatureMode] ?? null : null;
-        row.currentForecast = value?.isForecast ? value?.[temperatureMode] ?? null : null;
+          !value?.isForecast || isForecastBridgeDay ? (value?.[temperatureMode] ?? null) : null;
+        row.currentForecast = value?.isForecast ? (value?.[temperatureMode] ?? null) : null;
         return;
       }
 
@@ -1058,11 +1344,7 @@ export function getVisibleTooltipEntries(entries: readonly TooltipEntry[]) {
   numericEntries.forEach((entry) => {
     const dayKey = getTooltipEntryDayKey(entry);
 
-    if (
-      entry.dataKey === "currentForecast" &&
-      dayKey !== null &&
-      typeof entry.value === "number"
-    ) {
+    if (entry.dataKey === "currentForecast" && dayKey !== null && typeof entry.value === "number") {
       currentForecastValuesByDay.set(dayKey, entry.value);
     }
   });

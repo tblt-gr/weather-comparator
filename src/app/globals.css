@@ -214,6 +214,29 @@
         box-shadow: none;
     }
 
+    /* Fullscreen chart: native fullscreen (or the CSS overlay fallback on
+       browsers without the Fullscreen API) fills the viewport. */
+    .chart-fullscreen {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        background: var(--background);
+    }
+
+    /* Forced-landscape fallback when the native orientation lock is
+       unavailable: size to the rotated viewport and pivot 90°. */
+    .chart-fullscreen-rotate {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vh;
+        height: 100vw;
+        transform-origin: top left;
+        transform: rotate(90deg) translateY(-100vh);
+        z-index: 60;
+        background: var(--background);
+    }
+
     .dark .glass-card {
         background: oklch(0.148 0.025 260);
         border-color: var(--border);
