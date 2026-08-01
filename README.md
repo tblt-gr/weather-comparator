@@ -2,6 +2,7 @@
 <h4 align="center">Historical weather comparison dashboard - city search, multi-year charts, climate normals, extreme events, and exports.</h4>
 
 <p align="center">
+<a href="https://github.com/tblt-gr/weather-comparator/actions/workflows/ci.yaml"><img src="https://github.com/tblt-gr/weather-comparator/actions/workflows/ci.yaml/badge.svg?branch=main" alt="CI"></a>
 <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white" alt="Next.js 16"></a>
 <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=111111" alt="React 19"></a>
 <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" alt="TypeScript 5"></a>
