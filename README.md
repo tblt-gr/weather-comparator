@@ -1,4 +1,4 @@
-<h2 align="center"><b>Weather Comparator</b></h2>
+<h2 align="center"><b>☀️ Weather Comparator</b></h2>
 <h4 align="center">Historical weather comparison dashboard - city search, multi-year charts, climate normals, extreme events, and exports.</h4>
 
 <p align="center">
