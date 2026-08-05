@@ -16,6 +16,7 @@ export const fr: Translations = {
   "city.placeholder": "Paris, Lyon…",
   "city.searching": "Recherche…",
   "city.noResults": "Aucune ville trouvée.",
+  "city.recent": "Villes récentes",
   "period.start": "Début",
   "period.end": "Fin",
   "period.startAriaLabel": "Sélectionner la date de début",

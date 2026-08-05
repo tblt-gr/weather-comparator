@@ -5,11 +5,13 @@ import { useEffect, useRef, useState } from "react";
 import {
   Command,
   CommandEmpty,
+  CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
 import { searchCities } from "@/features/weather/api";
+import { addCityToHistory, loadCityHistory } from "@/features/weather/logic/cityHistory";
 import type { City } from "@/features/weather/types";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 
@@ -23,14 +25,22 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [query, setQuery] = useState(city?.name ?? "");
   const [results, setResults] = useState<City[]>([]);
+  const [recentCities, setRecentCities] = useState<City[]>(loadCityHistory);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (city) {
+      addCityToHistory(city);
+    }
+  }, [city]);
 
   useEffect(() => {
     const controller = new AbortController();
     const timeout = window.setTimeout(async () => {
       if (query.trim().length < 2 || query === city?.name) {
         setResults([]);
+        setIsLoading(false);
         return;
       }
 
@@ -79,13 +89,23 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
       >
         <CommandInput
           aria-label={t["city.searchAriaLabel"]}
-          onFocus={() => setIsOpen(results.length > 0 || isLoading)}
+          onFocus={() =>
+            setIsOpen(
+              query.trim().length === 0 ? recentCities.length > 0 : results.length > 0 || isLoading
+            )
+          }
           onKeyDown={(event) => {
             if (event.key === "Escape") {
               setIsOpen(false);
             }
           }}
-          onValueChange={setQuery}
+          onValueChange={(value) => {
+            setQuery(value);
+
+            if (value.trim().length === 0) {
+              setIsOpen(recentCities.length > 0);
+            }
+          }}
           placeholder={t["city.placeholder"]}
           value={query}
         />
@@ -95,26 +115,31 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
               {isLoading ? (
                 <div className="px-3 py-2 text-sm text-muted-foreground">{t["city.searching"]}</div>
               ) : null}
-              {!isLoading ? <CommandEmpty>{t["city.noResults"]}</CommandEmpty> : null}
-              {results.map((result) => (
-                <CommandItem
-                  key={result.id}
-                  onSelect={() => {
-                    onCityChange(result);
-                    setQuery(result.name);
-                    setResults([]);
-                    setIsOpen(false);
-                  }}
-                  value={`${result.id}-${result.name}`}
-                >
-                  <span>
-                    {result.name}, {result.country}
-                    {result.admin1 ? (
-                      <span className="text-muted-foreground"> - {result.admin1}</span>
-                    ) : null}
-                  </span>
-                </CommandItem>
-              ))}
+              {!isLoading && query.trim().length > 0 ? (
+                <CommandEmpty>{t["city.noResults"]}</CommandEmpty>
+              ) : null}
+              <CommandGroup heading={query.trim().length === 0 ? t["city.recent"] : undefined}>
+                {(query.trim().length === 0 ? recentCities : results).map((result) => (
+                  <CommandItem
+                    key={result.id}
+                    onSelect={() => {
+                      setRecentCities(addCityToHistory(result));
+                      onCityChange(result);
+                      setQuery(result.name);
+                      setResults([]);
+                      setIsOpen(false);
+                    }}
+                    value={`${result.id}-${result.name}`}
+                  >
+                    <span>
+                      {result.name}, {result.country}
+                      {result.admin1 ? (
+                        <span className="text-muted-foreground"> - {result.admin1}</span>
+                      ) : null}
+                    </span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
             </CommandList>
           </div>
         ) : null}

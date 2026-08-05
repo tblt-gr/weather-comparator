@@ -16,6 +16,7 @@ export const en: Translations = {
   "city.placeholder": "London, Manchester…",
   "city.searching": "Searching…",
   "city.noResults": "No cities found.",
+  "city.recent": "Recent cities",
   "period.start": "Start",
   "period.end": "End",
   "period.startAriaLabel": "Select start date",

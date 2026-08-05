@@ -16,6 +16,7 @@ export type Translations = {
   "city.placeholder": string;
   "city.searching": string;
   "city.noResults": string;
+  "city.recent": string;
   "period.start": string;
   "period.end": string;
   "period.startAriaLabel": string;
