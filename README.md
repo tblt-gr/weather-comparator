@@ -131,6 +131,6 @@ pnpm build
 - [Open-Meteo](https://open-meteo.com/)
 - [Open-Meteo Historical Weather API](https://open-meteo.com/en/docs/historical-weather-api)
 
-## License
+## Licence
 
-MIT
+[MIT](LICENSE) &copy; 2026 tblt-gr
