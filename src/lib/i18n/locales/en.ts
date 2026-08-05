@@ -12,6 +12,7 @@ export const en: Translations = {
   "state.chartLoading": "Loading chart…",
   "state.chartNoData": "No data available for this period.",
   "city.searchAriaLabel": "Search for a city",
+  "city.clearAriaLabel": "Clear city search",
   "city.label": "City",
   "city.placeholder": "London, Manchester…",
   "city.searching": "Searching…",

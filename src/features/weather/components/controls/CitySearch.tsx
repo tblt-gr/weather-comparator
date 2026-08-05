@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { X } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -17,7 +19,7 @@ import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 type CitySearchProps = {
   city: City | null;
-  onCityChange: (city: City) => void;
+  onCityChange: (city: City | null) => void;
 };
 
 export function CitySearch({ city, onCityChange }: CitySearchProps) {
@@ -89,6 +91,8 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
       >
         <CommandInput
           aria-label={t["city.searchAriaLabel"]}
+          className={query ? "pr-10" : undefined}
+          data-city-search-input
           onFocus={() =>
             setIsOpen(
               query.trim().length === 0 ? recentCities.length > 0 : results.length > 0 || isLoading
@@ -109,6 +113,28 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
           placeholder={t["city.placeholder"]}
           value={query}
         />
+        {query ? (
+          <Button
+            aria-label={t["city.clearAriaLabel"]}
+            className="absolute top-1/2 right-1 z-10 -translate-y-1/2"
+            onClick={(event) => {
+              event.stopPropagation();
+              setQuery("");
+              setResults([]);
+              setIsLoading(false);
+              setIsOpen(false);
+              onCityChange(null);
+              window.requestAnimationFrame(() => {
+                document.querySelector<HTMLInputElement>("[data-city-search-input]")?.focus();
+              });
+            }}
+            size="icon"
+            type="button"
+            variant="ghost"
+          >
+            <X className="size-4" />
+          </Button>
+        ) : null}
         {isOpen ? (
           <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-lg border border-border/60 bg-popover shadow-md">
             <CommandList>

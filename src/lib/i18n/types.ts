@@ -12,6 +12,7 @@ export type Translations = {
   "state.chartLoading": string;
   "state.chartNoData": string;
   "city.searchAriaLabel": string;
+  "city.clearAriaLabel": string;
   "city.label": string;
   "city.placeholder": string;
   "city.searching": string;

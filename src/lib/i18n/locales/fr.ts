@@ -12,6 +12,7 @@ export const fr: Translations = {
   "state.chartLoading": "Chargement du graphique…",
   "state.chartNoData": "Aucune donnée disponible pour cette période.",
   "city.searchAriaLabel": "Rechercher une ville",
+  "city.clearAriaLabel": "Effacer la recherche de ville",
   "city.label": "Ville",
   "city.placeholder": "Paris, Lyon…",
   "city.searching": "Recherche…",
