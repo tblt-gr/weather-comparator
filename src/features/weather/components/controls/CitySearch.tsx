@@ -117,6 +117,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
           <Button
             aria-label={t["city.clearAriaLabel"]}
             className="absolute top-1/2 right-1 z-10 -translate-y-1/2"
+            disableActiveTranslation
             onClick={(event) => {
               event.stopPropagation();
               setQuery("");
