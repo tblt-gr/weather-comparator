@@ -1,8 +1,8 @@
 {
   "name": "weather-comparator",
-  "license": "MIT",
+  "license": "MIT", 
   "author": "tblt-gr",
-  "version": "1.10.1",
+  "version": "1.11.1",
   "private": true,
   "packageManager": "pnpm@11.4.0",
   "scripts": {
