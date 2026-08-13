@@ -13,7 +13,11 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { searchCities } from "@/features/weather/api";
-import { addCityToHistory, loadCityHistory } from "@/features/weather/logic/cityHistory";
+import {
+  addCityToHistory,
+  loadCityHistory,
+  removeCityFromHistory,
+} from "@/features/weather/logic/cityHistory";
 import type { City } from "@/features/weather/types";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 
@@ -148,6 +152,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
               <CommandGroup heading={query.trim().length === 0 ? t["city.recent"] : undefined}>
                 {(query.trim().length === 0 ? recentCities : results).map((result) => (
                   <CommandItem
+                    className="justify-between [&>svg:last-child]:hidden"
                     key={result.id}
                     onSelect={() => {
                       setRecentCities(addCityToHistory(result));
@@ -158,12 +163,30 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
                     }}
                     value={`${result.id}-${result.name}`}
                   >
-                    <span>
+                    <span className="min-w-0 flex-1 truncate">
                       {result.name}, {result.country}
                       {result.admin1 ? (
                         <span className="text-muted-foreground"> - {result.admin1}</span>
                       ) : null}
                     </span>
+                    {query.trim().length === 0 ? (
+                      <Button
+                        aria-label={t["city.removeRecentAriaLabel"].replace("{city}", result.name)}
+                        className="ml-auto"
+                        disableActiveTranslation
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          const nextRecentCities = removeCityFromHistory(result.id);
+                          setRecentCities(nextRecentCities);
+                          setIsOpen(nextRecentCities.length > 0);
+                        }}
+                        size="icon-sm"
+                        type="button"
+                        variant="ghost"
+                      >
+                        <X className="size-4" />
+                      </Button>
+                    ) : null}
                   </CommandItem>
                 ))}
               </CommandGroup>

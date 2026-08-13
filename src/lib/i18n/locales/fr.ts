@@ -18,6 +18,7 @@ export const fr: Translations = {
   "city.searching": "Recherche…",
   "city.noResults": "Aucune ville trouvée.",
   "city.recent": "Villes récentes",
+  "city.removeRecentAriaLabel": "Supprimer {city} des villes récentes",
   "period.start": "Début",
   "period.end": "Fin",
   "period.startAriaLabel": "Sélectionner la date de début",

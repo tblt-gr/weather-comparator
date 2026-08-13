@@ -18,6 +18,7 @@ export type Translations = {
   "city.searching": string;
   "city.noResults": string;
   "city.recent": string;
+  "city.removeRecentAriaLabel": string;
   "period.start": string;
   "period.end": string;
   "period.startAriaLabel": string;

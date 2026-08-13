@@ -3,7 +3,7 @@ import test from "node:test";
 
 import type { City } from "@/features/weather/types";
 
-import { addCityToHistory, loadCityHistory } from "./cityHistory";
+import { addCityToHistory, loadCityHistory, removeCityFromHistory } from "./cityHistory";
 
 const storage = new Map<string, string>();
 const originalWindow = globalThis.window;
@@ -92,4 +92,15 @@ test("addCityToHistory keeps at most five cities", () => {
     loadCityHistory().map((city) => city.id),
     ["6", "5", "4", "3", "2"]
   );
+});
+
+test("removeCityFromHistory removes only the matching city", () => {
+  const paris = createCity("paris");
+  const lyon = createCity("lyon");
+
+  addCityToHistory(paris);
+  addCityToHistory(lyon);
+
+  assert.deepEqual(removeCityFromHistory(lyon.id), [paris]);
+  assert.deepEqual(loadCityHistory(), [paris]);
 });

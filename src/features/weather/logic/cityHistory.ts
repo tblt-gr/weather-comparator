@@ -60,3 +60,19 @@ export function addCityToHistory(city: City): City[] {
 
   return history;
 }
+
+export function removeCityFromHistory(cityId: City["id"]): City[] {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  const history = loadCityHistory().filter((city) => city.id !== cityId);
+
+  try {
+    window.localStorage.setItem(CITY_HISTORY_STORAGE_KEY, JSON.stringify(history));
+  } catch {
+    return history;
+  }
+
+  return history;
+}

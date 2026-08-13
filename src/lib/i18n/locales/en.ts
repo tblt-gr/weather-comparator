@@ -18,6 +18,7 @@ export const en: Translations = {
   "city.searching": "Searching…",
   "city.noResults": "No cities found.",
   "city.recent": "Recent cities",
+  "city.removeRecentAriaLabel": "Remove {city} from recent cities",
   "period.start": "Start",
   "period.end": "End",
   "period.startAriaLabel": "Select start date",
