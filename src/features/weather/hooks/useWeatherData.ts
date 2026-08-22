@@ -14,6 +14,7 @@ import { getForecastDateRangeForPeriod } from "@/features/weather/logic/forecast
 import { normalizeWeatherData } from "@/features/weather/logic/normalizeWeatherData";
 import { formatLocalDate as formatToday } from "@/features/weather/logic/dates";
 import { isValidDatePeriod } from "@/features/weather/logic/dates";
+import { limitWeatherOffsets } from "@/features/weather/logic/workloadLimits";
 import type { City, ForecastModel, WeatherYearDataset } from "@/features/weather/types";
 
 export function getWeatherQueryKey(city: City, period: DatePeriod, offsetYears: number) {
@@ -172,11 +173,12 @@ export function useWeatherData({
   showForecast: boolean;
   forecastModel: ForecastModel;
 }) {
+  const boundedOffsets = limitWeatherOffsets(offsets);
   const queries = useQueries({
     queries:
       city === null
         ? []
-        : offsets.map((offsetYears) => ({
+        : boundedOffsets.map((offsetYears) => ({
             queryKey: getWeatherQueryKey(city, period, offsetYears),
             enabled: isValidDatePeriod(period) && getComparableDateRangeByOffset({ offsetYears, period }) !== null,
             queryFn: ({ signal }: { signal: AbortSignal }) =>
@@ -229,7 +231,7 @@ export function useWeatherData({
   const errorMessage = aggregateWeatherQueryErrors(
     queries.map((query, index) => ({
       error: query.error,
-      offsetYears: offsets[index] ?? 0,
+      offsetYears: boundedOffsets[index] ?? 0,
     }))
   );
   const isLoadingQueries = queries.some((query) => query.isLoading);

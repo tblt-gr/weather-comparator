@@ -14,6 +14,7 @@ export type {
   DatePeriod,
 } from "@/features/weather/logic/dates/dateRange";
 export {
+  getDatePeriodDayCount,
   isValidDatePeriod,
   normalizeDatePeriod,
   validateDatePeriod,

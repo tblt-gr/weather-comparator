@@ -8,9 +8,12 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { type DatePeriod, getAvailableComparisonOffsets } from "@/features/weather/logic/dates";
+import { MAX_COMPARISON_OFFSETS } from "@/features/weather/logic/workloadLimits";
 import { getTranslations } from "@/lib/i18n/getTranslations";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Locale } from "@/lib/i18n/types";
@@ -41,6 +44,7 @@ export function YearSelector({
         ? formatComparisonOffsetLabel(period, visibleSelectedOffsets[0], locale)
         : t["year.nSelected"].replace("{count}", String(count));
   const canClear = canClearComparisonOffsets(selectedOffsets);
+  const selectionLimitReached = count >= MAX_COMPARISON_OFFSETS;
 
   return (
     <div className="grid min-w-0 gap-1">
@@ -62,10 +66,15 @@ export function YearSelector({
             align="start"
             className="max-h-80 w-(--radix-dropdown-menu-trigger-width) p-1"
           >
+            <DropdownMenuLabel>
+              {t["year.selectionLimit"].replace("{count}", String(MAX_COMPARISON_OFFSETS))}
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
             {offsets.map((offsetYears) => (
               <DropdownMenuCheckboxItem
                 checked={selectedOffsets.includes(offsetYears)}
                 className="h-10 px-2"
+                disabled={selectionLimitReached && !selectedOffsets.includes(offsetYears)}
                 key={offsetYears}
                 onCheckedChange={() => onToggleOffset(offsetYears)}
                 onSelect={keepDropdownMenuOpen}

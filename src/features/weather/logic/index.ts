@@ -24,10 +24,18 @@ export {
   mergeArchiveAndForecastWeather,
 } from "@/features/weather/logic/forecastWeather";
 export {
+  getDatePeriodDayCount,
   isValidDatePeriod,
   validateDatePeriod,
 } from "@/features/weather/logic/dates";
 export type { DatePeriodErrors, ValidationErrorKey } from "@/features/weather/logic/dates";
+export {
+  MAX_COMPARISON_OFFSETS,
+  MAX_PERIOD_DAYS,
+  MAX_WEATHER_DATASETS,
+  limitComparisonOffsets,
+  limitWeatherOffsets,
+} from "@/features/weather/logic/workloadLimits";
 export {
   buildColdWaveStats,
   buildHeatwaveStats,

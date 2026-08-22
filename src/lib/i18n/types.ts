@@ -27,6 +27,7 @@ export type Translations = {
   "period.refreshButton": string;
   "error.invalidDate": string;
   "error.beforeEndDate": string;
+  "error.periodTooLong": string;
   "year.noSelection": string;
   "year.label": string;
   "year.nSelected": string;
@@ -34,6 +35,7 @@ export type Translations = {
   "year.clearAriaLabel": string;
   "year.offsetSingular": string;
   "year.offsetPlural": string;
+  "year.selectionLimit": string;
   "normals.label": string;
   "normals.ariaLabel": string;
   "normals.infoAriaLabel": string;

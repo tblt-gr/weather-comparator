@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { isValidDatePeriod, normalizeDatePeriod, validateDatePeriod } from "./periodValidation";
+import {
+  getDatePeriodDayCount,
+  isValidDatePeriod,
+  normalizeDatePeriod,
+  validateDatePeriod,
+} from "./periodValidation";
 
 test("accepts single-day periods", () => {
   assert.equal(
@@ -76,4 +81,16 @@ test("returns error.beforeEndDate when start is after end", () => {
 test("returns no errors for a valid period", () => {
   const errors = validateDatePeriod({ startDate: "2026-05-01", endDate: "2026-05-25" });
   assert.deepEqual(errors, {});
+});
+
+test("accepts up to 366 inclusive days and rejects longer periods", () => {
+  const maximumPeriod = { startDate: "2024-01-01", endDate: "2024-12-31" };
+  const oversizedPeriod = { startDate: "2024-01-01", endDate: "2025-01-01" };
+
+  assert.equal(getDatePeriodDayCount(maximumPeriod), 366);
+  assert.equal(isValidDatePeriod(maximumPeriod), true);
+  assert.equal(isValidDatePeriod(oversizedPeriod), false);
+  assert.deepEqual(validateDatePeriod(oversizedPeriod), {
+    endDate: "error.periodTooLong",
+  });
 });

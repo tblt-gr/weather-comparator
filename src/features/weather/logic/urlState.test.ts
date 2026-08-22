@@ -76,6 +76,34 @@ test("parseCompareParam filters invalid and unavailable offsets", () => {
   );
 });
 
+test("parseCompareParam and serialization cap the number of comparison offsets", () => {
+  const period = { startDate: "2026-05-01", endDate: "2026-05-26" };
+
+  assert.deepEqual(parseCompareParam("12,11,10,9,8,7,6,5,4,3,2,1", period), [
+    1, 2, 3, 4, 5, 6, 7, 8, 9,
+  ]);
+
+  const params = serializeWeatherUrlState({
+    city: null,
+    comparisonOffsets: [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+    period,
+    showNormals: false,
+    showForecast: true,
+    temperatureMode: "tmax",
+    forecastModel: "best_match",
+  });
+
+  assert.equal(params.get("compare"), "1,2,3,4,5,6,7,8,9");
+});
+
+test("parseWeatherUrlState ignores periods that exceed the workload limit", () => {
+  const parsed = parseWeatherUrlState(
+    new URLSearchParams({ start: "2024-01-01", end: "2025-01-01" })
+  );
+
+  assert.equal(parsed.period, undefined);
+});
+
 test("serializeWeatherUrlState omits default values and canonicalizes compare ordering", () => {
   const params = serializeWeatherUrlState({
     city: paris,

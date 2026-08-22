@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import test from "node:test";
 
 import {
@@ -64,4 +66,15 @@ test("copyTextToClipboard prefers navigator.clipboard.writeText", async () => {
       value: originalNavigator,
     });
   }
+});
+
+test("loads export libraries only when an export is requested", () => {
+  const source = readFileSync(
+    path.join(process.cwd(), "src/features/weather/components/export/ExportButtons.tsx"),
+    "utf8"
+  );
+
+  assert.equal(source.includes('from "html-to-image"'), false);
+  assert.equal(source.includes('import("html-to-image")'), true);
+  assert.equal(source.includes('import("@/features/weather/logic/exports/exportCsv")'), true);
 });

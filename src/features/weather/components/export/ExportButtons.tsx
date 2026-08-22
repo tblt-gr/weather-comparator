@@ -2,7 +2,6 @@
 
 import { Download, FileDown, Link2, MoreVertical } from "lucide-react";
 import { useEffect, useState, type RefObject } from "react";
-import { toPng } from "html-to-image";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +10,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { exportWeatherCsv } from "@/features/weather/logic/exports";
 import type { WeatherYearDataset } from "@/features/weather/types";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 
@@ -106,7 +104,12 @@ export function ExportButtons({ datasets, chartRef, shareUrl }: ExportButtonsPro
           <Link2 />
           {shareLabel}
         </DropdownMenuItem>
-        <DropdownMenuItem disabled={!hasData} onSelect={() => downloadCsv(datasets)}>
+        <DropdownMenuItem
+          disabled={!hasData}
+          onSelect={() => {
+            void downloadCsv(datasets);
+          }}
+        >
           <FileDown />
           CSV
         </DropdownMenuItem>
@@ -159,7 +162,8 @@ export async function copyTextToClipboard(text: string) {
   }
 }
 
-function downloadCsv(datasets: WeatherYearDataset[]) {
+async function downloadCsv(datasets: WeatherYearDataset[]) {
+  const { exportWeatherCsv } = await import("@/features/weather/logic/exports/exportCsv");
   const csv = exportWeatherCsv(datasets);
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -172,6 +176,7 @@ async function downloadPng(chartRef: RefObject<HTMLDivElement | null>) {
     return;
   }
 
+  const { toPng } = await import("html-to-image");
   const url = await toPng(chartRef.current, {
     backgroundColor: getChartExportBackground(
       getComputedStyle(document.documentElement).getPropertyValue("--background")

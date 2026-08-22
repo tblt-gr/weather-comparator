@@ -8,6 +8,10 @@ import {
 } from "@/features/weather/logic/dates";
 import type { WeatherUrlState } from "@/features/weather/logic/urlState";
 import { isForecastModel } from "@/features/weather/logic/weatherModels";
+import {
+  MAX_COMPARISON_OFFSETS,
+  limitComparisonOffsets,
+} from "@/features/weather/logic/workloadLimits";
 import type {
   City,
   ExtremeKind,
@@ -128,6 +132,14 @@ export const useWeatherStore = create<WeatherState>((set) => ({
     set((state) => {
       const exists = state.comparisonOffsets.includes(offsetYears);
 
+      if (!Number.isInteger(offsetYears) || offsetYears <= 0) {
+        return state;
+      }
+
+      if (!exists && state.comparisonOffsets.length >= MAX_COMPARISON_OFFSETS) {
+        return state;
+      }
+
       return {
         comparisonOffsets: exists
           ? state.comparisonOffsets.filter((offset) => offset !== offsetYears)
@@ -172,8 +184,9 @@ export const useWeatherStore = create<WeatherState>((set) => ({
       city: state.city ?? currentState.city,
       period: state.period ?? currentState.period,
       comparisonOffsets:
-        state.comparisonOffsets?.slice().sort((left, right) => left - right) ??
-        currentState.comparisonOffsets,
+        state.comparisonOffsets !== undefined
+          ? limitComparisonOffsets(state.comparisonOffsets)
+          : currentState.comparisonOffsets,
       temperatureMode: state.temperatureMode ?? currentState.temperatureMode,
       forecastModel: state.forecastModel ?? currentState.forecastModel,
       showNormals: state.showNormals ?? currentState.showNormals,

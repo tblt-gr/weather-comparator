@@ -166,6 +166,28 @@ test("toggleComparisonOffset keeps offsets sorted and unhides the related series
   assert.deepEqual(useWeatherStore.getState().comparisonOffsets, [1, 3]);
 });
 
+test("caps comparison offsets and ignores invalid values", () => {
+  useWeatherStore.setState({ comparisonOffsets: [1, 2, 3, 4, 5, 6, 7, 8, 9] });
+
+  useWeatherStore.getState().toggleComparisonOffset(10);
+  useWeatherStore.getState().toggleComparisonOffset(0);
+
+  assert.deepEqual(useWeatherStore.getState().comparisonOffsets, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+  useWeatherStore.getState().toggleComparisonOffset(9);
+  useWeatherStore.getState().toggleComparisonOffset(10);
+
+  assert.deepEqual(useWeatherStore.getState().comparisonOffsets, [1, 2, 3, 4, 5, 6, 7, 8, 10]);
+});
+
+test("caps comparison offsets hydrated from URL state", () => {
+  useWeatherStore.getState().hydrateFromUrl({
+    comparisonOffsets: [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+  });
+
+  assert.deepEqual(useWeatherStore.getState().comparisonOffsets, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+});
+
 test("clearComparisonOffsets removes compared periods and related hidden series", () => {
   useWeatherStore.setState({
     comparisonOffsets: [1, 3],
