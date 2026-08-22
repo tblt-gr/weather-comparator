@@ -83,7 +83,7 @@ export function ColdWaveOverlay({ coldWaves, colors = {} }: ColdWaveOverlayProps
   }
 
   return (
-    <section className="border-t border-border/60 pt-5">
+    <section className="border-t border-border/60 pt-3">
       <h2 className="mb-3 text-sm font-semibold text-foreground">{t["coldwave.sectionTitle"]}</h2>
       <div className="divide-y divide-border/60 border-y border-border/60">
         {groupedColdWaves.map((group) => (
