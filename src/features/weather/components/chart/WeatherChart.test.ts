@@ -3,17 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
-// This project runs tests with Node's built-in runner, so this file covers only
-// pure helpers exported by WeatherChart. Rendering tests need a DOM environment.
 import {
-  buildChartRows,
-  formatAccessibleTemperature,
-  formatChartDateTick,
-  formatExtremeDateRange,
-  formatExtremeTooltipLabel,
-  formatTooltipDate,
-  getChartTickFontWeight,
-  getChartRowValue,
   getCurrentForecastLineAnimation,
   getCurrentObservedLineAnimation,
   getCurrentSeriesAnimation,
@@ -24,19 +14,31 @@ import {
   getSeriesLineKeysDependency,
   getSeriesLineKeys,
   getFreshSeriesKeys,
+  getNormalsLineConfig,
+} from "./weatherChartAnimation";
+import {
+  buildChartRows,
+  formatAccessibleTemperature,
+  formatChartDateTick,
+  getChartTickFontWeight,
+  getChartRowValue,
   getExtremeAreaSegments,
   getExtremeBridgeDay,
-  getTooltipExtremeEntries,
-  getTooltipTropicalNightEntries,
   getDisplayedForecastBoundaryDay,
   getForecastBoundaryDay,
   getHeatwaveFill,
   getTodayBoundaryDay,
   getMonthBoundaryDays,
-  getNormalsLineConfig,
+} from "./weatherChartLogic";
+import {
+  formatExtremeDateRange,
+  formatExtremeTooltipLabel,
+  formatTooltipDate,
+  getTooltipExtremeEntries,
+  getTooltipTropicalNightEntries,
   getVisibleTooltipEntries,
   sortTooltipEntries,
-} from "./WeatherChart";
+} from "./weatherChartTooltip";
 
 test("keeps historical periods solid and reserves weather-series dashes for forecasts", () => {
   const chartSource = readFileSync(
@@ -932,7 +934,7 @@ test("formats the accessible chart table values", () => {
 
 test("provides a native keyboard-accessible data table", () => {
   const source = readFileSync(
-    path.join(process.cwd(), "src/features/weather/components/chart/WeatherChart.tsx"),
+    path.join(process.cwd(), "src/features/weather/components/chart/ChartDataTable.tsx"),
     "utf8"
   );
 
@@ -940,7 +942,7 @@ test("provides a native keyboard-accessible data table", () => {
   assert.equal(source.includes('<table className="w-full'), true);
   assert.equal(source.includes('scope="col"'), true);
   assert.equal(source.includes('scope="row"'), true);
-  assert.equal(source.includes("id={dataTableCaptionId}"), true);
+  assert.equal(source.includes("id={captionId}"), true);
 });
 
 test("exposes a fullscreen toggle whose label reflects the current state", () => {
