@@ -911,10 +911,11 @@ test("uses an equidistant x-axis interval to keep date ticks evenly spaced", () 
   assert.equal(source.includes('interval="equidistantPreserveStart"'), true);
 });
 
-test("keeps visible focus styles on recharts surfaces inside the chart shell", () => {
+test("hides pointer focus on recharts surfaces while preserving keyboard focus", () => {
   const source = readFileSync(path.join(process.cwd(), "src/app/globals.css"), "utf8");
 
-  assert.equal(source.includes(".weather-chart-shell :focus"), false);
+  assert.equal(source.includes(".weather-chart-shell :focus:not(:focus-visible)"), true);
+  assert.equal(source.includes(".weather-chart-shell :focus-visible"), false);
 });
 
 test("formats the accessible chart table values", () => {

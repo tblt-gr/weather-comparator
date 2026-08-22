@@ -1,7 +1,6 @@
 "use client";
 
 import { InfoIcon } from "lucide-react";
-import { useSyncExternalStore } from "react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -22,6 +21,7 @@ import { FORECAST_MODELS } from "@/features/weather/logic/weatherModels";
 import type { ForecastModel } from "@/features/weather/types";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Translations } from "@/lib/i18n/types";
+import { useHydrated } from "@/lib/useHydrated";
 
 type ForecastControlProps = {
   checked: boolean;
@@ -46,8 +46,6 @@ const HINT_KEYS: Record<ForecastModel, keyof Translations> = {
   meteofrance_seamless: "forecastModel.hint.meteofrance_seamless",
 };
 
-const subscribeNever = () => () => {};
-
 export function ForecastControl({
   checked,
   onCheckedChange,
@@ -55,11 +53,7 @@ export function ForecastControl({
   onModelChange,
 }: ForecastControlProps) {
   const { t } = useLocale();
-  const mounted = useSyncExternalStore(
-    subscribeNever,
-    () => true,
-    () => false
-  );
+  const mounted = useHydrated();
 
   const infoButton = (
     <button

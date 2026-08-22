@@ -9,6 +9,7 @@ test("uses shared grid columns when summary stats wrap on large screens", () => 
   const source = readFileSync(new URL("./ClimateSummaryBar.tsx", import.meta.url), "utf8");
 
   assert.equal(source.includes("lg:grid-cols-[repeat(auto-fit,minmax(9rem,1fr))]"), true);
+  assert.equal(source.includes("lg:gap-y-4"), true);
   assert.equal(source.includes("lg:flex-wrap"), false);
   assert.equal(source.includes("lg:first:pl-3"), true);
 });

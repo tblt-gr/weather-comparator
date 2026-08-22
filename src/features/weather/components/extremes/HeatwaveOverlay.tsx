@@ -82,7 +82,7 @@ export function HeatwaveOverlay({ heatwaves, colors = {} }: HeatwaveOverlayProps
   }
 
   return (
-    <section className="border-t border-border/60 pt-3">
+    <section className="rounded-lg border border-border/60 bg-card px-3 py-4 sm:px-5 sm:py-5">
       <h2 className="mb-3 text-sm font-semibold text-foreground">{t["heatwave.sectionTitle"]}</h2>
       <div className="divide-y divide-border/60 border-y border-border/60">
         {groupedHeatwaves.map((group) => (

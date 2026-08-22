@@ -6,7 +6,7 @@ export const DEFAULT_THEME: Theme = "dark";
 
 export const THEME_COLORS: Record<Theme, string> = {
   light: "#f5f6f7",
-  dark: "#0b0c0f",
+  dark: "#0a1322",
 };
 
 export function parseTheme(value: string | undefined): Theme {

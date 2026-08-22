@@ -31,7 +31,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [query, setQuery] = useState(city?.name ?? "");
   const [results, setResults] = useState<City[]>([]);
-  const [recentCities, setRecentCities] = useState<City[]>(loadCityHistory);
+  const [recentCities, setRecentCities] = useState<City[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [searchFailed, setSearchFailed] = useState(false);
@@ -97,19 +97,22 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
       <span className="text-xs font-medium text-muted-foreground">{t["city.label"]}</span>
       <Command
         shouldFilter={false}
-        className="weather-touch-control relative h-9 min-w-0 overflow-visible rounded-md! border border-input bg-background p-0 shadow-none [&_[data-slot=input-group]]:h-full! [&_[data-slot=input-group]]:rounded-md! [&_[data-slot=input-group]]:border-0! [&_[data-slot=input-group]]:bg-transparent!"
+        className="weather-touch-control relative h-9 min-w-0 overflow-visible rounded-md! border border-input bg-transparent p-0 shadow-none dark:bg-input/30 [&_[data-slot=input-group]]:h-full! [&_[data-slot=input-group]]:rounded-md! [&_[data-slot=input-group]]:border-0! [&_[data-slot=input-group]]:bg-transparent!"
       >
         <CommandInput
           aria-label={t["city.searchAriaLabel"]}
           className={query ? "pr-10" : undefined}
           data-city-search-input
-          onFocus={() =>
-            setIsOpen(
-              query.trim().length === 0
-                ? recentCities.length > 0
-                : results.length > 0 || isLoading || searchFailed
-            )
-          }
+          onFocus={() => {
+            if (query.trim().length === 0) {
+              const nextRecentCities = loadCityHistory();
+              setRecentCities(nextRecentCities);
+              setIsOpen(nextRecentCities.length > 0);
+              return;
+            }
+
+            setIsOpen(results.length > 0 || isLoading || searchFailed);
+          }}
           onKeyDown={(event) => {
             if (event.key === "Escape") {
               setIsOpen(false);

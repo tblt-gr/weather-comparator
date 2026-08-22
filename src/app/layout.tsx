@@ -63,7 +63,10 @@ export default async function RootLayout({
       suppressHydrationWarning
       className={`${theme === "dark" ? "dark " : ""}h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col" suppressHydrationWarning>
+      <head>
+        <meta name="darkreader-lock" />
+      </head>
+      <body className="flex min-h-full flex-col">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[9999] focus:rounded-lg focus:bg-background focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-foreground focus:ring-2 focus:ring-ring focus:outline-none"

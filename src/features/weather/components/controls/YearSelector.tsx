@@ -45,7 +45,7 @@ export function YearSelector({
   return (
     <div className="grid min-w-0 gap-1">
       <span className="text-xs font-medium text-muted-foreground">{t["year.label"]}</span>
-      <div className="flex min-w-0 items-center rounded-md border border-input bg-background">
+      <div className="flex min-w-0 items-center rounded-md border border-input bg-background dark:bg-input/30">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

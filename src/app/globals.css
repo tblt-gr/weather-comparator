@@ -67,7 +67,7 @@
     --accent-foreground: oklch(0.2 0.025 245);
     --destructive: oklch(0.55 0.22 27);
     --border: oklch(0.885 0.006 245);
-    --input: oklch(0.64 0.008 245);
+    --input: oklch(0.92 0.012 222);
     --ring: oklch(0.62 0.11 192);
     --chart-1: oklch(0.56 0.14 190);
     --chart-2: oklch(0.48 0.15 255);
@@ -95,7 +95,7 @@
 }
 
 .dark {
-    --background: oklch(0.095 0.008 260);
+    --background: oklch(0.112 0.022 260);
     --foreground: oklch(0.92 0.01 240);
     --card: oklch(0.18 0.014 252);
     --card-foreground: oklch(0.92 0.01 240);
@@ -111,7 +111,7 @@
     --accent-foreground: oklch(0.94 0.012 220);
     --destructive: oklch(0.704 0.191 22.216);
     --border: oklch(0.31 0.016 252);
-    --input: oklch(0.48 0.01 258);
+    --input: oklch(1 0 0 / 8%);
     --ring: oklch(0.72 0.13 185);
     --chart-1: oklch(0.74 0.13 185);
     --chart-2: oklch(0.74 0.13 255);
@@ -182,6 +182,11 @@
 @layer components {
     .app-ambient {
         background: var(--background);
+    }
+
+    .weather-chart-shell :focus:not(:focus-visible) {
+        outline: none;
+        box-shadow: none;
     }
 
     /* Fullscreen chart: native fullscreen (or the CSS overlay fallback on

@@ -31,10 +31,7 @@ export function WeatherDashboardHeader({
               {t["app.title"]}
             </h1>
             {city ? (
-              <span
-                className="hidden truncate text-sm text-muted-foreground sm:inline"
-                suppressHydrationWarning
-              >
+              <span className="hidden truncate text-sm text-muted-foreground sm:inline">
                 {city.name}, {city.country}
               </span>
             ) : null}

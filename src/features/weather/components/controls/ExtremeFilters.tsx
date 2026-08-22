@@ -1,7 +1,6 @@
 "use client";
 
 import { InfoIcon } from "lucide-react";
-import { useSyncExternalStore } from "react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -14,6 +13,7 @@ import {
 import { EXTREME_KIND_COLORS } from "@/features/weather/logic/extremes";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Translations } from "@/lib/i18n/types";
+import { useHydrated } from "@/lib/useHydrated";
 import type { ExtremeKind } from "@/features/weather/types";
 
 const EXTREME_KINDS: {
@@ -39,8 +39,6 @@ const EXTREME_KINDS: {
   },
 ];
 
-const subscribeNever = () => () => {};
-
 type ExtremeFiltersProps = {
   hiddenKinds: ExtremeKind[];
   availableKinds: Record<ExtremeKind, boolean>;
@@ -49,11 +47,7 @@ type ExtremeFiltersProps = {
 
 export function ExtremeFilters({ hiddenKinds, availableKinds, onToggleKind }: ExtremeFiltersProps) {
   const { t } = useLocale();
-  const mounted = useSyncExternalStore(
-    subscribeNever,
-    () => true,
-    () => false
-  );
+  const mounted = useHydrated();
 
   return (
     <div

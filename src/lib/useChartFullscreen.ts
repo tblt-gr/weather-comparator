@@ -35,7 +35,7 @@ export function useChartFullscreen(
   { lockLandscape }: { lockLandscape: boolean }
 ): ChartFullscreenController {
   const [active, setActive] = useState(false);
-  const [viewport, setViewport] = useState<ChartFullscreenViewport>(readViewport);
+  const [viewport, setViewport] = useState<ChartFullscreenViewport>({ width: 0, height: 0 });
   // Tracks whether the native Fullscreen API drove the current session so the
   // `fullscreenchange` sync below only reacts to sessions it actually started.
   const usedNativeFullscreenRef = useRef(false);

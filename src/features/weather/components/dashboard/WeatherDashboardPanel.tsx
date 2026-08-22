@@ -2,9 +2,8 @@
 
 import { useMemo, type RefObject } from "react";
 
-import { palette, WeatherChart } from "@/features/weather/components/chart";
+import { WeatherChart } from "@/features/weather/components/chart";
 import { ExportButtons } from "@/features/weather/components/export";
-import { ColdWaveOverlay, HeatwaveOverlay } from "@/features/weather/components/extremes";
 import { ClimateSummaryBar } from "@/features/weather/components/summary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
@@ -55,13 +54,6 @@ export function WeatherDashboardPanel({
     [datasets, hiddenSeries]
   );
   const hasData = datasets.length > 0;
-  const datasetColors = useMemo(
-    () =>
-      Object.fromEntries(
-        datasets.map((dataset, index) => [dataset.id, palette[index % palette.length]])
-      ) as Record<string, string>,
-    [datasets]
-  );
 
   return (
     <section className="max-w-full min-w-0 rounded-lg border border-border/60 bg-card px-3 py-4 sm:px-5 sm:py-5">
@@ -108,8 +100,6 @@ export function WeatherDashboardPanel({
         {showNormals && weatherNormalsFetching ? (
           <p className="text-sm text-muted-foreground">{t["state.computingNormals"]}</p>
         ) : null}
-        <HeatwaveOverlay colors={datasetColors} heatwaves={heatwaves} />
-        <ColdWaveOverlay coldWaves={coldWaves} colors={datasetColors} />
       </div>
     </section>
   );

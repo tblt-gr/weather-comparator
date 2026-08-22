@@ -1,7 +1,6 @@
 "use client";
 
 import { InfoIcon } from "lucide-react";
-import { useSyncExternalStore } from "react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -12,21 +11,16 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { useHydrated } from "@/lib/useHydrated";
 
 type SeasonalNormalsToggleProps = {
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
 };
 
-const subscribeNever = () => () => {};
-
 export function SeasonalNormalsToggle({ checked, onCheckedChange }: SeasonalNormalsToggleProps) {
   const { t } = useLocale();
-  const mounted = useSyncExternalStore(
-    subscribeNever,
-    () => true,
-    () => false
-  );
+  const mounted = useHydrated();
 
   const infoButton = (
     <button
