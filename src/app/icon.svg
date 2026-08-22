@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Weather Comparator">
-  <rect width="512" height="512" fill="#008da9" />
+  <rect width="512" height="512" rx="96" fill="#008da9" />
   <g fill="none" stroke="#ffffff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="196" cy="196" r="58" fill="#ffffff" stroke="none" />
     <g stroke-width="20">
