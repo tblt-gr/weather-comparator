@@ -85,7 +85,7 @@ export function ForecastControl({
         <Select onValueChange={(next) => onModelChange(next as ForecastModel)} value={model}>
           <SelectTrigger
             aria-label={t["forecastModel.ariaLabel"]}
-            className="h-8 w-full min-w-0 rounded-md border-input bg-background hover:bg-muted sm:w-auto sm:min-w-40 dark:border-input dark:bg-input/30 dark:hover:bg-input/50"
+            className="h-8 w-full min-w-0 rounded-md border-input sm:w-auto sm:min-w-40"
           >
             <SelectValue />
           </SelectTrigger>
