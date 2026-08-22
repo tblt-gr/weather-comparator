@@ -38,7 +38,6 @@ export const fr: Translations = {
   "year.clearAriaLabel": "Effacer les périodes comparées",
   "year.offsetSingular": "-1 an",
   "year.offsetPlural": "-{count} ans",
-  "year.selectionLimit": "{count} périodes comparées maximum",
   "normals.label": "Normale climatique",
   "normals.ariaLabel": "Afficher la normale climatique",
   "normals.infoAriaLabel": "À propos de la normale climatique",
@@ -46,10 +45,13 @@ export const fr: Translations = {
     "Moyenne des températures maximales et minimales calculée sur la période de référence 1991–2020.",
   "extremes.filtersAriaLabel": "Afficher les épisodes extrêmes",
   "extremes.criteriaForAriaLabel": "Afficher les critères pour {kind}",
-  "extremes.criteria.canicule": "Tmax ≥ 35 °C et Tmin ≥ 20 °C pendant au moins 3 jours consécutifs.",
+  "extremes.criteria.canicule":
+    "Tmax ≥ 35 °C et Tmin ≥ 20 °C pendant au moins 3 jours consécutifs.",
   "extremes.criteria.vague_de_chaleur": "Tmax ≥ 30 °C pendant au moins 3 jours consécutifs.",
-  "extremes.criteria.vague_de_froid": "Tmin ≤ -5 °C et Tmax ≤ 0 °C pendant au moins 3 jours consécutifs.",
-  "extremes.criteria.grand_froid": "Tmin ≤ -10 °C ou Tmax ≤ -5 °C pendant au moins 3 jours consécutifs.",
+  "extremes.criteria.vague_de_froid":
+    "Tmin ≤ -5 °C et Tmax ≤ 0 °C pendant au moins 3 jours consécutifs.",
+  "extremes.criteria.grand_froid":
+    "Tmin ≤ -10 °C ou Tmax ≤ -5 °C pendant au moins 3 jours consécutifs.",
   "temp.groupAriaLabel": "Type de température",
   "forecastModel.ariaLabel": "Choisir le modèle de prévision",
   "forecastModel.best_match": "Automatique",
@@ -61,7 +63,8 @@ export const fr: Translations = {
   "forecastModel.hint.ecmwf_ifs025": "Centre européen, couverture mondiale, ~25 km.",
   "forecastModel.hint.gfs_seamless": "NOAA (États-Unis), couverture mondiale, ~13 km.",
   "forecastModel.hint.icon_seamless": "DWD (Allemagne), couverture mondiale, ~13 km.",
-  "forecastModel.hint.meteofrance_seamless": "AROME/ARPEGE, haute résolution sur la France, ~1,3 km.",
+  "forecastModel.hint.meteofrance_seamless":
+    "AROME/ARPEGE, haute résolution sur la France, ~1,3 km.",
   "theme.lightAriaLabel": "Activer le mode clair",
   "theme.darkAriaLabel": "Activer le mode sombre",
   "lang.ariaLabel": "Changer de langue",
@@ -106,9 +109,11 @@ export const fr: Translations = {
   "chart.dataTableCaption": "Températures quotidiennes comparées — {mode}",
   "chart.dataTableDate": "Date",
   "app.skipToContent": "Aller au contenu principal",
-  "forecast.unavailable": "Prévisions indisponibles — les données futures n'ont pas pu être chargées.",
+  "forecast.unavailable":
+    "Prévisions indisponibles — les données futures n'ont pas pu être chargées.",
   "forecast.label": "Prévisions",
   "forecast.ariaLabel": "Afficher les prévisions",
-  "forecast.description": "Ajoute les prévisions à venir sur l'année de référence, à partir du meilleur modèle disponible.",
+  "forecast.description":
+    "Ajoute les prévisions à venir sur l'année de référence, à partir du meilleur modèle disponible.",
   "forecast.infoAriaLabel": "À propos des prévisions",
 };

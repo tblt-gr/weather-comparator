@@ -2,22 +2,11 @@
 
 import { create } from "zustand";
 
-import {
-  type DatePeriod,
-  getDefaultComparisonPeriod,
-} from "@/features/weather/logic/dates";
+import { type DatePeriod, getDefaultComparisonPeriod } from "@/features/weather/logic/dates";
 import type { WeatherUrlState } from "@/features/weather/logic/urlState";
 import { isForecastModel } from "@/features/weather/logic/weatherModels";
-import {
-  MAX_COMPARISON_OFFSETS,
-  limitComparisonOffsets,
-} from "@/features/weather/logic/workloadLimits";
-import type {
-  City,
-  ExtremeKind,
-  ForecastModel,
-  TemperatureMode,
-} from "@/features/weather/types";
+import { normalizeComparisonOffsets } from "@/features/weather/logic/workloadLimits";
+import type { City, ExtremeKind, ForecastModel, TemperatureMode } from "@/features/weather/types";
 
 const CITY_STORAGE_KEY = "weather-compare.city";
 const FORECAST_MODEL_STORAGE_KEY = "weather-compare.forecastModel";
@@ -136,10 +125,6 @@ export const useWeatherStore = create<WeatherState>((set) => ({
         return state;
       }
 
-      if (!exists && state.comparisonOffsets.length >= MAX_COMPARISON_OFFSETS) {
-        return state;
-      }
-
       return {
         comparisonOffsets: exists
           ? state.comparisonOffsets.filter((offset) => offset !== offsetYears)
@@ -185,7 +170,7 @@ export const useWeatherStore = create<WeatherState>((set) => ({
       period: state.period ?? currentState.period,
       comparisonOffsets:
         state.comparisonOffsets !== undefined
-          ? limitComparisonOffsets(state.comparisonOffsets)
+          ? normalizeComparisonOffsets(state.comparisonOffsets)
           : currentState.comparisonOffsets,
       temperatureMode: state.temperatureMode ?? currentState.temperatureMode,
       forecastModel: state.forecastModel ?? currentState.forecastModel,

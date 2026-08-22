@@ -38,7 +38,6 @@ export type Translations = {
   "year.clearAriaLabel": string;
   "year.offsetSingular": string;
   "year.offsetPlural": string;
-  "year.selectionLimit": string;
   "normals.label": string;
   "normals.ariaLabel": string;
   "normals.infoAriaLabel": string;

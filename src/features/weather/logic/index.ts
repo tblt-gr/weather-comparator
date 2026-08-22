@@ -30,12 +30,12 @@ export {
 } from "@/features/weather/logic/dates";
 export type { DatePeriodErrors, ValidationErrorKey } from "@/features/weather/logic/dates";
 export {
-  MAX_COMPARISON_OFFSETS,
+  MAX_CONCURRENT_WEATHER_REQUESTS,
   MAX_PERIOD_DAYS,
-  MAX_WEATHER_DATASETS,
-  limitComparisonOffsets,
-  limitWeatherOffsets,
+  normalizeComparisonOffsets,
+  normalizeWeatherOffsets,
 } from "@/features/weather/logic/workloadLimits";
+export { createRequestLimiter } from "@/features/weather/logic/requestLimiter";
 export {
   buildColdWaveStats,
   buildHeatwaveStats,

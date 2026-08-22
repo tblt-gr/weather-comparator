@@ -3,12 +3,9 @@ import {
   getAvailableComparisonOffsets,
   getDefaultComparisonPeriod,
 } from "@/features/weather/logic/dates";
-import {
-  isValidDatePeriod,
-  validateDatePeriod,
-} from "@/features/weather/logic/dates";
+import { isValidDatePeriod, validateDatePeriod } from "@/features/weather/logic/dates";
 import { isForecastModel } from "@/features/weather/logic/weatherModels";
-import { limitComparisonOffsets } from "@/features/weather/logic/workloadLimits";
+import { normalizeComparisonOffsets } from "@/features/weather/logic/workloadLimits";
 import type { City, ForecastModel, TemperatureMode } from "@/features/weather/types";
 
 type EncodedCity = {
@@ -82,7 +79,7 @@ export function parseCompareParam(compare: string, period: DatePeriod) {
     .map((value) => Number.parseInt(value, 10))
     .filter((value) => Number.isInteger(value) && value > 0 && availableOffsets.has(value));
 
-  return limitComparisonOffsets(offsets);
+  return normalizeComparisonOffsets(offsets);
 }
 
 export function parseWeatherUrlState(
@@ -170,7 +167,7 @@ export function serializeWeatherUrlState(state: {
     params.set("end", state.period.endDate);
   }
 
-  const comparisonOffsets = limitComparisonOffsets(state.comparisonOffsets);
+  const comparisonOffsets = normalizeComparisonOffsets(state.comparisonOffsets);
 
   if (comparisonOffsets.length > 0) {
     params.set("compare", comparisonOffsets.join(","));

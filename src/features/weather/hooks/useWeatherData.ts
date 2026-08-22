@@ -8,33 +8,29 @@ import {
   type DatePeriod,
   eachDateInRange,
   formatDisplayDate,
+  formatLocalDate as formatToday,
   getComparableDateRangeByOffset,
+  isValidDatePeriod,
 } from "@/features/weather/logic/dates";
 import { getForecastDateRangeForPeriod } from "@/features/weather/logic/forecastWeather";
 import { normalizeWeatherData } from "@/features/weather/logic/normalizeWeatherData";
-import { formatLocalDate as formatToday } from "@/features/weather/logic/dates";
-import { isValidDatePeriod } from "@/features/weather/logic/dates";
-import { limitWeatherOffsets } from "@/features/weather/logic/workloadLimits";
+import { createRequestLimiter } from "@/features/weather/logic/requestLimiter";
+import {
+  MAX_CONCURRENT_WEATHER_REQUESTS,
+  normalizeWeatherOffsets,
+} from "@/features/weather/logic/workloadLimits";
 import type { City, ForecastModel, WeatherYearDataset } from "@/features/weather/types";
 import { getTranslations } from "@/lib/i18n/getTranslations";
 import type { Locale } from "@/lib/i18n/types";
+
+const weatherRequestLimiter = createRequestLimiter(MAX_CONCURRENT_WEATHER_REQUESTS);
 
 export function getWeatherQueryKey(city: City, period: DatePeriod, offsetYears: number) {
   return ["weather", city.id, period.startDate, period.endDate, offsetYears] as const;
 }
 
-export function getForecastQueryKey(
-  city: City,
-  period: DatePeriod,
-  forecastModel: ForecastModel
-) {
-  return [
-    "weather-forecast",
-    city.id,
-    period.startDate,
-    period.endDate,
-    forecastModel,
-  ] as const;
+export function getForecastQueryKey(city: City, period: DatePeriod, forecastModel: ForecastModel) {
+  return ["weather-forecast", city.id, period.startDate, period.endDate, forecastModel] as const;
 }
 
 export function aggregateWeatherQueryErrors(
@@ -134,38 +130,40 @@ export function mergeCurrentDatasetWithForecast({
   return {
     ...currentDataset,
     label: `${formatDisplayDate(firstDate)} - ${formatDisplayDate(period.endDate)}`,
-    values: eachDateInRange({ startDate: firstDate, endDate: period.endDate }).map((date, index) => {
-      const forecastValue = forecastByDate.get(date);
+    values: eachDateInRange({ startDate: firstDate, endDate: period.endDate }).map(
+      (date, index) => {
+        const forecastValue = forecastByDate.get(date);
 
-      if (forecastValue) {
+        if (forecastValue) {
+          return {
+            date,
+            day: index + 1,
+            year: Number(date.slice(0, 4)),
+            tmax: forecastValue.tmax,
+            tmin: forecastValue.tmin,
+            isForecast: true,
+          };
+        }
+
+        const currentValue = currentByDate.get(date);
+
+        if (currentValue) {
+          return {
+            ...currentValue,
+            day: index + 1,
+          };
+        }
+
         return {
           date,
           day: index + 1,
           year: Number(date.slice(0, 4)),
-          tmax: forecastValue.tmax,
-          tmin: forecastValue.tmin,
-          isForecast: true,
+          tmax: null,
+          tmin: null,
+          isForecast: false,
         };
       }
-
-      const currentValue = currentByDate.get(date);
-
-      if (currentValue) {
-        return {
-          ...currentValue,
-          day: index + 1,
-        };
-      }
-
-      return {
-        date,
-        day: index + 1,
-        year: Number(date.slice(0, 4)),
-        tmax: null,
-        tmin: null,
-        isForecast: false,
-      };
-    }),
+    ),
   } satisfies WeatherYearDataset;
 }
 
@@ -184,26 +182,30 @@ export function useWeatherData({
   forecastModel: ForecastModel;
   locale: Locale;
 }) {
-  const boundedOffsets = limitWeatherOffsets(offsets);
+  const normalizedOffsets = normalizeWeatherOffsets(offsets);
   const queries = useQueries({
     queries:
       city === null
         ? []
-        : boundedOffsets.map((offsetYears) => ({
+        : normalizedOffsets.map((offsetYears) => ({
             queryKey: getWeatherQueryKey(city, period, offsetYears),
-            enabled: isValidDatePeriod(period) && getComparableDateRangeByOffset({ offsetYears, period }) !== null,
+            enabled:
+              isValidDatePeriod(period) &&
+              getComparableDateRangeByOffset({ offsetYears, period }) !== null,
             queryFn: ({ signal }: { signal: AbortSignal }) =>
-              fetchWeatherDataset({ city, offsetYears, period, signal }),
+              weatherRequestLimiter.run(
+                () => fetchWeatherDataset({ city, offsetYears, period, signal }),
+                signal
+              ),
             staleTime: 1000 * 60 * 60 * 24,
           })),
   });
 
   const today = formatToday(new Date());
   const hasReferenceYear =
-    isValidDatePeriod(period) && getComparableDateRangeByOffset({ offsetYears: 0, period }) !== null;
-  const forecastRange = hasReferenceYear
-    ? getForecastDateRangeForPeriod({ period, today })
-    : null;
+    isValidDatePeriod(period) &&
+    getComparableDateRangeByOffset({ offsetYears: 0, period }) !== null;
+  const forecastRange = hasReferenceYear ? getForecastDateRangeForPeriod({ period, today }) : null;
   const forecastQuery = useQuery({
     queryKey:
       city === null
@@ -231,8 +233,8 @@ export function useWeatherData({
   const data = archiveData
     .map((dataset) =>
       dataset.offsetYears === 0 && forecastResponse
-        ? mergeCurrentDatasetWithForecast({ currentDataset: dataset, forecastResponse, period }) ??
-          dataset
+        ? (mergeCurrentDatasetWithForecast({ currentDataset: dataset, forecastResponse, period }) ??
+          dataset)
         : dataset
     )
     .sort((a, b) => a.offsetYears - b.offsetYears);
@@ -242,7 +244,7 @@ export function useWeatherData({
   const errorMessage = aggregateWeatherQueryErrors(
     queries.map((query, index) => ({
       error: query.error,
-      offsetYears: boundedOffsets[index] ?? 0,
+      offsetYears: normalizedOffsets[index] ?? 0,
     })),
     locale
   );

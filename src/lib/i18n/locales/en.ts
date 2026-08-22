@@ -38,7 +38,6 @@ export const en: Translations = {
   "year.clearAriaLabel": "Clear comparison periods",
   "year.offsetSingular": "-1 year",
   "year.offsetPlural": "-{count} years",
-  "year.selectionLimit": "Up to {count} comparison periods",
   "normals.label": "Climate normal",
   "normals.ariaLabel": "Show climate normal",
   "normals.infoAriaLabel": "About the climate normal",
@@ -48,7 +47,8 @@ export const en: Translations = {
   "extremes.criteriaForAriaLabel": "View criteria for {kind}",
   "extremes.criteria.canicule": "Tmax ≥ 35 °C and Tmin ≥ 20 °C for at least 3 consecutive days.",
   "extremes.criteria.vague_de_chaleur": "Tmax ≥ 30 °C for at least 3 consecutive days.",
-  "extremes.criteria.vague_de_froid": "Tmin ≤ -5 °C and Tmax ≤ 0 °C for at least 3 consecutive days.",
+  "extremes.criteria.vague_de_froid":
+    "Tmin ≤ -5 °C and Tmax ≤ 0 °C for at least 3 consecutive days.",
   "extremes.criteria.grand_froid": "Tmin ≤ -10 °C or Tmax ≤ -5 °C for at least 3 consecutive days.",
   "temp.groupAriaLabel": "Temperature type",
   "forecastModel.ariaLabel": "Choose the forecast model",
@@ -109,6 +109,7 @@ export const en: Translations = {
   "forecast.unavailable": "Forecast unavailable — future data could not be loaded.",
   "forecast.label": "Forecast",
   "forecast.ariaLabel": "Show forecast",
-  "forecast.description": "Adds upcoming forecast data on the reference year, from the best available model.",
+  "forecast.description":
+    "Adds upcoming forecast data on the reference year, from the best available model.",
   "forecast.infoAriaLabel": "About the forecast",
 };

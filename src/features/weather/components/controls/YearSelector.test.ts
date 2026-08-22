@@ -65,3 +65,14 @@ test("uses Radix checkbox items for roving keyboard focus", () => {
   assert.equal(source.includes('role="menuitemcheckbox"'), false);
   assert.equal(source.includes("useVirtualizer"), false);
 });
+
+test("does not disable comparison periods behind a selection limit", () => {
+  const source = readFileSync(
+    path.join(process.cwd(), "src/features/weather/components/controls/YearSelector.tsx"),
+    "utf8"
+  );
+
+  assert.equal(source.includes("MAX_COMPARISON_OFFSETS"), false);
+  assert.equal(source.includes("selectionLimitReached"), false);
+  assert.equal(source.includes("disabled={selectionLimitReached"), false);
+});

@@ -76,12 +76,13 @@ test("parseCompareParam filters invalid and unavailable offsets", () => {
   );
 });
 
-test("parseCompareParam and serialization cap the number of comparison offsets", () => {
+test("parseCompareParam and serialization preserve every comparison offset", () => {
   const period = { startDate: "2026-05-01", endDate: "2026-05-26" };
 
-  assert.deepEqual(parseCompareParam("12,11,10,9,8,7,6,5,4,3,2,1", period), [
-    1, 2, 3, 4, 5, 6, 7, 8, 9,
-  ]);
+  assert.deepEqual(
+    parseCompareParam("12,11,10,9,8,7,6,5,4,3,2,1", period),
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+  );
 
   const params = serializeWeatherUrlState({
     city: null,
@@ -93,7 +94,7 @@ test("parseCompareParam and serialization cap the number of comparison offsets",
     forecastModel: "best_match",
   });
 
-  assert.equal(params.get("compare"), "1,2,3,4,5,6,7,8,9");
+  assert.equal(params.get("compare"), "1,2,3,4,5,6,7,8,9,10,11,12");
 });
 
 test("parseWeatherUrlState ignores periods that exceed the workload limit", () => {
