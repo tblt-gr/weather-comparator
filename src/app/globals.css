@@ -236,4 +236,36 @@
             --fade-end: 2rem;
         }
     }
+
+    @media (pointer: coarse) {
+        button:not([data-slot="checkbox"]),
+        input,
+        select,
+        textarea,
+        summary {
+            min-width: 2.75rem;
+            min-height: 2.75rem;
+        }
+
+        [data-slot="dropdown-menu-item"],
+        [data-slot="dropdown-menu-checkbox-item"],
+        [data-slot="dropdown-menu-radio-item"],
+        [data-slot="dropdown-menu-sub-trigger"],
+        [data-slot="select-item"],
+        [data-slot="select-scroll-up-button"],
+        [data-slot="select-scroll-down-button"],
+        [data-slot="command-item"],
+        [data-slot="tabs-trigger"] {
+            min-height: 2.75rem;
+        }
+
+        [data-slot="checkbox"]::after {
+            inset: -0.875rem;
+        }
+
+        .weather-touch-control,
+        .weather-touch-row {
+            min-height: 2.75rem;
+        }
+    }
 }

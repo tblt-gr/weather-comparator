@@ -78,7 +78,7 @@ export function ExtremeFilters({ hiddenKinds, availableKinds, onToggleKind }: Ex
         return (
           <div
             key={kind}
-            className="flex h-8 w-full items-center gap-1.5 px-1 text-sm text-muted-foreground transition-colors hover:text-foreground has-disabled:opacity-45 sm:w-auto"
+            className="weather-touch-row flex h-8 w-full items-center gap-1.5 px-1 text-sm text-muted-foreground transition-colors hover:text-foreground has-disabled:opacity-45 sm:w-auto"
           >
             <label className="flex flex-1 cursor-pointer items-center gap-2 has-disabled:cursor-not-allowed lg:whitespace-nowrap">
               <Checkbox

@@ -91,7 +91,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
       <span className="text-xs font-medium text-muted-foreground">{t["city.label"]}</span>
       <Command
         shouldFilter={false}
-        className="relative h-9 min-w-0 overflow-visible rounded-md! border border-input bg-background p-0 shadow-none [&_[data-slot=input-group]]:h-full! [&_[data-slot=input-group]]:rounded-md! [&_[data-slot=input-group]]:border-0! [&_[data-slot=input-group]]:bg-transparent!"
+        className="weather-touch-control relative h-9 min-w-0 overflow-visible rounded-md! border border-input bg-background p-0 shadow-none [&_[data-slot=input-group]]:h-full! [&_[data-slot=input-group]]:rounded-md! [&_[data-slot=input-group]]:border-0! [&_[data-slot=input-group]]:bg-transparent!"
       >
         <CommandInput
           aria-label={t["city.searchAriaLabel"]}

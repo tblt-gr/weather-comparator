@@ -72,7 +72,7 @@ export function ForecastControl({
   );
 
   return (
-    <div className="grid min-h-8 w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-1 text-sm text-muted-foreground transition-colors hover:text-foreground sm:w-auto sm:grid-cols-[auto_auto_auto]">
+    <div className="weather-touch-row grid min-h-8 w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-1 text-sm text-muted-foreground transition-colors hover:text-foreground sm:w-auto sm:grid-cols-[auto_auto_auto]">
       <label className="flex cursor-pointer items-center gap-2 sm:whitespace-nowrap">
         <Checkbox
           aria-label={t["forecast.ariaLabel"]}

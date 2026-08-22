@@ -39,7 +39,7 @@ export function SeasonalNormalsToggle({ checked, onCheckedChange }: SeasonalNorm
   );
 
   return (
-    <div className="flex h-8 w-full items-center gap-1.5 px-1 text-sm text-muted-foreground transition-colors hover:text-foreground sm:w-auto">
+    <div className="weather-touch-row flex h-8 w-full items-center gap-1.5 px-1 text-sm text-muted-foreground transition-colors hover:text-foreground sm:w-auto">
       <label className="flex flex-1 cursor-pointer items-center gap-2 sm:whitespace-nowrap">
         <Checkbox
           aria-label={t["normals.ariaLabel"]}
