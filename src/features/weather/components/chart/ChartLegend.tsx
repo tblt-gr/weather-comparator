@@ -7,17 +7,10 @@ type ChartLegendProps = {
   series: { id: string; label: string }[];
   hiddenSeries: string[];
   colors: Record<string, string>;
-  strokeDasharrays: Record<string, string | undefined>;
   onToggleSeries: (seriesId: string) => void;
 };
 
-export function ChartLegend({
-  series,
-  hiddenSeries,
-  colors,
-  strokeDasharrays,
-  onToggleSeries,
-}: ChartLegendProps) {
+export function ChartLegend({ series, hiddenSeries, colors, onToggleSeries }: ChartLegendProps) {
   return (
     <div className="-mb-1 flex min-w-0 gap-2 overflow-x-auto pb-1 lg:mb-0 lg:flex-wrap lg:overflow-x-visible lg:pb-0">
       {series.map((item) => {
@@ -45,7 +38,6 @@ export function ChartLegend({
             >
               <line
                 stroke={colors[item.id]}
-                strokeDasharray={strokeDasharrays[item.id]}
                 strokeLinecap="round"
                 strokeWidth={isPrimary ? 3 : 2}
                 x1="0"

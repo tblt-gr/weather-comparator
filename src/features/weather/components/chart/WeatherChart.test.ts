@@ -14,7 +14,6 @@ import {
   formatTooltipDate,
   getChartTickFontWeight,
   getChartRowValue,
-  getComparisonStrokeDasharray,
   getCurrentForecastLineAnimation,
   getCurrentObservedLineAnimation,
   getCurrentSeriesAnimation,
@@ -39,12 +38,21 @@ import {
   sortTooltipEntries,
 } from "./WeatherChart";
 
-test("uses line patterns as a second visual cue for comparison years", () => {
-  assert.equal(getComparisonStrokeDasharray(0), undefined);
-  assert.equal(getComparisonStrokeDasharray(1), undefined);
-  assert.equal(getComparisonStrokeDasharray(2), "7 4");
-  assert.equal(getComparisonStrokeDasharray(3), "2 3");
-  assert.equal(getComparisonStrokeDasharray(4), "10 3 2 3");
+test("keeps historical periods solid and reserves weather-series dashes for forecasts", () => {
+  const chartSource = readFileSync(
+    path.join(process.cwd(), "src/features/weather/components/chart/WeatherChart.tsx"),
+    "utf8"
+  );
+  const legendSource = readFileSync(
+    path.join(process.cwd(), "src/features/weather/components/chart/ChartLegend.tsx"),
+    "utf8"
+  );
+
+  assert.equal(chartSource.includes("COMPARISON_STROKE_DASHARRAYS"), false);
+  assert.equal(chartSource.includes("strokeDasharray={strokeDasharrays"), false);
+  assert.equal(chartSource.includes('dataKey="currentForecast"'), true);
+  assert.equal(chartSource.includes('strokeDasharray="7 4"'), true);
+  assert.equal(legendSource.includes("strokeDasharray="), false);
 });
 
 function stripDiacritics(value: string) {
@@ -887,7 +895,7 @@ test("enables the recharts accessibility layer on the main chart", () => {
 
   assert.equal(source.includes("<LineChart\n                accessibilityLayer"), true);
   assert.equal(source.includes('role="group"'), true);
-  assert.equal(source.includes('aria-describedby={dataTableCaptionId}'), true);
+  assert.equal(source.includes("aria-describedby={dataTableCaptionId}"), true);
   assert.equal(source.includes('"weather-chart-shell"'), true);
   assert.equal(source.includes('!isFullscreen && "min-w-[760px]"'), true);
 });
@@ -932,7 +940,7 @@ test("provides a native keyboard-accessible data table", () => {
   assert.equal(source.includes('<table className="w-full'), true);
   assert.equal(source.includes('scope="col"'), true);
   assert.equal(source.includes('scope="row"'), true);
-  assert.equal(source.includes('id={dataTableCaptionId}'), true);
+  assert.equal(source.includes("id={dataTableCaptionId}"), true);
 });
 
 test("exposes a fullscreen toggle whose label reflects the current state", () => {

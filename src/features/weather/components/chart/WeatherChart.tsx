@@ -62,16 +62,6 @@ export const palette = [
   "var(--chart-10)",
 ];
 
-const COMPARISON_STROKE_DASHARRAYS = [undefined, "7 4", "2 3", "10 3 2 3"] as const;
-
-export function getComparisonStrokeDasharray(datasetIndex: number) {
-  if (datasetIndex <= 0) {
-    return undefined;
-  }
-
-  return COMPARISON_STROKE_DASHARRAYS[(datasetIndex - 1) % COMPARISON_STROKE_DASHARRAYS.length];
-}
-
 type WeatherChartProps = {
   datasets: WeatherYearDataset[];
   temperatureMode: TemperatureMode;
@@ -190,13 +180,6 @@ export function WeatherChart({
       Object.fromEntries(
         datasets.map((dataset, index) => [dataset.id, palette[index % palette.length]])
       ) as Record<string, string>,
-    [datasets]
-  );
-  const strokeDasharrays = useMemo(
-    () =>
-      Object.fromEntries(
-        datasets.map((dataset, index) => [dataset.id, getComparisonStrokeDasharray(index)])
-      ) as Record<string, string | undefined>,
     [datasets]
   );
   const rows = useMemo(
@@ -645,7 +628,6 @@ export function WeatherChart({
                       key={dataset.id}
                       name={dataset.label}
                       stroke={colors[dataset.id]}
-                      strokeDasharray={strokeDasharrays[dataset.id]}
                       strokeOpacity={0.82}
                       strokeWidth={1.75}
                       type="monotone"
@@ -741,7 +723,6 @@ export function WeatherChart({
           id: dataset.id,
           label: dataset.label,
         }))}
-        strokeDasharrays={strokeDasharrays}
       />
 
       <details className="group rounded-md border border-border/60 bg-muted/10 open:bg-muted/20">
