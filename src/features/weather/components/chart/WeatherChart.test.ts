@@ -7,11 +7,13 @@ import test from "node:test";
 // pure helpers exported by WeatherChart. Rendering tests need a DOM environment.
 import {
   buildChartRows,
+  formatAccessibleTemperature,
   formatChartDateTick,
   formatExtremeDateRange,
   formatExtremeTooltipLabel,
   formatTooltipDate,
   getChartTickFontWeight,
+  getChartRowValue,
   getComparisonStrokeDasharray,
   getCurrentForecastLineAnimation,
   getCurrentObservedLineAnimation,
@@ -877,13 +879,15 @@ test("keeps the climate normals line dashed from the first frame", () => {
   });
 });
 
-test("disables the recharts accessibility focus layer on the main chart", () => {
+test("enables the recharts accessibility layer on the main chart", () => {
   const source = readFileSync(
     path.join(process.cwd(), "src/features/weather/components/chart/WeatherChart.tsx"),
     "utf8"
   );
 
-  assert.equal(source.includes("accessibilityLayer={false}"), true);
+  assert.equal(source.includes("<LineChart\n                accessibilityLayer"), true);
+  assert.equal(source.includes('role="group"'), true);
+  assert.equal(source.includes('aria-describedby={dataTableCaptionId}'), true);
   assert.equal(source.includes('"weather-chart-shell"'), true);
   assert.equal(source.includes('!isFullscreen && "min-w-[760px]"'), true);
 });
@@ -897,11 +901,38 @@ test("uses an equidistant x-axis interval to keep date ticks evenly spaced", () 
   assert.equal(source.includes('interval="equidistantPreserveStart"'), true);
 });
 
-test("removes focus outline styles from recharts surfaces inside the chart shell", () => {
+test("keeps visible focus styles on recharts surfaces inside the chart shell", () => {
   const source = readFileSync(path.join(process.cwd(), "src/app/globals.css"), "utf8");
 
-  assert.equal(source.includes(".weather-chart-shell :focus"), true);
-  assert.equal(source.includes("outline: none;"), true);
+  assert.equal(source.includes(".weather-chart-shell :focus"), false);
+});
+
+test("formats the accessible chart table values", () => {
+  const row = {
+    day: 1,
+    label: "2026-06-01",
+    tickLabel: "01/06/26",
+    currentObserved: 24.25,
+    currentForecast: null,
+    comparison: 21,
+  };
+
+  assert.equal(formatAccessibleTemperature(getChartRowValue(row, "current")), "24.3 °C");
+  assert.equal(formatAccessibleTemperature(getChartRowValue(row, "comparison")), "21.0 °C");
+  assert.equal(formatAccessibleTemperature(getChartRowValue(row, "missing")), "—");
+});
+
+test("provides a native keyboard-accessible data table", () => {
+  const source = readFileSync(
+    path.join(process.cwd(), "src/features/weather/components/chart/WeatherChart.tsx"),
+    "utf8"
+  );
+
+  assert.equal(source.includes('<details className="group'), true);
+  assert.equal(source.includes('<table className="w-full'), true);
+  assert.equal(source.includes('scope="col"'), true);
+  assert.equal(source.includes('scope="row"'), true);
+  assert.equal(source.includes('id={dataTableCaptionId}'), true);
 });
 
 test("exposes a fullscreen toggle whose label reflects the current state", () => {

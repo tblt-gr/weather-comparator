@@ -96,6 +96,9 @@ export type Translations = {
   "chart.enterFullscreen": string;
   "chart.exitFullscreen": string;
   "chart.tooltipHint": string;
+  "chart.dataTableToggle": string;
+  "chart.dataTableCaption": string;
+  "chart.dataTableDate": string;
   "app.skipToContent": string;
   "forecast.unavailable": string;
   "forecast.label": string;

@@ -185,12 +185,6 @@
         background: var(--background);
     }
 
-    .weather-chart-shell :focus,
-    .weather-chart-shell :focus-visible {
-        outline: none;
-        box-shadow: none;
-    }
-
     /* Fullscreen chart: native fullscreen (or the CSS overlay fallback on
        browsers without the Fullscreen API) fills the viewport. */
     .chart-fullscreen {
