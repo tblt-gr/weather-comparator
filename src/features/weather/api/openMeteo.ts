@@ -9,6 +9,7 @@ import {
 } from "@/features/weather/logic/climateNormalYears";
 import { getForecastDateRangeForPeriod } from "@/features/weather/logic/forecastWeather";
 import type { City, ForecastModel } from "@/features/weather/types";
+import type { Locale } from "@/lib/i18n/types";
 
 type GeocodingResult = {
   id: number;
@@ -50,7 +51,10 @@ export function createWeatherRequestSignal(signal?: AbortSignal, timeoutMs = FOR
   return signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
 }
 
-export async function searchCities(query: string, signal?: AbortSignal): Promise<City[]> {
+export async function searchCities(
+  query: string,
+  { locale = "fr", signal }: { locale?: Locale; signal?: AbortSignal } = {}
+): Promise<City[]> {
   const trimmedQuery = query.trim();
 
   if (trimmedQuery.length < 2) {
@@ -60,7 +64,7 @@ export async function searchCities(query: string, signal?: AbortSignal): Promise
   const params = new URLSearchParams({
     name: trimmedQuery,
     count: "8",
-    language: "fr",
+    language: locale,
     format: "json",
   });
 

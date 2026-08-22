@@ -17,6 +17,8 @@ export type Translations = {
   "city.placeholder": string;
   "city.searching": string;
   "city.noResults": string;
+  "city.searchError": string;
+  "city.retry": string;
   "city.recent": string;
   "city.removeRecentAriaLabel": string;
   "period.start": string;
@@ -28,6 +30,7 @@ export type Translations = {
   "error.invalidDate": string;
   "error.beforeEndDate": string;
   "error.periodTooLong": string;
+  "error.referencePeriod": string;
   "year.noSelection": string;
   "year.label": string;
   "year.nSelected": string;
@@ -41,7 +44,7 @@ export type Translations = {
   "normals.infoAriaLabel": string;
   "normals.description": string;
   "extremes.filtersAriaLabel": string;
-  "extremes.criteriaAriaLabel": string;
+  "extremes.criteriaForAriaLabel": string;
   "extremes.criteria.canicule": string;
   "extremes.criteria.vague_de_chaleur": string;
   "extremes.criteria.vague_de_froid": string;

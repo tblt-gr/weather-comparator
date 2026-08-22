@@ -7,6 +7,15 @@ test("city search does not keep visible labels hardcoded in french", () => {
 
   assert.equal(source.includes(">Ville<"), false);
   assert.equal(source.includes("Aucune ville trouvée."), false);
+  assert.equal(source.includes('t["city.searchError"]'), true);
+  assert.equal(source.includes('t["city.retry"]'), true);
+});
+
+test("extreme criteria buttons include the episode name in their accessible label", () => {
+  const source = readFileSync(new URL("./controls/ExtremeFilters.tsx", import.meta.url), "utf8");
+
+  assert.equal(source.includes('t["extremes.criteriaForAriaLabel"]'), true);
+  assert.equal(source.includes('.replace("{kind}", t[labelKey])'), true);
 });
 
 test("dashboard loading state does not keep the weather loading label hardcoded in french", () => {

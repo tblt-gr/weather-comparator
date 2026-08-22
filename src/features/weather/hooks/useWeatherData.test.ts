@@ -67,7 +67,20 @@ test("aggregateWeatherQueryErrors preserves the offset that failed", () => {
       { error: null, offsetYears: 1 },
       { error: "Unavailable", offsetYears: 3 },
     ]),
-    "annee de reference: Missing archive | -3 ans: Unavailable"
+    "année de référence: Missing archive | -3 ans: Unavailable"
+  );
+});
+
+test("aggregateWeatherQueryErrors localizes query labels in english", () => {
+  assert.equal(
+    aggregateWeatherQueryErrors(
+      [
+        { error: new Error("Missing archive"), offsetYears: 0 },
+        { error: "Unavailable", offsetYears: 1 },
+      ],
+      "en"
+    ),
+    "reference period: Missing archive | -1 year: Unavailable"
   );
 });
 

@@ -16,6 +16,8 @@ import { formatLocalDate as formatToday } from "@/features/weather/logic/dates";
 import { isValidDatePeriod } from "@/features/weather/logic/dates";
 import { limitWeatherOffsets } from "@/features/weather/logic/workloadLimits";
 import type { City, ForecastModel, WeatherYearDataset } from "@/features/weather/types";
+import { getTranslations } from "@/lib/i18n/getTranslations";
+import type { Locale } from "@/lib/i18n/types";
 
 export function getWeatherQueryKey(city: City, period: DatePeriod, offsetYears: number) {
   return ["weather", city.id, period.startDate, period.endDate, offsetYears] as const;
@@ -36,8 +38,10 @@ export function getForecastQueryKey(
 }
 
 export function aggregateWeatherQueryErrors(
-  queries: Array<{ error: unknown; offsetYears: number }>
+  queries: Array<{ error: unknown; offsetYears: number }>,
+  locale: Locale = "fr"
 ) {
+  const t = getTranslations(locale);
   const messages = queries.flatMap(({ error, offsetYears }) => {
     if (!error) {
       return [];
@@ -45,7 +49,12 @@ export function aggregateWeatherQueryErrors(
 
     const message =
       error instanceof Error ? error.message : typeof error === "string" ? error : String(error);
-    const label = offsetYears === 0 ? "annee de reference" : `-${offsetYears} an${offsetYears > 1 ? "s" : ""}`;
+    const label =
+      offsetYears === 0
+        ? t["error.referencePeriod"]
+        : offsetYears === 1
+          ? t["year.offsetSingular"]
+          : t["year.offsetPlural"].replace("{count}", String(offsetYears));
     return [`${label}: ${message}`];
   });
 
@@ -166,12 +175,14 @@ export function useWeatherData({
   period,
   showForecast,
   forecastModel,
+  locale,
 }: {
   city: City | null;
   offsets: number[];
   period: DatePeriod;
   showForecast: boolean;
   forecastModel: ForecastModel;
+  locale: Locale;
 }) {
   const boundedOffsets = limitWeatherOffsets(offsets);
   const queries = useQueries({
@@ -232,7 +243,8 @@ export function useWeatherData({
     queries.map((query, index) => ({
       error: query.error,
       offsetYears: boundedOffsets[index] ?? 0,
-    }))
+    })),
+    locale
   );
   const isLoadingQueries = queries.some((query) => query.isLoading);
 

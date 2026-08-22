@@ -67,7 +67,7 @@ export function ExtremeFilters({ hiddenKinds, availableKinds, onToggleKind }: Ex
 
         const infoButton = (
           <button
-            aria-label={t["extremes.criteriaAriaLabel"]}
+            aria-label={t["extremes.criteriaForAriaLabel"].replace("{kind}", t[labelKey])}
             className="-mx-1 flex size-8 shrink-0 cursor-pointer items-center justify-center text-muted-foreground transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-ring/70 focus-visible:outline-none"
             type="button"
           >

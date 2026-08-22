@@ -38,7 +38,7 @@ export function WeatherDashboard() {
     setShowNormals,
     setShowForecast,
   } = useWeatherStore();
-  const { t } = useLocale();
+  const { locale, t } = useLocale();
   const shareUrl = useWeatherUrlState();
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -51,6 +51,7 @@ export function WeatherDashboard() {
     period,
     showForecast,
     forecastModel,
+    locale,
   });
   const normals = useClimateNormals({
     city,

@@ -27,13 +27,15 @@ type CitySearchProps = {
 };
 
 export function CitySearch({ city, onCityChange }: CitySearchProps) {
-  const { t } = useLocale();
+  const { locale, t } = useLocale();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [query, setQuery] = useState(city?.name ?? "");
   const [results, setResults] = useState<City[]>([]);
   const [recentCities, setRecentCities] = useState<City[]>(loadCityHistory);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [searchFailed, setSearchFailed] = useState(false);
+  const [searchAttempt, setSearchAttempt] = useState(0);
 
   useEffect(() => {
     if (city) {
@@ -47,13 +49,15 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
       if (query.trim().length < 2 || query === city?.name) {
         setResults([]);
         setIsLoading(false);
+        setSearchFailed(false);
         return;
       }
 
       setIsLoading(true);
+      setSearchFailed(false);
 
       try {
-        const cities = await searchCities(query, controller.signal);
+        const cities = await searchCities(query, { locale, signal: controller.signal });
         if (!controller.signal.aborted) {
           setResults(cities);
           setIsOpen(true);
@@ -61,6 +65,8 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
       } catch {
         if (!controller.signal.aborted) {
           setResults([]);
+          setSearchFailed(true);
+          setIsOpen(true);
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -73,7 +79,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
       controller.abort();
       window.clearTimeout(timeout);
     };
-  }, [city?.name, query]);
+  }, [city?.name, locale, query, searchAttempt]);
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
@@ -99,7 +105,9 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
           data-city-search-input
           onFocus={() =>
             setIsOpen(
-              query.trim().length === 0 ? recentCities.length > 0 : results.length > 0 || isLoading
+              query.trim().length === 0
+                ? recentCities.length > 0
+                : results.length > 0 || isLoading || searchFailed
             )
           }
           onKeyDown={(event) => {
@@ -109,6 +117,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
           }}
           onValueChange={(value) => {
             setQuery(value);
+            setSearchFailed(false);
 
             if (value.trim().length === 0) {
               setIsOpen(recentCities.length > 0);
@@ -127,6 +136,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
               setQuery("");
               setResults([]);
               setIsLoading(false);
+              setSearchFailed(false);
               setIsOpen(false);
               onCityChange(null);
               window.requestAnimationFrame(() => {
@@ -146,7 +156,25 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
               {isLoading ? (
                 <div className="px-3 py-2 text-sm text-muted-foreground">{t["city.searching"]}</div>
               ) : null}
-              {!isLoading && query.trim().length > 0 ? (
+              {!isLoading && searchFailed ? (
+                <div className="grid gap-2 px-3 py-3" role="alert">
+                  <p className="text-sm text-destructive">{t["city.searchError"]}</p>
+                  <Button
+                    className="w-fit"
+                    onClick={() => {
+                      setSearchFailed(false);
+                      setIsLoading(true);
+                      setSearchAttempt((attempt) => attempt + 1);
+                    }}
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                  >
+                    {t["city.retry"]}
+                  </Button>
+                </div>
+              ) : null}
+              {!isLoading && !searchFailed && query.trim().length > 0 ? (
                 <CommandEmpty>{t["city.noResults"]}</CommandEmpty>
               ) : null}
               <CommandGroup heading={query.trim().length === 0 ? t["city.recent"] : undefined}>

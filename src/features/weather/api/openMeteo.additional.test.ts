@@ -70,7 +70,20 @@ test("searchCities forwards the abort signal to fetch", async () => {
     return new Response(JSON.stringify({ results: [] }));
   });
 
-  await searchCities("Paris", signal);
+  await searchCities("Paris", { signal });
+
+  mock.restoreAll();
+});
+
+test("searchCities sends the active interface locale to Open-Meteo", async () => {
+  mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    const url = new URL(String(input));
+    assert.equal(url.searchParams.get("language"), "en");
+
+    return new Response(JSON.stringify({ results: [] }));
+  });
+
+  await searchCities("London", { locale: "en" });
 
   mock.restoreAll();
 });
