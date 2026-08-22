@@ -6,8 +6,6 @@ import { toast } from "sonner";
 import { WeatherDashboardFilters } from "./WeatherDashboardFilters";
 import { WeatherDashboardHeader } from "./WeatherDashboardHeader";
 import { EmptyState, WeatherDashboardPanel } from "./WeatherDashboardPanel";
-import { palette } from "@/features/weather/components/chart";
-import { ColdWaveOverlay, HeatwaveOverlay } from "@/features/weather/components/extremes";
 import { useClimateNormals } from "@/features/weather/hooks/useClimateNormals";
 import { useGeolocatedCity } from "@/features/weather/hooks/useGeolocatedCity";
 import { usePersistedForecastModel } from "@/features/weather/hooks/usePersistedForecastModel";
@@ -73,7 +71,10 @@ export function WeatherDashboard() {
   }, [weather.hasForecastWarning, t]);
 
   const chartRef = useRef<HTMLDivElement | null>(null);
-  const visibleDatasets = useMemo(() => weather.data.filter((dataset) => !hiddenSeries.includes(dataset.id)), [hiddenSeries, weather.data]);
+  const visibleDatasets = useMemo(
+    () => weather.data.filter((dataset) => !hiddenSeries.includes(dataset.id)),
+    [hiddenSeries, weather.data]
+  );
   const detectedHeatwaves = useMemo(() => detectHeatwaves(visibleDatasets), [visibleDatasets]);
   const detectedColdWaves = useMemo(() => detectColdWaves(visibleDatasets), [visibleDatasets]);
   const availableExtremeKinds = useMemo<Record<ExtremeKind, boolean>>(
@@ -93,17 +94,11 @@ export function WeatherDashboard() {
     () => detectedColdWaves.filter((coldWave) => !hiddenExtremeKinds.includes(coldWave.kind)),
     [detectedColdWaves, hiddenExtremeKinds]
   );
-  const datasetColors = useMemo(
-    () => Object.fromEntries(
-      weather.data.map((dataset, index) => [dataset.id, palette[index % palette.length]])
-    ) as Record<string, string>,
-    [weather.data]
-  );
   const hasCity = city !== null;
 
   return (
     <main id="main-content" className="app-ambient min-h-screen text-foreground">
-      <div className="mx-auto flex w-full flex-col gap-4 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
         <WeatherDashboardHeader
           city={city}
           filtersOpen={filtersOpen}
@@ -134,26 +129,22 @@ export function WeatherDashboard() {
         {!hasCity ? (
           <EmptyState message={t["state.selectCity"]} />
         ) : (
-          <>
-            <WeatherDashboardPanel
-              chartRef={chartRef}
-              coldWaves={coldWaves}
-              datasets={weather.data}
-              heatwaves={heatwaves}
-              hiddenSeries={hiddenSeries}
-              normals={normals.data}
-              onToggleSeries={toggleHiddenSeries}
-              shareUrl={shareUrl}
-              showNormals={showNormals}
-              temperatureMode={temperatureMode}
-              weatherError={weather.error}
-              weatherIsError={weather.isError}
-              weatherIsLoading={weather.isLoading}
-              weatherNormalsFetching={normals.isFetching}
-            />
-            <HeatwaveOverlay colors={datasetColors} heatwaves={heatwaves} />
-            <ColdWaveOverlay colors={datasetColors} coldWaves={coldWaves} />
-          </>
+          <WeatherDashboardPanel
+            chartRef={chartRef}
+            coldWaves={coldWaves}
+            datasets={weather.data}
+            heatwaves={heatwaves}
+            hiddenSeries={hiddenSeries}
+            normals={normals.data}
+            onToggleSeries={toggleHiddenSeries}
+            shareUrl={shareUrl}
+            showNormals={showNormals}
+            temperatureMode={temperatureMode}
+            weatherError={weather.error}
+            weatherIsError={weather.isError}
+            weatherIsLoading={weather.isLoading}
+            weatherNormalsFetching={normals.isFetching}
+          />
         )}
       </div>
     </main>

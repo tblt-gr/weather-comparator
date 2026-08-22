@@ -87,11 +87,11 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
   }, []);
 
   return (
-    <div className="relative grid gap-1 text-sm font-medium" ref={containerRef}>
-      <span>{t["city.label"]}</span>
+    <div className="relative grid min-w-0 gap-1 text-sm font-medium" ref={containerRef}>
+      <span className="text-xs font-medium text-muted-foreground">{t["city.label"]}</span>
       <Command
         shouldFilter={false}
-        className="relative h-11 overflow-visible rounded-lg! border border-input bg-transparent p-0 shadow-none"
+        className="relative h-9 min-w-0 overflow-visible rounded-md! border border-input bg-background p-0 shadow-none [&_[data-slot=input-group]]:h-full! [&_[data-slot=input-group]]:rounded-md! [&_[data-slot=input-group]]:border-0! [&_[data-slot=input-group]]:bg-transparent!"
       >
         <CommandInput
           aria-label={t["city.searchAriaLabel"]}
@@ -141,7 +141,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
           </Button>
         ) : null}
         {isOpen ? (
-          <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-lg border border-border/60 bg-popover shadow-md">
+          <div className="absolute top-full right-0 left-0 z-50 mt-1 rounded-md border border-border/60 bg-popover shadow-lg shadow-black/10">
             <CommandList>
               {isLoading ? (
                 <div className="px-3 py-2 text-sm text-muted-foreground">{t["city.searching"]}</div>

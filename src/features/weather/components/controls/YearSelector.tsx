@@ -10,10 +10,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  type DatePeriod,
-  getAvailableComparisonOffsets,
-} from "@/features/weather/logic/dates";
+import { type DatePeriod, getAvailableComparisonOffsets } from "@/features/weather/logic/dates";
 import { getTranslations } from "@/lib/i18n/getTranslations";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Locale } from "@/lib/i18n/types";
@@ -60,22 +57,25 @@ export function YearSelector({
   });
 
   return (
-    <div className="grid gap-1">
-      <span className="text-sm font-medium">{t["year.label"]}</span>
-      <div className="relative">
+    <div className="grid min-w-0 gap-1">
+      <span className="text-xs font-medium text-muted-foreground">{t["year.label"]}</span>
+      <div className="flex min-w-0 items-center rounded-md border border-input bg-background">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               aria-label={t["year.dropdownAriaLabel"]}
-              className="h-11 w-full justify-between pr-12"
+              className="h-9 min-w-0 flex-1 justify-between rounded-md px-2.5"
               type="button"
-              variant="outline"
+              variant="ghost"
             >
-              <span className="truncate">{label}</span>
+              <span className="min-w-0 truncate">{label}</span>
               <ChevronDown className="size-4 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-(--radix-dropdown-menu-trigger-width) p-1">
+          <DropdownMenuContent
+            align="start"
+            className="w-(--radix-dropdown-menu-trigger-width) p-1"
+          >
             <div
               ref={setScrollElement}
               style={{ height: `${ITEM_HEIGHT * VISIBLE_ITEMS}px`, overflowY: "auto" }}
@@ -87,14 +87,21 @@ export function YearSelector({
                   return (
                     <button
                       aria-checked={checked}
-                      className="absolute left-0 top-0 flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                      className="absolute top-0 left-0 flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                       key={virtualItem.key}
                       onClick={() => onToggleOffset(offsetYears)}
                       role="menuitemcheckbox"
-                      style={{ height: `${ITEM_HEIGHT}px`, transform: `translateY(${virtualItem.start}px)` }}
+                      style={{
+                        height: `${ITEM_HEIGHT}px`,
+                        transform: `translateY(${virtualItem.start}px)`,
+                      }}
                       type="button"
                     >
-                      <Check className={checked ? "size-4 shrink-0 opacity-100" : "size-4 shrink-0 opacity-0"} />
+                      <Check
+                        className={
+                          checked ? "size-4 shrink-0 opacity-100" : "size-4 shrink-0 opacity-0"
+                        }
+                      />
                       {formatComparisonOffsetLabel(period, offsetYears, locale)}
                     </button>
                   );
@@ -105,7 +112,7 @@ export function YearSelector({
         </DropdownMenu>
         <Button
           aria-label={t["year.clearAriaLabel"]}
-          className="absolute top-1/2 right-1 z-10 h-11 w-11 -translate-y-1/2"
+          className="mr-0.5 size-8"
           disableActiveTranslation
           disabled={!canClear}
           onClick={(event) => {

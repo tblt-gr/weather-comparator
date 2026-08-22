@@ -73,12 +73,18 @@ export function ClimateSummaryBar({
   return (
     <div
       ref={scrollRef}
-      className="summary-scroll flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1 -mb-1 lg:mb-0 lg:flex-initial lg:flex-wrap lg:overflow-x-visible lg:pb-0"
+      className="summary-scroll -mb-1 flex min-w-0 flex-1 overflow-x-auto pb-1 lg:mb-0 lg:flex-wrap lg:overflow-x-visible lg:pb-0"
       data-fade-end={fade.end ? "true" : undefined}
       data-fade-start={fade.start ? "true" : undefined}
     >
-      {stats.map((stat) => (
-        <StatCard key={stat.label} label={stat.label} tone={stat.tone} value={stat.value} />
+      {stats.map((stat, index) => (
+        <StatItem
+          isPrimary={index === 0}
+          key={stat.label}
+          label={stat.label}
+          tone={stat.tone}
+          value={stat.value}
+        />
       ))}
     </div>
   );
@@ -128,7 +134,6 @@ export function buildClimateSummaryStats({
           { label: t["stats.normal"], value: formatTemp(normalAverage) },
           {
             label: t["stats.deviation"],
-            tone: delta === null ? "neutral" : delta >= 0 ? "warm" : "cold",
             value: delta === null ? "—" : `${delta >= 0 ? "+" : ""}${delta.toFixed(1)} °C`,
           } satisfies ClimateSummaryStat,
         ]
@@ -166,7 +171,10 @@ function buildOptionalHeatwaveStats(
   return stats;
 }
 
-function buildOptionalColdStats(coldWaveStats: ReturnType<typeof buildColdWaveStats>, t: Translations) {
+function buildOptionalColdStats(
+  coldWaveStats: ReturnType<typeof buildColdWaveStats>,
+  t: Translations
+) {
   const stats: ClimateSummaryStat[] = [];
 
   if (coldWaveStats.freezingDays > 0) {
@@ -204,26 +212,32 @@ function buildOptionalColdStats(coldWaveStats: ReturnType<typeof buildColdWaveSt
   return stats;
 }
 
-function StatCard({
+function StatItem({
+  isPrimary,
   label,
   value,
   tone = "neutral",
 }: {
+  isPrimary: boolean;
   label: string;
   value: string;
   tone?: "neutral" | "warm" | "cold";
 }) {
   const valueClass =
     tone === "warm"
-      ? "text-orange-600 dark:text-orange-400"
+      ? "text-orange-700 dark:text-orange-400"
       : tone === "cold"
-        ? "text-sky-600 dark:text-sky-400"
-        : "text-foreground";
+        ? "text-sky-700 dark:text-sky-400"
+        : isPrimary
+          ? "text-primary"
+          : "text-foreground";
 
   return (
-    <div className="glass-card w-28 shrink-0 rounded-xl px-3 py-2 sm:w-36 lg:w-auto lg:min-w-36">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className={`mt-0.5 text-base font-semibold tabular-nums ${valueClass}`}>{value}</p>
+    <div className="min-w-28 shrink-0 border-r border-border/60 px-3 first:pl-0 last:border-r-0 sm:min-w-32 lg:min-w-36">
+      <p className="truncate text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+        {label}
+      </p>
+      <p className={`mt-1 text-lg font-semibold tabular-nums ${valueClass}`}>{value}</p>
     </div>
   );
 }

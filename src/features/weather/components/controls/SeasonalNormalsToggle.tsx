@@ -31,7 +31,7 @@ export function SeasonalNormalsToggle({ checked, onCheckedChange }: SeasonalNorm
   const infoButton = (
     <button
       aria-label={t["normals.infoAriaLabel"]}
-      className="shrink-0 cursor-pointer text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+      className="-mx-1 flex size-8 shrink-0 cursor-pointer items-center justify-center text-muted-foreground transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-ring/70 focus-visible:outline-none"
       type="button"
     >
       <InfoIcon className="size-4" />
@@ -39,8 +39,8 @@ export function SeasonalNormalsToggle({ checked, onCheckedChange }: SeasonalNorm
   );
 
   return (
-    <div className="flex h-11 w-full items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 text-sm font-medium transition-colors hover:bg-muted lg:w-auto">
-      <label className="flex flex-1 cursor-pointer items-center gap-2 lg:whitespace-nowrap">
+    <div className="flex h-8 w-full items-center gap-1.5 px-1 text-sm text-muted-foreground transition-colors hover:text-foreground sm:w-auto">
+      <label className="flex flex-1 cursor-pointer items-center gap-2 sm:whitespace-nowrap">
         <Checkbox
           aria-label={t["normals.ariaLabel"]}
           checked={checked}

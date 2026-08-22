@@ -2,12 +2,19 @@
 
 import { useMemo, type RefObject } from "react";
 
-import { WeatherChart } from "@/features/weather/components/chart";
+import { palette, WeatherChart } from "@/features/weather/components/chart";
 import { ExportButtons } from "@/features/weather/components/export";
+import { ColdWaveOverlay, HeatwaveOverlay } from "@/features/weather/components/extremes";
 import { ClimateSummaryBar } from "@/features/weather/components/summary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
-import type { ClimateNormal, ColdWavePeriod, HeatwavePeriod, TemperatureMode, WeatherYearDataset } from "@/features/weather/types";
+import type {
+  ClimateNormal,
+  ColdWavePeriod,
+  HeatwavePeriod,
+  TemperatureMode,
+  WeatherYearDataset,
+} from "@/features/weather/types";
 
 type WeatherDashboardPanelProps = {
   chartRef: RefObject<HTMLDivElement | null>;
@@ -48,11 +55,18 @@ export function WeatherDashboardPanel({
     [datasets, hiddenSeries]
   );
   const hasData = datasets.length > 0;
+  const datasetColors = useMemo(
+    () =>
+      Object.fromEntries(
+        datasets.map((dataset, index) => [dataset.id, palette[index % palette.length]])
+      ) as Record<string, string>,
+    [datasets]
+  );
 
   return (
-    <section className="glass-panel rounded-2xl p-4">
-      <div className="grid gap-4">
-        <div className="flex min-w-0 items-center gap-3 lg:justify-between">
+    <section className="max-w-full min-w-0 rounded-lg border border-border/60 bg-card px-3 py-4 sm:px-5 sm:py-5">
+      <div className="grid min-w-0 gap-5">
+        <div className="flex min-w-0 items-start gap-3 lg:justify-between">
           <ClimateSummaryBar
             coldWaves={coldWaves}
             datasets={datasets}
@@ -73,7 +87,7 @@ export function WeatherDashboardPanel({
         ) : null}
 
         {!weatherIsLoading && !weatherIsError && hasData ? (
-          <div ref={chartRef}>
+          <div className="min-w-0 border-t border-border/50 pt-2" ref={chartRef}>
             <WeatherChart
               coldWaves={coldWaves}
               datasets={datasets}
@@ -94,7 +108,8 @@ export function WeatherDashboardPanel({
         {showNormals && weatherNormalsFetching ? (
           <p className="text-sm text-muted-foreground">{t["state.computingNormals"]}</p>
         ) : null}
-
+        <HeatwaveOverlay colors={datasetColors} heatwaves={heatwaves} />
+        <ColdWaveOverlay coldWaves={coldWaves} colors={datasetColors} />
       </div>
     </section>
   );
@@ -102,7 +117,7 @@ export function WeatherDashboardPanel({
 
 export function EmptyState({ message }: { message: string }) {
   return (
-    <div className="glass-card flex min-h-[360px] items-center justify-center rounded-xl border-dashed text-sm text-muted-foreground">
+    <div className="flex min-h-[360px] items-center justify-center rounded-lg border border-dashed border-border/60 bg-card text-sm text-muted-foreground">
       {message}
     </div>
   );
@@ -110,9 +125,9 @@ export function EmptyState({ message }: { message: string }) {
 
 function ChartSkeleton() {
   return (
-    <div className="grid gap-4" aria-hidden="true">
-      <div className="overflow-x-auto">
-        <div className="relative h-[420px] min-w-[760px]">
+    <div className="grid min-w-0 gap-4" aria-hidden="true">
+      <div className="min-w-0 overflow-x-auto">
+        <div className="relative h-[480px] min-w-[760px]">
           {/* Y-axis tick labels — mirrors YAxis width={56} + left margin 8 */}
           <div
             className="absolute flex flex-col justify-between"
@@ -124,21 +139,24 @@ function ChartSkeleton() {
           </div>
 
           {/* Chart data area */}
-          <div
-            className="absolute"
-            style={{ left: 64, top: 16, right: 24, bottom: 56 }}
-          >
+          <div className="absolute" style={{ left: 64, top: 16, right: 24, bottom: 56 }}>
             {/* Horizontal grid lines */}
             {[0, 20, 40, 60, 80, 100].map((pct) => (
               <Skeleton
                 key={pct}
-                className="absolute left-0 right-0 h-px rounded-none opacity-60"
+                className="absolute right-0 left-0 h-px rounded-none opacity-60"
                 style={{ top: `${pct}%` }}
               />
             ))}
             {/* Data series suggestions */}
-            <Skeleton className="absolute left-0 right-0 h-3 rounded-full opacity-70" style={{ top: "28%" }} />
-            <Skeleton className="absolute left-0 h-3 rounded-full opacity-45" style={{ top: "50%", right: "8%" }} />
+            <Skeleton
+              className="absolute right-0 left-0 h-3 rounded-full opacity-70"
+              style={{ top: "28%" }}
+            />
+            <Skeleton
+              className="absolute left-0 h-3 rounded-full opacity-45"
+              style={{ top: "50%", right: "8%" }}
+            />
           </div>
 
           {/* X-axis tick labels — bottom margin 56 */}

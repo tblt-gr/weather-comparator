@@ -54,12 +54,22 @@ export const palette = [
   "var(--chart-3)",
   "var(--chart-4)",
   "var(--chart-5)",
-  "oklch(0.68 0.16 205)",
-  "oklch(0.7 0.16 135)",
-  "oklch(0.66 0.18 285)",
-  "oklch(0.72 0.17 78)",
-  "oklch(0.66 0.16 18)",
+  "var(--chart-6)",
+  "var(--chart-7)",
+  "var(--chart-8)",
+  "var(--chart-9)",
+  "var(--chart-10)",
 ];
+
+const COMPARISON_STROKE_DASHARRAYS = [undefined, "7 4", "2 3", "10 3 2 3"] as const;
+
+export function getComparisonStrokeDasharray(datasetIndex: number) {
+  if (datasetIndex <= 0) {
+    return undefined;
+  }
+
+  return COMPARISON_STROKE_DASHARRAYS[(datasetIndex - 1) % COMPARISON_STROKE_DASHARRAYS.length];
+}
 
 type WeatherChartProps = {
   datasets: WeatherYearDataset[];
@@ -110,7 +120,7 @@ type TooltipExtremeEntry = {
 const SERIES_ANIMATION_MS = 1500;
 const UPDATE_ANIMATION_MS = 400;
 const NORMALS_LINE_STROKE_DASHARRAY = "6 5";
-const CHART_HEIGHT = 420;
+const CHART_HEIGHT = 480;
 const CHART_MIN_WIDTH = 760;
 
 type ActiveTooltip = {
@@ -178,6 +188,13 @@ export function WeatherChart({
       Object.fromEntries(
         datasets.map((dataset, index) => [dataset.id, palette[index % palette.length]])
       ) as Record<string, string>,
+    [datasets]
+  );
+  const strokeDasharrays = useMemo(
+    () =>
+      Object.fromEntries(
+        datasets.map((dataset, index) => [dataset.id, getComparisonStrokeDasharray(index)])
+      ) as Record<string, string | undefined>,
     [datasets]
   );
   const rows = useMemo(
@@ -417,7 +434,7 @@ export function WeatherChart({
   };
 
   return (
-    <div className="grid gap-4">
+    <div className="grid min-w-0 gap-4">
       <div
         className={cn(
           // `min-w-0` lets this grid item shrink below the chart's min-content
@@ -452,92 +469,14 @@ export function WeatherChart({
                 margin={{ bottom: isMobile ? 16 : 56, left: 8, right: 24, top: 16 }}
                 width={chartRenderWidth}
               >
-                <defs>
-                  {heatwaves.map((heatwave) => (
-                    <pattern
-                      height="8"
-                      id={getExtremePatternId(
-                        heatwave.datasetId,
-                        heatwave.start,
-                        heatwave.kind,
-                        "heat"
-                      )}
-                      key={getExtremePatternId(
-                        heatwave.datasetId,
-                        heatwave.start,
-                        heatwave.kind,
-                        "heat"
-                      )}
-                      patternTransform="rotate(45)"
-                      patternUnits="userSpaceOnUse"
-                      width="8"
-                    >
-                      <rect
-                        fill={getHeatwaveFill(heatwave.kind)}
-                        height="8"
-                        opacity="0.14"
-                        width="8"
-                        x="0"
-                        y="0"
-                      />
-                      <line
-                        stroke={getHeatwaveFill(heatwave.kind)}
-                        strokeOpacity="0.6"
-                        strokeWidth="3"
-                        x1="0"
-                        x2="0"
-                        y1="0"
-                        y2="8"
-                      />
-                    </pattern>
-                  ))}
-                  {coldWaves.map((coldWave) => (
-                    <pattern
-                      height="8"
-                      id={getExtremePatternId(
-                        coldWave.datasetId,
-                        coldWave.start,
-                        coldWave.kind,
-                        "cold"
-                      )}
-                      key={getExtremePatternId(
-                        coldWave.datasetId,
-                        coldWave.start,
-                        coldWave.kind,
-                        "cold"
-                      )}
-                      patternTransform="rotate(45)"
-                      patternUnits="userSpaceOnUse"
-                      width="8"
-                    >
-                      <rect
-                        fill={getColdWaveFill(coldWave.kind)}
-                        height="8"
-                        opacity="0.14"
-                        width="8"
-                        x="0"
-                        y="0"
-                      />
-                      <line
-                        stroke={getColdWaveFill(coldWave.kind)}
-                        strokeOpacity="0.6"
-                        strokeWidth="3"
-                        x1="0"
-                        x2="0"
-                        y1="0"
-                        y2="8"
-                      />
-                    </pattern>
-                  ))}
-                </defs>
-                <CartesianGrid stroke="var(--border)" strokeDasharray="4 4" strokeOpacity={0.72} />
+                <CartesianGrid stroke="var(--border)" strokeOpacity={0.42} vertical={false} />
                 {monthBoundaryDays.map((day) => (
                   <ReferenceLine
                     ifOverflow="extendDomain"
                     key={day}
                     stroke="var(--border)"
-                    strokeOpacity={0.95}
-                    strokeWidth={1.5}
+                    strokeOpacity={0.5}
+                    strokeWidth={1}
                     x={day}
                   />
                 ))}
@@ -622,17 +561,13 @@ export function WeatherChart({
                   const bridgeToDay = getExtremeBridgeDay(heatwave, heatwaves);
                   return getExtremeAreaSegments(heatwave, bridgeToDay).map((segment) => (
                     <ReferenceArea
-                      fill={
-                        segment.isForecast
-                          ? `url(#${getExtremePatternId(heatwave.datasetId, heatwave.start, heatwave.kind, "heat")})`
-                          : getHeatwaveFill(heatwave.kind)
-                      }
-                      fillOpacity={heatwave.kind === "canicule" ? 0.28 : 0.2}
+                      fill={getHeatwaveFill(heatwave.kind)}
+                      fillOpacity={heatwave.kind === "canicule" ? 0.11 : 0.07}
                       ifOverflow="extendDomain"
                       key={`${heatwave.datasetId}-${heatwave.start}-${segment.x1}-${segment.x2}`}
                       stroke={getHeatwaveFill(heatwave.kind)}
-                      strokeDasharray={segment.isForecast ? "5 3" : undefined}
-                      strokeOpacity={heatwave.kind === "canicule" ? 0.65 : 0.45}
+                      strokeDasharray={segment.isForecast ? "2 4" : undefined}
+                      strokeOpacity={heatwave.kind === "canicule" ? 0.32 : 0.2}
                       x1={segment.x1}
                       x2={segment.x2}
                     />
@@ -642,17 +577,13 @@ export function WeatherChart({
                   const bridgeToDay = getExtremeBridgeDay(coldWave, coldWaves);
                   return getExtremeAreaSegments(coldWave, bridgeToDay).map((segment) => (
                     <ReferenceArea
-                      fill={
-                        segment.isForecast
-                          ? `url(#${getExtremePatternId(coldWave.datasetId, coldWave.start, coldWave.kind, "cold")})`
-                          : getColdWaveFill(coldWave.kind)
-                      }
-                      fillOpacity={coldWave.kind === "grand_froid" ? 0.28 : 0.2}
+                      fill={getColdWaveFill(coldWave.kind)}
+                      fillOpacity={coldWave.kind === "grand_froid" ? 0.09 : 0.06}
                       ifOverflow="extendDomain"
                       key={`${coldWave.datasetId}-${coldWave.start}-${segment.x1}-${segment.x2}`}
                       stroke={getColdWaveFill(coldWave.kind)}
-                      strokeDasharray={segment.isForecast ? "5 3" : undefined}
-                      strokeOpacity={coldWave.kind === "grand_froid" ? 0.65 : 0.45}
+                      strokeDasharray={segment.isForecast ? "2 4" : undefined}
+                      strokeOpacity={coldWave.kind === "grand_froid" ? 0.28 : 0.18}
                       x1={segment.x1}
                       x2={segment.x2}
                     />
@@ -672,7 +603,7 @@ export function WeatherChart({
                         name={dataset.label}
                         stroke={colors[dataset.id]}
                         strokeOpacity={1}
-                        strokeWidth={3}
+                        strokeWidth={2.75}
                         type="monotone"
                       />
                       <Line
@@ -689,7 +620,7 @@ export function WeatherChart({
                         stroke={colors[dataset.id]}
                         strokeDasharray="7 4"
                         strokeOpacity={0.7}
-                        strokeWidth={3}
+                        strokeWidth={2.75}
                         type="monotone"
                       />
                     </Fragment>
@@ -711,8 +642,9 @@ export function WeatherChart({
                       key={dataset.id}
                       name={dataset.label}
                       stroke={colors[dataset.id]}
-                      strokeOpacity={0.7}
-                      strokeWidth={2}
+                      strokeDasharray={strokeDasharrays[dataset.id]}
+                      strokeOpacity={0.82}
+                      strokeWidth={1.75}
                       type="monotone"
                     />
                   )
@@ -732,7 +664,7 @@ export function WeatherChart({
                 ) : null}
               </LineChart>
             ) : (
-              <div className="flex h-[420px] items-center justify-center rounded-xl border border-dashed border-border/50 bg-muted/30 text-sm text-muted-foreground">
+              <div className="flex h-[480px] items-center justify-center rounded-md border border-dashed border-border/50 bg-muted/20 text-sm text-muted-foreground">
                 {t["state.chartLoading"]}
               </div>
             )}
@@ -786,7 +718,7 @@ export function WeatherChart({
         <Button
           aria-label={isFullscreen ? t["chart.exitFullscreen"] : t["chart.enterFullscreen"]}
           className={cn(
-            "absolute top-3 z-10 size-9 shrink-0 rounded-full bg-background/80 shadow-md backdrop-blur",
+            "absolute top-3 z-10 size-8 shrink-0 rounded-md bg-background/80 shadow-sm backdrop-blur",
             isMobile && !isFullscreen ? "right-0" : "right-3"
           )}
           onClick={toggleFullscreen}
@@ -806,6 +738,7 @@ export function WeatherChart({
           id: dataset.id,
           label: dataset.label,
         }))}
+        strokeDasharrays={strokeDasharrays}
       />
     </div>
   );
@@ -874,10 +807,8 @@ function ChartTooltipCard({
   return (
     <div
       className={cn(
-        "rounded-xl border border-border/60 bg-popover p-3 text-sm text-popover-foreground",
-        variant === "floating"
-          ? "shadow-2xl shadow-primary/5 dark:shadow-black/30"
-          : "w-full shadow-sm"
+        "rounded-md border border-border/60 bg-popover p-3 text-sm text-popover-foreground",
+        variant === "floating" ? "shadow-lg shadow-black/10 dark:shadow-black/30" : "w-full"
       )}
     >
       <p className="mb-2 font-medium">
@@ -891,7 +822,14 @@ function ChartTooltipCard({
             className="flex items-center justify-between gap-6"
             key={String(entry.dataKey ?? entry.name)}
           >
-            <span style={{ color: entry.color }}>{entry.name}</span>
+            <span className="flex min-w-0 items-center gap-2 text-foreground">
+              <span
+                aria-hidden="true"
+                className="size-2 shrink-0 rounded-full"
+                style={{ backgroundColor: entry.color }}
+              />
+              <span className="truncate">{entry.name}</span>
+            </span>
             <span className="font-medium">
               {typeof entry.value === "number" ? `${entry.value.toFixed(1)} °C` : "-"}
             </span>
@@ -1516,13 +1454,4 @@ export function getExtremeBridgeDay(
   );
 
   return successor ? successor.startDay : null;
-}
-
-function getExtremePatternId(
-  datasetId: string,
-  start: string,
-  kind: HeatwavePeriod["kind"] | ColdWavePeriod["kind"],
-  family: "heat" | "cold"
-) {
-  return `${family}-${datasetId}-${start}-${kind}`.replace(/[^a-zA-Z0-9_-]/g, "-");
 }

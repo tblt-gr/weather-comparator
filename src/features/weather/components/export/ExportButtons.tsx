@@ -88,9 +88,9 @@ export function ExportButtons({ datasets, chartRef, shareUrl }: ExportButtonsPro
       <DropdownMenuTrigger asChild>
         <Button
           aria-label={t["export.menuLabel"]}
-          className="h-11 w-11 shrink-0"
+          className="size-8 shrink-0"
           type="button"
-          variant="outline"
+          variant="ghost"
         >
           <MoreVertical aria-hidden="true" className="size-4" />
         </Button>

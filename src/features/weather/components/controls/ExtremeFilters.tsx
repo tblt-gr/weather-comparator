@@ -58,7 +58,7 @@ export function ExtremeFilters({ hiddenKinds, availableKinds, onToggleKind }: Ex
   return (
     <div
       aria-label={t["extremes.filtersAriaLabel"]}
-      className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:flex lg:flex-nowrap lg:items-end"
+      className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center"
       role="group"
     >
       {EXTREME_KINDS.map(({ kind, labelKey, criteriaKey }) => {
@@ -68,7 +68,7 @@ export function ExtremeFilters({ hiddenKinds, availableKinds, onToggleKind }: Ex
         const infoButton = (
           <button
             aria-label={t["extremes.criteriaAriaLabel"]}
-            className="shrink-0 cursor-pointer text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+            className="-mx-1 flex size-8 shrink-0 cursor-pointer items-center justify-center text-muted-foreground transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-ring/70 focus-visible:outline-none"
             type="button"
           >
             <InfoIcon className="size-4" />
@@ -78,7 +78,7 @@ export function ExtremeFilters({ hiddenKinds, availableKinds, onToggleKind }: Ex
         return (
           <div
             key={kind}
-            className="flex h-11 w-full items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 text-sm font-medium transition-colors hover:bg-muted has-disabled:opacity-50 has-disabled:hover:bg-muted/50 lg:w-auto"
+            className="flex h-8 w-full items-center gap-1.5 px-1 text-sm text-muted-foreground transition-colors hover:text-foreground has-disabled:opacity-45 sm:w-auto"
           >
             <label className="flex flex-1 cursor-pointer items-center gap-2 has-disabled:cursor-not-allowed lg:whitespace-nowrap">
               <Checkbox
@@ -88,7 +88,7 @@ export function ExtremeFilters({ hiddenKinds, availableKinds, onToggleKind }: Ex
               />
               <span
                 aria-hidden
-                className="size-2.5 shrink-0 rounded-full"
+                className="size-2 shrink-0 rounded-full"
                 style={{ backgroundColor: EXTREME_KIND_COLORS[kind] }}
               />
               {t[labelKey]}

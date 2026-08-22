@@ -5,10 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { DatePeriod } from "@/features/weather/logic/dates";
-import {
-  type DatePeriodErrors,
-  validateDatePeriod,
-} from "@/features/weather/logic/dates";
+import { type DatePeriodErrors, validateDatePeriod } from "@/features/weather/logic/dates";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 type PeriodPickerProps = {
@@ -45,14 +42,16 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
   }
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
+    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
       <div className="min-w-0">
-        <span className="mb-1 block text-sm font-medium">{t["period.start"]}</span>
+        <span className="mb-1 block text-xs font-medium text-muted-foreground">
+          {t["period.start"]}
+        </span>
         <Input
           aria-describedby={errors.startDate ? "start-date-error" : undefined}
           aria-invalid={errors.startDate ? true : undefined}
           aria-label={t["period.startAriaLabel"]}
-          className="h-11"
+          className="h-9 rounded-md bg-background"
           onChange={(event) => {
             setLocalPeriod((prev) => ({ ...prev, startDate: event.target.value }));
             if (errors.startDate) setErrors((prev) => ({ ...prev, startDate: undefined }));
@@ -68,12 +67,14 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
       </div>
 
       <div className="min-w-0">
-        <span className="mb-1 block text-sm font-medium">{t["period.end"]}</span>
+        <span className="mb-1 block text-xs font-medium text-muted-foreground">
+          {t["period.end"]}
+        </span>
         <Input
           aria-describedby={errors.endDate ? "end-date-error" : undefined}
           aria-invalid={errors.endDate ? true : undefined}
           aria-label={t["period.endAriaLabel"]}
-          className="h-11"
+          className="h-9 rounded-md bg-background"
           onChange={(event) => {
             setLocalPeriod((prev) => ({ ...prev, endDate: event.target.value }));
             if (errors.endDate) setErrors((prev) => ({ ...prev, endDate: undefined }));
@@ -91,7 +92,7 @@ export function PeriodPicker({ period, onPeriodChange }: PeriodPickerProps) {
       <div className="flex items-end sm:col-span-2 lg:col-span-1">
         <Button
           aria-label={t["period.refreshAriaLabel"]}
-          className="h-11 w-full lg:w-auto"
+          className="h-9 w-full rounded-md px-3 lg:w-auto"
           disabled={!hasPendingChange}
           onClick={handleRefresh}
           type="button"

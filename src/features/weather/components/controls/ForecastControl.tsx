@@ -64,7 +64,7 @@ export function ForecastControl({
   const infoButton = (
     <button
       aria-label={t["forecast.infoAriaLabel"]}
-      className="shrink-0 cursor-pointer text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+      className="-mx-1 flex size-8 shrink-0 cursor-pointer items-center justify-center text-muted-foreground transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-ring/70 focus-visible:outline-none"
       type="button"
     >
       <InfoIcon className="size-4" />
@@ -72,8 +72,8 @@ export function ForecastControl({
   );
 
   return (
-    <div className="flex h-11 w-full items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 text-sm font-medium transition-colors hover:bg-muted lg:w-auto">
-      <label className="flex cursor-pointer items-center gap-2 lg:whitespace-nowrap">
+    <div className="grid min-h-8 w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-1 text-sm text-muted-foreground transition-colors hover:text-foreground sm:w-auto sm:grid-cols-[auto_auto_auto]">
+      <label className="flex cursor-pointer items-center gap-2 sm:whitespace-nowrap">
         <Checkbox
           aria-label={t["forecast.ariaLabel"]}
           checked={checked}
@@ -81,15 +81,11 @@ export function ForecastControl({
         />
         {t["forecast.label"]}
       </label>
-      {mounted ? (
-        <Select
-          disabled={!checked}
-          onValueChange={(next) => onModelChange(next as ForecastModel)}
-          value={model}
-        >
+      {mounted && checked ? (
+        <Select onValueChange={(next) => onModelChange(next as ForecastModel)} value={model}>
           <SelectTrigger
             aria-label={t["forecastModel.ariaLabel"]}
-            className="h-11 flex-1 border-border bg-background hover:bg-muted dark:border-input dark:bg-input/30 dark:hover:bg-input/50 lg:flex-none"
+            className="h-8 w-full min-w-0 rounded-md border-input bg-background hover:bg-muted sm:w-auto sm:min-w-40 dark:border-input dark:bg-input/30 dark:hover:bg-input/50"
           >
             <SelectValue />
           </SelectTrigger>
@@ -101,9 +97,9 @@ export function ForecastControl({
             ))}
           </SelectContent>
         </Select>
-      ) : (
+      ) : !mounted && checked ? (
         <span className="flex-1 truncate text-muted-foreground">{t[LABEL_KEYS[model]]}</span>
-      )}
+      ) : null}
       {mounted ? (
         <Popover>
           <PopoverTrigger asChild>{infoButton}</PopoverTrigger>

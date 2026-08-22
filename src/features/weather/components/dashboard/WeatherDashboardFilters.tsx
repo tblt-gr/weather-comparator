@@ -57,9 +57,9 @@ export function WeatherDashboardFilters({
   return (
     <section
       aria-label={t["app.filtersAriaLabel"]}
-      className="glass-panel flex flex-col gap-4 rounded-2xl p-4"
+      className="flex flex-col gap-3 rounded-lg border border-border/60 bg-card px-3 py-3 sm:px-4"
     >
-      <div className="grid gap-4 lg:grid-cols-[minmax(240px,340px)_minmax(360px,1fr)] lg:items-end xl:grid-cols-[minmax(240px,340px)_minmax(360px,520px)_1fr_auto]">
+      <div className="grid gap-3 lg:grid-cols-[minmax(200px,0.9fr)_minmax(360px,1.5fr)_minmax(180px,0.7fr)_auto] lg:items-end">
         <CitySearch key={city?.id ?? "empty"} city={city} onCityChange={onCityChange} />
         <PeriodPicker period={period} onPeriodChange={onPeriodChange} />
         <YearSelector
@@ -72,7 +72,7 @@ export function WeatherDashboardFilters({
           <TemperatureToggle onChange={onTemperatureModeChange} value={temperatureMode} />
         </div>
       </div>
-      <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center">
+      <div className="flex flex-col gap-2 border-t border-border/50 pt-3 sm:flex-row sm:flex-wrap sm:items-center">
         <SeasonalNormalsToggle checked={showNormals} onCheckedChange={onShowNormalsChange} />
         <ForecastControl
           checked={showForecast}

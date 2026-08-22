@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
 import { useMemo } from "react";
 
 import { EXTREME_KIND_COLORS } from "@/features/weather/logic/extremes";
@@ -17,11 +18,7 @@ function getSeverityColor(kind: HeatwavePeriod["kind"]) {
   return EXTREME_KIND_COLORS[kind];
 }
 
-export function formatHeatwaveDateRange(
-  start: string,
-  end: string,
-  locale: Locale = "fr"
-): string {
+export function formatHeatwaveDateRange(start: string, end: string, locale: Locale = "fr"): string {
   const dateLocale = locale === "fr" ? "fr-FR" : "en-GB";
   const separator = getTranslations(locale)["heatwave.dateSeparator"];
   const fmt = new Intl.DateTimeFormat(dateLocale, {
@@ -85,53 +82,69 @@ export function HeatwaveOverlay({ heatwaves, colors = {} }: HeatwaveOverlayProps
   }
 
   return (
-    <div className="glass-panel rounded-2xl p-4">
-      <h2 className="mb-5 font-semibold text-foreground">{t["heatwave.sectionTitle"]}</h2>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <section className="border-t border-border/60 pt-5">
+      <h2 className="mb-3 text-sm font-semibold text-foreground">{t["heatwave.sectionTitle"]}</h2>
+      <div className="divide-y divide-border/60 border-y border-border/60">
         {groupedHeatwaves.map((group) => (
-          <div
-            className="rounded-xl border border-orange-300/40 bg-orange-100/60 p-4 shadow-sm shadow-orange-900/5 dark:border-orange-300/20 dark:bg-orange-400/15 dark:shadow-orange-300/5"
-            key={group.year}
-          >
-            <p className="mb-1.5 flex items-center gap-1.5 font-semibold text-orange-950 dark:text-orange-100">
-              {colors[group.heatwaves[0].datasetId] && (
-                <span
-                  aria-hidden="true"
-                  className="inline-block size-2.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: colors[group.heatwaves[0].datasetId] }}
-                />
-              )}
-              {group.year}
-            </p>
-            <ul className="grid gap-1.5 text-orange-900 dark:text-orange-200">
+          <details className="group" key={group.year}>
+            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3 py-2.5 focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring/70 focus-visible:outline-none [&::-webkit-details-marker]:hidden">
+              <span className="flex shrink-0 items-center gap-2 font-semibold tabular-nums">
+                {colors[group.heatwaves[0].datasetId] ? (
+                  <span
+                    aria-hidden="true"
+                    className="h-0.5 w-4 shrink-0"
+                    style={{ backgroundColor: colors[group.heatwaves[0].datasetId] }}
+                  />
+                ) : null}
+                {group.year}
+              </span>
+              <span className="min-w-0 flex-1 text-xs leading-5 text-muted-foreground">
+                {getHeatwaveDaysByKind(group.heatwaves).map(({ kind, days }, index) => (
+                  <span key={kind}>
+                    {index > 0 ? " · " : null}
+                    {t["extremes.total"]} {getSeverityLabel(kind, locale)}: {days}{" "}
+                    {t["heatwave.days"]}
+                  </span>
+                ))}
+              </span>
+              <ChevronDown
+                aria-hidden="true"
+                className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+              />
+            </summary>
+            <ul className="border-t border-border/40 pl-6 sm:pl-8">
               {group.heatwaves.map((heatwave) => (
-                <li className="flex gap-2" key={`${heatwave.datasetId}-${heatwave.start}`}>
-                  <span
-                    aria-hidden="true"
-                    className="mt-1.5 size-2.5 shrink-0 rounded-full"
-                    style={{ backgroundColor: getSeverityColor(heatwave.kind) }}
-                  />
-                  <span className="text-sm">{formatHeatwaveSummary(heatwave, locale)}</span>
+                <li
+                  className="grid gap-1.5 border-b border-border/40 py-3 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+                  key={`${heatwave.datasetId}-${heatwave.start}`}
+                >
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-2 text-sm font-medium">
+                      <span
+                        aria-hidden="true"
+                        className="size-2 shrink-0 rounded-full"
+                        style={{ backgroundColor: getSeverityColor(heatwave.kind) }}
+                      />
+                      {getSeverityLabel(heatwave.kind, locale)}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {formatHeatwaveDateRange(heatwave.start, heatwave.end, locale)}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs sm:justify-end sm:text-right">
+                    <span className="text-muted-foreground tabular-nums">
+                      {heatwave.duration} {t["heatwave.days"]}
+                    </span>
+                    <span className="font-medium tabular-nums">
+                      {t["heatwave.avgMax"]} {heatwave.averageMax.toFixed(1)} °C
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>
-            <hr className="my-3 border-orange-300/40 dark:border-orange-300/20" />
-            <ul className="mb-2 grid gap-1.5 text-sm text-orange-900 dark:text-orange-200">
-              {getHeatwaveDaysByKind(group.heatwaves).map(({ kind, days }) => (
-                <li className="flex items-center gap-1 text-sm" key={kind}>
-                  <span
-                    aria-hidden="true"
-                    className="inline-block size-2.5 shrink-0 rounded-full"
-                    style={{ backgroundColor: getSeverityColor(kind) }}
-                  />
-                  {t["extremes.total"]} {getSeverityLabel(kind, locale)}: {days}{" "}
-                  {t["heatwave.days"]}
-                </li>
-              ))}
-            </ul>
-          </div>
+          </details>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

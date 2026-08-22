@@ -14,47 +14,52 @@ type WeatherDashboardHeaderProps = {
   onToggleFilters: () => void;
 };
 
-export function WeatherDashboardHeader({ city, filtersOpen, onToggleFilters }: WeatherDashboardHeaderProps) {
+export function WeatherDashboardHeader({
+  city,
+  filtersOpen,
+  onToggleFilters,
+}: WeatherDashboardHeaderProps) {
   const { t } = useLocale();
 
   return (
-    <header className="glass-panel overflow-hidden rounded-2xl">
-      <div className="h-0.75 bg-primary from-primary/40 via-primary to-primary/20" />
-      <div className="flex flex-col gap-3 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-start gap-3">
-          <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <Thermometer className="size-5" />
+    <header className="flex items-center justify-between border-b border-border/60 pb-4">
+      <div className="flex min-w-0 items-center gap-2.5">
+        <Thermometer className="size-4 shrink-0 text-primary" aria-hidden="true" />
+        <div className="min-w-0">
+          <div className="flex min-w-0 items-baseline gap-2.5">
+            <h1 className="shrink-0 text-base leading-tight font-semibold tracking-tight">
+              {t["app.title"]}
+            </h1>
+            {city ? (
+              <span
+                className="hidden truncate text-sm text-muted-foreground sm:inline"
+                suppressHydrationWarning
+              >
+                {city.name}, {city.country}
+              </span>
+            ) : null}
           </div>
-          <div>
-            <h1 className="text-lg leading-tight font-semibold tracking-tight">{t["app.title"]}</h1>
-            <p className="mt-0.5 text-sm text-muted-foreground" suppressHydrationWarning>
-              {t["app.subtitle"]}
-              {city ? (
-                <span className="font-medium text-foreground">
-                  {" · "}
-                  {city.name}, {city.country}
-                </span>
-              ) : null}
-            </p>
-          </div>
+          <p className="mt-0.5 hidden text-xs text-muted-foreground sm:block">
+            {t["app.subtitle"]}
+          </p>
         </div>
-        <div className="flex items-center gap-2 justify-between lg:justify-end">
-          <Button
-            aria-controls="dashboard-filters"
-            aria-expanded={filtersOpen}
-            aria-label={t["app.filtersToggleAriaLabel"]}
-            className="h-11 w-11 lg:hidden"
-            onClick={onToggleFilters}
-            size="icon"
-            type="button"
-            variant="outline"
-          >
-            {filtersOpen ? <X className="size-4" /> : <Menu className="size-4" />}
-          </Button>
-          <div className="flex items-center gap-2">
-            <LanguageSwitcher />
-            <ThemeToggle />
-          </div>
+      </div>
+      <div className="flex shrink-0 items-center gap-1">
+        <Button
+          aria-controls="dashboard-filters"
+          aria-expanded={filtersOpen}
+          aria-label={t["app.filtersToggleAriaLabel"]}
+          className="size-8 lg:hidden"
+          onClick={onToggleFilters}
+          size="icon"
+          type="button"
+          variant="ghost"
+        >
+          {filtersOpen ? <X className="size-4" /> : <Menu className="size-4" />}
+        </Button>
+        <div className="flex items-center gap-1">
+          <LanguageSwitcher />
+          <ThemeToggle />
         </div>
       </div>
     </header>
