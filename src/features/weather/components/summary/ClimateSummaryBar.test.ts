@@ -1,8 +1,17 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { buildClimateSummaryStats } from "./ClimateSummaryBar";
 import { fr } from "@/lib/i18n/locales/fr";
+
+test("uses shared grid columns when summary stats wrap on large screens", () => {
+  const source = readFileSync(new URL("./ClimateSummaryBar.tsx", import.meta.url), "utf8");
+
+  assert.equal(source.includes("lg:grid-cols-[repeat(auto-fit,minmax(9rem,1fr))]"), true);
+  assert.equal(source.includes("lg:flex-wrap"), false);
+  assert.equal(source.includes("lg:first:pl-3"), true);
+});
 
 test("keeps hot days at zero but hides tropical nights and heatwave event cards at zero", () => {
   const stats = buildClimateSummaryStats({

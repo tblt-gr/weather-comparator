@@ -73,7 +73,7 @@ export function ClimateSummaryBar({
   return (
     <div
       ref={scrollRef}
-      className="summary-scroll -mb-1 flex min-w-0 flex-1 overflow-x-auto pb-1 lg:mb-0 lg:flex-wrap lg:overflow-x-visible lg:pb-0"
+      className="summary-scroll -mb-1 flex min-w-0 flex-1 overflow-x-auto pb-1 lg:mb-0 lg:grid lg:grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] lg:overflow-x-visible lg:pb-0"
       data-fade-end={fade.end ? "true" : undefined}
       data-fade-start={fade.start ? "true" : undefined}
     >
@@ -233,7 +233,7 @@ function StatItem({
           : "text-foreground";
 
   return (
-    <div className="min-w-28 shrink-0 border-r border-border/60 px-3 first:pl-0 last:border-r-0 sm:min-w-32 lg:min-w-36">
+    <div className="min-w-28 shrink-0 border-r border-border/60 px-3 first:pl-0 last:border-r-0 sm:min-w-32 lg:min-w-0 lg:first:pl-3">
       <p className="truncate text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
         {label}
       </p>
