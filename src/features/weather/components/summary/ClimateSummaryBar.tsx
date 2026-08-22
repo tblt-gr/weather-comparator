@@ -225,9 +225,9 @@ function StatItem({
 }) {
   const valueClass =
     tone === "warm"
-      ? "text-orange-700 dark:text-orange-400"
+      ? "text-heat-summary"
       : tone === "cold"
-        ? "text-sky-700 dark:text-sky-400"
+        ? "text-cold-summary"
         : isPrimary
           ? "text-primary"
           : "text-foreground";
