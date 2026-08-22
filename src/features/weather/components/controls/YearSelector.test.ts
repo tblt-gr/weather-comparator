@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import test from "node:test";
 
 import {
@@ -51,4 +53,15 @@ test("prevents the comparison period menu from closing after a selection", () =>
 test("enables the clear action whenever at least one offset is stored", () => {
   assert.equal(canClearComparisonOffsets([]), false);
   assert.equal(canClearComparisonOffsets([2]), true);
+});
+
+test("uses Radix checkbox items for roving keyboard focus", () => {
+  const source = readFileSync(
+    path.join(process.cwd(), "src/features/weather/components/controls/YearSelector.tsx"),
+    "utf8"
+  );
+
+  assert.equal(source.includes("<DropdownMenuCheckboxItem"), true);
+  assert.equal(source.includes('role="menuitemcheckbox"'), false);
+  assert.equal(source.includes("useVirtualizer"), false);
 });

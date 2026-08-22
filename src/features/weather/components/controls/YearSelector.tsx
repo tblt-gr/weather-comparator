@@ -1,12 +1,12 @@
 "use client";
 
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { Check, ChevronDown, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { ChevronDown, X } from "lucide-react";
+import { useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -21,9 +21,6 @@ type YearSelectorProps = {
   onToggleOffset: (offsetYears: number) => void;
   onClearOffsets: () => void;
 };
-
-const ITEM_HEIGHT = 40;
-const VISIBLE_ITEMS = 8;
 
 export function YearSelector({
   period,
@@ -45,17 +42,6 @@ export function YearSelector({
         : t["year.nSelected"].replace("{count}", String(count));
   const canClear = canClearComparisonOffsets(selectedOffsets);
 
-  const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
-  // TanStack Virtual is currently flagged as incompatible with React Compiler memoization.
-  // The hook usage is intentional here and local to this non-memoized dropdown.
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const virtualizer = useVirtualizer({
-    count: offsets.length,
-    getScrollElement: () => scrollElement,
-    estimateSize: () => ITEM_HEIGHT,
-    overscan: 3,
-  });
-
   return (
     <div className="grid min-w-0 gap-1">
       <span className="text-xs font-medium text-muted-foreground">{t["year.label"]}</span>
@@ -74,40 +60,19 @@ export function YearSelector({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
-            className="w-(--radix-dropdown-menu-trigger-width) p-1"
+            className="max-h-80 w-(--radix-dropdown-menu-trigger-width) p-1"
           >
-            <div
-              ref={setScrollElement}
-              style={{ height: `${ITEM_HEIGHT * VISIBLE_ITEMS}px`, overflowY: "auto" }}
-            >
-              <div style={{ height: `${virtualizer.getTotalSize()}px`, position: "relative" }}>
-                {virtualizer.getVirtualItems().map((virtualItem) => {
-                  const offsetYears = offsets[virtualItem.index];
-                  const checked = selectedOffsets.includes(offsetYears);
-                  return (
-                    <button
-                      aria-checked={checked}
-                      className="absolute top-0 left-0 flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                      key={virtualItem.key}
-                      onClick={() => onToggleOffset(offsetYears)}
-                      role="menuitemcheckbox"
-                      style={{
-                        height: `${ITEM_HEIGHT}px`,
-                        transform: `translateY(${virtualItem.start}px)`,
-                      }}
-                      type="button"
-                    >
-                      <Check
-                        className={
-                          checked ? "size-4 shrink-0 opacity-100" : "size-4 shrink-0 opacity-0"
-                        }
-                      />
-                      {formatComparisonOffsetLabel(period, offsetYears, locale)}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            {offsets.map((offsetYears) => (
+              <DropdownMenuCheckboxItem
+                checked={selectedOffsets.includes(offsetYears)}
+                className="h-10 px-2"
+                key={offsetYears}
+                onCheckedChange={() => onToggleOffset(offsetYears)}
+                onSelect={keepDropdownMenuOpen}
+              >
+                {formatComparisonOffsetLabel(period, offsetYears, locale)}
+              </DropdownMenuCheckboxItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
         <Button
