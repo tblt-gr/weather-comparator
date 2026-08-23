@@ -96,23 +96,23 @@
 
 .dark {
     --background: oklch(0.112 0.022 260);
-    --foreground: oklch(0.92 0.01 240);
-    --card: oklch(0.18 0.014 252);
-    --card-foreground: oklch(0.92 0.01 240);
-    --popover: oklch(0.215 0.016 252);
-    --popover-foreground: oklch(0.92 0.01 240);
-    --primary: oklch(0.72 0.13 185);
-    --primary-foreground: oklch(0.105 0.015 250);
-    --secondary: oklch(0.235 0.016 252);
-    --secondary-foreground: oklch(0.9 0.01 240);
-    --muted: oklch(0.22 0.014 252);
-    --muted-foreground: oklch(0.66 0.018 240);
-    --accent: oklch(0.25 0.025 200);
-    --accent-foreground: oklch(0.94 0.012 220);
+    --foreground: oklch(0.93 0.018 225);
+    --card: oklch(0.185 0.03 260);
+    --card-foreground: oklch(0.93 0.018 225);
+    --popover: oklch(0.19 0.03 260);
+    --popover-foreground: oklch(0.93 0.018 225);
+    --primary: oklch(0.74 0.17 190);
+    --primary-foreground: oklch(0.12 0.035 250);
+    --secondary: oklch(0.26 0.04 258);
+    --secondary-foreground: oklch(0.92 0.018 225);
+    --muted: oklch(0.25 0.035 258);
+    --muted-foreground: oklch(0.68 0.032 238);
+    --accent: oklch(0.32 0.09 205);
+    --accent-foreground: oklch(0.94 0.018 220);
     --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(0.31 0.016 252);
+    --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 8%);
-    --ring: oklch(0.72 0.13 185);
+    --ring: oklch(0.75 0.17 190);
     --chart-1: oklch(0.74 0.13 185);
     --chart-2: oklch(0.74 0.13 255);
     --chart-3: oklch(0.74 0.12 145);
@@ -182,6 +182,11 @@
 @layer components {
     .app-ambient {
         background: var(--background);
+        background-image: linear-gradient(160deg, oklch(0.975 0.014 210 / 60%) 0%, transparent 50%);
+    }
+
+    .dark .app-ambient {
+        background-image: linear-gradient(160deg, oklch(0.22 0.07 220 / 30%) 0%, transparent 50%);
     }
 
     .weather-chart-shell :focus:not(:focus-visible) {
@@ -270,6 +275,16 @@
         .weather-touch-control,
         .weather-touch-row {
             min-height: 2.75rem;
+        }
+
+        .city-search-control,
+        .city-search-control [data-slot="command-input"],
+        .city-search-clear {
+            min-height: 3rem;
+        }
+
+        .city-search-clear {
+            min-width: 3rem;
         }
     }
 }

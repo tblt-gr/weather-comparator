@@ -96,12 +96,11 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
     <div className="relative grid min-w-0 gap-1 text-sm font-medium" ref={containerRef}>
       <span className="text-xs font-medium text-muted-foreground">{t["city.label"]}</span>
       <Command
+        label={t["city.searchAriaLabel"]}
         shouldFilter={false}
-        className="weather-touch-control relative h-9 min-w-0 overflow-visible rounded-md! border border-input bg-transparent p-0 shadow-none dark:bg-input/30 [&_[data-slot=input-group]]:h-full! [&_[data-slot=input-group]]:rounded-md! [&_[data-slot=input-group]]:border-0! [&_[data-slot=input-group]]:bg-transparent!"
+        className="city-search-control weather-touch-control relative h-9 min-w-0 flex-row overflow-visible rounded-md! border border-input bg-transparent p-0 shadow-none dark:bg-input/30 [&_[data-slot=command-input-wrapper]]:min-w-0 [&_[data-slot=command-input-wrapper]]:flex-1 [&_[data-slot=input-group]]:h-full! [&_[data-slot=input-group]]:rounded-md! [&_[data-slot=input-group]]:border-0! [&_[data-slot=input-group]]:bg-transparent!"
       >
         <CommandInput
-          aria-label={t["city.searchAriaLabel"]}
-          className={query ? "pr-10" : undefined}
           data-city-search-input
           onFocus={() => {
             if (query.trim().length === 0) {
@@ -132,7 +131,7 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
         {query ? (
           <Button
             aria-label={t["city.clearAriaLabel"]}
-            className="absolute top-1/2 right-1 z-10 -translate-y-1/2"
+            className="city-search-clear z-10"
             disableActiveTranslation
             onClick={(event) => {
               event.stopPropagation();
@@ -223,7 +222,9 @@ export function CitySearch({ city, onCityChange }: CitySearchProps) {
               </CommandGroup>
             </CommandList>
           </div>
-        ) : null}
+        ) : (
+          <CommandList aria-hidden className="hidden" />
+        )}
       </Command>
     </div>
   );

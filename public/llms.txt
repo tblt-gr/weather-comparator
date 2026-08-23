@@ -1,0 +1,24 @@
+# Weather Comparator
+
+> A free, bilingual application for comparing daily temperatures across multiple years for a
+> selected city and period.
+
+Weather Comparator lets users:
+
+- Compare maximum or minimum daily temperatures across years.
+- Display the 1991–2020 climate normal.
+- Highlight heat waves, severe heat, cold waves, and severe cold.
+- Export chart data as PNG or CSV and share the selected comparison through its URL.
+
+Weather and geocoding data come from the public Open-Meteo APIs. Reverse geocoding uses
+Nominatim. No account or API key is required.
+
+The interface is available in English and French.
+
+## Resources
+
+- [Weather Comparator application](/): Open the interactive weather comparison dashboard.
+- [Source code and documentation](https://github.com/tblt-gr/weather-comparator): Review the
+  project source, setup instructions, and feature documentation.
+- [Open-Meteo Historical Weather API](https://open-meteo.com/en/docs/historical-weather-api):
+  Learn about the historical weather data used by the application.
