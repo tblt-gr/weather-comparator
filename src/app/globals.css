@@ -200,7 +200,7 @@
         position: fixed;
         inset: 0;
         z-index: 60;
-        background: var(--background);
+        background: var(--card);
     }
 
     /* Forced-landscape fallback when the native orientation lock is
@@ -214,7 +214,7 @@
         transform-origin: top left;
         transform: rotate(90deg) translateY(-100vh);
         z-index: 60;
-        background: var(--background);
+        background: var(--card);
     }
 
     @media (max-width: 1023px) {

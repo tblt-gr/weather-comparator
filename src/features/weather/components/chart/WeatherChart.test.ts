@@ -978,4 +978,8 @@ test("defines the fullscreen and forced-landscape chart styles", () => {
 
   assert.equal(source.includes(".chart-fullscreen {"), true);
   assert.equal(source.includes(".chart-fullscreen-rotate {"), true);
+  assert.equal(
+    source.match(/\.chart-fullscreen(?:-rotate)?\s*\{[^}]*background: var\(--card\);/g)?.length,
+    2
+  );
 });
