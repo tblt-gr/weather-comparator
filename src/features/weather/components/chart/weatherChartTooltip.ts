@@ -43,6 +43,29 @@ export function sortTooltipEntries(entries: readonly TooltipEntry[]) {
   });
 }
 
+const TOOLTIP_SERIES_WRAP_AFTER = 8;
+const TOOLTIP_SERIES_MAX_COLUMNS = 3;
+const TOOLTIP_SERIES_MAX_ROWS = 12;
+
+export function getTooltipSeriesLayout(entryCount: number) {
+  const count = Math.max(0, entryCount);
+
+  if (count <= TOOLTIP_SERIES_WRAP_AFTER) {
+    return { columnCount: 1, overflowY: "visible" as const };
+  }
+
+  const columnCount = Math.min(
+    TOOLTIP_SERIES_MAX_COLUMNS,
+    Math.ceil(count / TOOLTIP_SERIES_WRAP_AFTER)
+  );
+  const rowCount = Math.ceil(count / columnCount);
+
+  return {
+    columnCount,
+    overflowY: rowCount > TOOLTIP_SERIES_MAX_ROWS ? ("auto" as const) : ("visible" as const),
+  };
+}
+
 export function getVisibleTooltipEntries(entries: readonly TooltipEntry[]) {
   const numericEntries = entries.filter((entry) => typeof entry.value === "number");
   const currentForecastValuesByDay = new Map<string, number>();

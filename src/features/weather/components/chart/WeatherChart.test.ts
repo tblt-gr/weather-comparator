@@ -35,6 +35,7 @@ import {
   formatExtremeTooltipLabel,
   formatTooltipDate,
   getTooltipExtremeEntries,
+  getTooltipSeriesLayout,
   getTooltipTropicalNightEntries,
   getVisibleTooltipEntries,
   sortTooltipEntries,
@@ -131,6 +132,54 @@ test("hides the current observed bridge point from tooltip entries", () => {
     ]).map((entry) => entry.dataKey),
     ["currentForecast", "minus-1"]
   );
+});
+
+test("keeps a short tooltip series in a single column", () => {
+  assert.deepEqual(getTooltipSeriesLayout(1), {
+    columnCount: 1,
+    overflowY: "visible",
+  });
+  assert.deepEqual(getTooltipSeriesLayout(8), {
+    columnCount: 1,
+    overflowY: "visible",
+  });
+});
+
+test("wraps tooltip series onto extra columns before the list overflows the chart", () => {
+  assert.deepEqual(getTooltipSeriesLayout(9), {
+    columnCount: 2,
+    overflowY: "visible",
+  });
+  assert.deepEqual(getTooltipSeriesLayout(16), {
+    columnCount: 2,
+    overflowY: "visible",
+  });
+  assert.deepEqual(getTooltipSeriesLayout(17), {
+    columnCount: 3,
+    overflowY: "visible",
+  });
+});
+
+test("caps tooltip series at three columns and scrolls when the list is still too tall", () => {
+  assert.deepEqual(getTooltipSeriesLayout(36), {
+    columnCount: 3,
+    overflowY: "visible",
+  });
+  assert.deepEqual(getTooltipSeriesLayout(37), {
+    columnCount: 3,
+    overflowY: "auto",
+  });
+});
+
+test("lays out the chart tooltip series on a wrapping column grid", () => {
+  const source = readFileSync(
+    path.join(process.cwd(), "src/features/weather/components/chart/ChartTooltip.tsx"),
+    "utf8"
+  );
+
+  assert.equal(source.includes("getTooltipSeriesLayout"), true);
+  assert.equal(source.includes("gridTemplateColumns"), true);
+  assert.equal(source.includes("overflow-y-auto"), true);
 });
 
 test("returns active extreme events for the hovered day", () => {
