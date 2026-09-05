@@ -24,11 +24,32 @@ type GeocodingResponse = {
   results?: GeocodingResult[];
 };
 
+export const FORECAST_DAILY_VARIABLES = [
+  "temperature_2m_max",
+  "temperature_2m_min",
+  "weather_code",
+  "precipitation_sum",
+  "precipitation_probability_max",
+  "uv_index_max",
+  "wind_speed_10m_max",
+  "wind_gusts_10m_max",
+  "wind_direction_10m_dominant",
+  "relative_humidity_2m_mean",
+] as const;
+
 export type OpenMeteoArchiveResponse = {
   daily?: {
     time?: string[];
     temperature_2m_max?: (number | null)[];
     temperature_2m_min?: (number | null)[];
+    weather_code?: (number | null)[];
+    precipitation_sum?: (number | null)[];
+    precipitation_probability_max?: (number | null)[];
+    uv_index_max?: (number | null)[];
+    wind_speed_10m_max?: (number | null)[];
+    wind_gusts_10m_max?: (number | null)[];
+    wind_direction_10m_dominant?: (number | null)[];
+    relative_humidity_2m_mean?: (number | null)[];
     is_forecast?: boolean[];
   };
 };
@@ -155,7 +176,7 @@ export async function fetchForecastWeather({
     longitude: String(city.longitude),
     start_date: range.startDate,
     end_date: range.endDate,
-    daily: "temperature_2m_max,temperature_2m_min",
+    daily: FORECAST_DAILY_VARIABLES.join(","),
     timezone: "Europe/Paris",
   });
 

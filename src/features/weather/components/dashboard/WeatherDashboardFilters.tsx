@@ -59,6 +59,7 @@ export function WeatherDashboardFilters({
       aria-label={t["app.filtersAriaLabel"]}
       className="flex flex-col gap-3 rounded-lg border border-border/60 bg-card px-3 py-3 sm:px-4"
     >
+      <h2 className="text-sm font-semibold tracking-tight">{t["filters.title"]}</h2>
       <div className="grid gap-3 lg:grid-cols-[minmax(200px,0.9fr)_minmax(360px,1.5fr)_minmax(180px,0.7fr)_auto] lg:items-end">
         <CitySearch key={city?.id ?? "empty"} city={city} onCityChange={onCityChange} />
         <PeriodPicker period={period} onPeriodChange={onPeriodChange} />

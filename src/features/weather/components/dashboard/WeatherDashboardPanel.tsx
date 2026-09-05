@@ -56,7 +56,11 @@ export function WeatherDashboardPanel({
   const hasData = datasets.length > 0;
 
   return (
-    <section className="max-w-full min-w-0 rounded-lg border border-border/60 bg-card px-3 py-4 sm:px-5 sm:py-5">
+    <section
+      aria-label={t["chart.title"]}
+      className="max-w-full min-w-0 rounded-lg border border-border/60 bg-card px-3 py-4 sm:px-5 sm:py-5"
+    >
+      <h2 className="mb-3 text-sm font-semibold tracking-tight">{t["chart.title"]}</h2>
       <div className="grid min-w-0 gap-5">
         <div className="flex min-w-0 items-start gap-3 lg:justify-between">
           <ClimateSummaryBar

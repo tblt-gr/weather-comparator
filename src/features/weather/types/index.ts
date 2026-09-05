@@ -4,8 +4,13 @@ export type {
   ColdWavePeriod,
   DailyTemperature,
   ExtremeKind,
+  ForecastHorizonDays,
   ForecastModel,
+  ForecastOutlookDay,
   HeatwavePeriod,
   TemperatureMode,
+  UvRiskLevel,
+  WeatherCondition,
+  WeatherConditionKind,
   WeatherYearDataset,
 } from "@/features/weather/types/weather";

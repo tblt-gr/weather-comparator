@@ -7,6 +7,7 @@ import {
   fetchClimateNormalsRange,
   fetchForecastWeather,
   fetchHistoricalWeather,
+  FORECAST_DAILY_VARIABLES,
   searchCities,
 } from "./openMeteo";
 
@@ -251,7 +252,11 @@ test("fetchForecastWeather uses the forecast endpoint and future-only range", as
     assert.equal(url.pathname, "/v1/forecast");
     assert.equal(url.searchParams.get("start_date"), "2025-05-25");
     assert.equal(url.searchParams.get("end_date"), "2025-05-30");
-    assert.equal(url.searchParams.get("daily"), "temperature_2m_max,temperature_2m_min");
+    assert.equal(url.searchParams.get("daily"), FORECAST_DAILY_VARIABLES.join(","));
+    assert.match(url.searchParams.get("daily") ?? "", /weather_code/);
+    assert.match(url.searchParams.get("daily") ?? "", /precipitation_sum/);
+    assert.match(url.searchParams.get("daily") ?? "", /wind_speed_10m_max/);
+    assert.match(url.searchParams.get("daily") ?? "", /relative_humidity_2m_mean/);
     assert.equal(url.searchParams.get("timezone"), "Europe/Paris");
 
     return new Response(JSON.stringify({ daily: { time: [] } }));

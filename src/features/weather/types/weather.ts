@@ -16,6 +16,47 @@ export type ForecastModel =
   | "icon_seamless"
   | "meteofrance_seamless";
 
+export type ForecastHorizonDays = 7 | 15;
+
+export type UvRiskLevel = "low" | "moderate" | "high" | "very_high" | "extreme";
+
+export type WeatherConditionKind =
+  | "clear"
+  | "mainly_clear"
+  | "partly_cloudy"
+  | "overcast"
+  | "fog"
+  | "drizzle"
+  | "freezing_drizzle"
+  | "rain"
+  | "freezing_rain"
+  | "snow"
+  | "snow_grains"
+  | "rain_showers"
+  | "snow_showers"
+  | "thunderstorm"
+  | "thunderstorm_hail"
+  | "unknown";
+
+export type WeatherCondition = {
+  kind: WeatherConditionKind;
+  code: number | null;
+};
+
+export type ForecastOutlookDay = {
+  date: string;
+  condition: WeatherCondition;
+  tmax: number | null;
+  tmin: number | null;
+  precipitationSum: number | null;
+  precipitationProbability: number | null;
+  uvIndex: number | null;
+  windSpeedMax: number | null;
+  windGustsMax: number | null;
+  windDirection: number | null;
+  humidityMean: number | null;
+};
+
 export type DailyTemperature = {
   date: string;
   day: number;

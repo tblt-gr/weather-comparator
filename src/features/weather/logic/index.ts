@@ -24,6 +24,15 @@ export {
   mergeArchiveAndForecastWeather,
 } from "@/features/weather/logic/forecastWeather";
 export {
+  addForecastDays,
+  buildForecastOutlook,
+  formatWindCardinal,
+  getUvRiskLevel,
+  getWeatherCondition,
+  UV_RISK_BANDS,
+  UV_RISK_COLORS,
+} from "@/features/weather/logic/forecastOutlook";
+export {
   getDatePeriodDayCount,
   isValidDatePeriod,
   validateDatePeriod,

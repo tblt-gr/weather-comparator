@@ -82,6 +82,14 @@
     --heat-summary: oklch(0.553 0.195 38.402);
     --cold-summary: oklch(0.5 0.134 242.749);
     --scrollbar-thumb: oklch(0.55 0.03 240 / 45%);
+    --weather-cloud: var(--muted-foreground);
+    --weather-sun: oklch(0.78 0.16 92);
+    --weather-rain: oklch(0.55 0.12 250);
+    --weather-drizzle: oklch(0.62 0.1 235);
+    --weather-snow: oklch(0.78 0.02 240);
+    --weather-ice: oklch(0.62 0.1 210);
+    --weather-bolt: oklch(0.72 0.18 75);
+    --weather-fog: oklch(0.62 0.03 240);
     --radius: 0.5rem;
     --radius-full: 9999px;
     --sidebar: oklch(1 0 0);
@@ -126,6 +134,13 @@
     --heat-summary: oklch(0.75 0.183 55.934);
     --cold-summary: oklch(0.746 0.16 232.661);
     --scrollbar-thumb: oklch(0.85 0.02 240 / 40%);
+    --weather-sun: oklch(0.84 0.15 90);
+    --weather-rain: oklch(0.72 0.1 235);
+    --weather-drizzle: oklch(0.76 0.08 230);
+    --weather-snow: oklch(0.96 0.012 220);
+    --weather-ice: oklch(0.78 0.08 210);
+    --weather-bolt: oklch(0.86 0.16 80);
+    --weather-fog: oklch(0.78 0.03 230);
     --sidebar: oklch(0.185 0.03 260);
     --sidebar-foreground: oklch(0.93 0.018 225);
     --sidebar-primary: oklch(0.74 0.17 190);

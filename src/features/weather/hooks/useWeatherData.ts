@@ -252,6 +252,7 @@ export function useWeatherData({
 
   return {
     data,
+    forecastResponse,
     hasForecastWarning,
     isLoading: data.length === 0 && isLoadingQueries,
     isFetching: queries.some((query) => query.isFetching) || forecastQuery.isFetching,

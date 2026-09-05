@@ -7,6 +7,7 @@ import { WeatherDashboardFilters } from "./WeatherDashboardFilters";
 import { WeatherDashboardHeader } from "./WeatherDashboardHeader";
 import { EmptyState, WeatherDashboardPanel } from "./WeatherDashboardPanel";
 import { palette } from "@/features/weather/components/chart";
+import { ForecastOutlook } from "@/features/weather/components/forecast";
 import { ColdWaveOverlay, HeatwaveOverlay } from "@/features/weather/components/extremes";
 import { useClimateNormals } from "@/features/weather/hooks/useClimateNormals";
 import { useGeolocatedCity } from "@/features/weather/hooks/useGeolocatedCity";
@@ -140,6 +141,13 @@ export function WeatherDashboard({ initialPeriod }: { initialPeriod: DatePeriod 
             temperatureMode={temperatureMode}
           />
         </div>
+        {hasCity ? (
+          <ForecastOutlook
+            period={renderedPeriod}
+            response={weather.forecastResponse}
+            showForecast={showForecast}
+          />
+        ) : null}
         {!hasCity ? (
           <EmptyState message={t["state.selectCity"]} />
         ) : (

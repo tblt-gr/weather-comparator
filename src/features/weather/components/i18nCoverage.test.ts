@@ -18,6 +18,36 @@ test("extreme criteria buttons include the episode name in their accessible labe
   assert.equal(source.includes('.replace("{kind}", t[labelKey])'), true);
 });
 
+test("forecast outlook uses translated weather labels instead of hardcoded french copy", () => {
+  const source = readFileSync(new URL("./forecast/ForecastOutlook.tsx", import.meta.url), "utf8");
+
+  assert.equal(source.includes('t["forecast.outlookTitle"]'), true);
+  assert.equal(source.includes("`weather.${day.condition.kind}`"), true);
+  assert.equal(source.includes("forecast.uv.low"), true);
+  assert.equal(source.includes("forecast.uv.extreme"), true);
+  assert.equal(source.includes('t["forecast.uv.scaleAriaLabel"]'), true);
+  assert.equal(source.includes('t["forecast.uv.scaleTitle"]'), true);
+  assert.equal(source.includes(">Soleil<"), false);
+  assert.equal(source.includes(">Orage<"), false);
+  assert.equal(source.includes(">Faible<"), false);
+});
+
+test("dashboard cards use translated section titles", () => {
+  const filters = readFileSync(
+    new URL("./dashboard/WeatherDashboardFilters.tsx", import.meta.url),
+    "utf8"
+  );
+  const panel = readFileSync(
+    new URL("./dashboard/WeatherDashboardPanel.tsx", import.meta.url),
+    "utf8"
+  );
+
+  assert.equal(filters.includes('t["filters.title"]'), true);
+  assert.equal(panel.includes('t["chart.title"]'), true);
+  assert.equal(filters.includes(">Filtres<"), false);
+  assert.equal(panel.includes(">Graphique<"), false);
+});
+
 test("dashboard loading state does not keep the weather loading label hardcoded in french", () => {
   const source = readFileSync(new URL("./dashboard/WeatherDashboardPanel.tsx", import.meta.url), "utf8");
 
