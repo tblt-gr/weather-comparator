@@ -16,10 +16,11 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: APP_ICON_BACKGROUND,
+          background: "transparent",
         }}
       >
-        <svg aria-hidden="true" height="132" viewBox="0 0 512 512" width="132">
+        <svg aria-hidden="true" height="180" viewBox="0 0 512 512" width="180">
+          <rect width="512" height="512" rx="96" fill={APP_ICON_BACKGROUND} />
           <g
             fill="none"
             stroke={APP_ICON_FOREGROUND}

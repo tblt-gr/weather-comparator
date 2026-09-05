@@ -42,3 +42,12 @@ test("the Apple icon uses the same vector weather mark as the installable icon",
   assert.equal(source.includes("<svg"), true);
   assert.equal(source.includes("☀"), false);
 });
+
+test("the Apple icon uses the same rounded tile as the installable icon", () => {
+  const source = readFileSync(path.join(process.cwd(), "src/app/apple-icon.tsx"), "utf8");
+  const icon = readFileSync(path.join(process.cwd(), "src/app/icon.svg"), "utf8");
+
+  assert.equal(icon.includes('rx="96"'), true);
+  assert.equal(source.includes('rx="96"'), true);
+  assert.equal(source.includes("background: APP_ICON_BACKGROUND"), false);
+});
