@@ -19,14 +19,21 @@ test("extreme criteria buttons include the episode name in their accessible labe
 });
 
 test("forecast outlook uses translated weather labels instead of hardcoded french copy", () => {
-  const source = readFileSync(new URL("./forecast/ForecastOutlook.tsx", import.meta.url), "utf8");
+  const outlook = readFileSync(new URL("./forecast/ForecastOutlook.tsx", import.meta.url), "utf8");
+  const dayCell = readFileSync(new URL("./forecast/ForecastDayCell.tsx", import.meta.url), "utf8");
+  const uvScale = readFileSync(new URL("./forecast/UvScaleInfo.tsx", import.meta.url), "utf8");
+  const format = readFileSync(
+    new URL("./forecast/forecastOutlookFormat.ts", import.meta.url),
+    "utf8"
+  );
+  const source = `${outlook}\n${dayCell}\n${uvScale}\n${format}`;
 
-  assert.equal(source.includes('t["forecast.outlookTitle"]'), true);
-  assert.equal(source.includes("`weather.${day.condition.kind}`"), true);
+  assert.equal(outlook.includes('t["forecast.outlookTitle"]'), true);
+  assert.equal(dayCell.includes("`weather.${day.condition.kind}`"), true);
   assert.equal(source.includes("forecast.uv.low"), true);
   assert.equal(source.includes("forecast.uv.extreme"), true);
-  assert.equal(source.includes('t["forecast.uv.scaleAriaLabel"]'), true);
-  assert.equal(source.includes('t["forecast.uv.scaleTitle"]'), true);
+  assert.equal(uvScale.includes('t["forecast.uv.scaleAriaLabel"]'), true);
+  assert.equal(uvScale.includes('t["forecast.uv.scaleTitle"]'), true);
   assert.equal(source.includes(">Soleil<"), false);
   assert.equal(source.includes(">Orage<"), false);
   assert.equal(source.includes(">Faible<"), false);
