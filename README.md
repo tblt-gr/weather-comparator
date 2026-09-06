@@ -36,6 +36,7 @@ One-page weather analytics app for comparing daily temperatures across years. Se
 - **Multi-year comparison** - reference year plus selectable historical years
 - **Temperature modes** - switch between daily maximum and minimum temperatures
 - **Interactive chart** - Recharts line chart with year visibility toggles
+- **Daily forecast** - 7- or 15-day outlook with condition, temperatures, precipitation, wind, humidity, and UV
 - **Climate normals** - optional 1991-2020 seasonal baseline overlay
 - **Heatwave detection** - automatic highlight of hot periods in visible datasets
 - **Cold-wave overlays** - highlight cold periods across the compared datasets
