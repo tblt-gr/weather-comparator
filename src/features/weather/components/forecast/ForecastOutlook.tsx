@@ -79,7 +79,7 @@ export function ForecastOutlook({ period, response, showForecast }: ForecastOutl
       </div>
 
       <ol
-        className="summary-scroll flex w-full min-w-0 overflow-x-auto overscroll-x-contain"
+        className="summary-scroll relative flex w-full min-w-0 overflow-x-auto overscroll-x-contain [contain:paint]"
         data-fade-end={fade.end ? "true" : undefined}
         data-fade-start={fade.start ? "true" : undefined}
         ref={scrollRef}

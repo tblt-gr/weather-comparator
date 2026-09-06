@@ -397,7 +397,9 @@ export function WeatherChart({
       >
         <div
           className={cn(
-            isFullscreen ? "min-h-0 flex-1 overflow-hidden" : "summary-scroll overflow-x-auto"
+            isFullscreen
+              ? "min-h-0 flex-1 overflow-hidden"
+              : "summary-scroll relative overflow-x-auto [contain:paint]"
           )}
           data-fade-end={!isFullscreen && scrollFade.end ? "true" : undefined}
           data-fade-start={!isFullscreen && scrollFade.start ? "true" : undefined}

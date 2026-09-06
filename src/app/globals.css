@@ -232,6 +232,13 @@
         background: var(--card);
     }
 
+    /* Flex rows with overflow-x-auto still expand the root scrollport
+       unless they establish paint containment. */
+    .summary-scroll {
+        position: relative;
+        contain: paint;
+    }
+
     @media (max-width: 1023px) {
         .summary-scroll {
             --fade-start: 0px;

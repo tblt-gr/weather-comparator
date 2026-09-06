@@ -112,8 +112,8 @@ export function WeatherDashboard({ initialPeriod }: { initialPeriod: DatePeriod 
   const hasCity = city !== null;
 
   return (
-    <main id="main-content" className="app-ambient min-h-screen text-foreground">
-      <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
+    <main id="main-content" className="app-ambient min-h-screen min-w-0 text-foreground">
+      <div className="mx-auto flex w-full min-w-0 max-w-[1600px] flex-col gap-5 px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
         <WeatherDashboardHeader
           city={city}
           filtersOpen={filtersOpen}

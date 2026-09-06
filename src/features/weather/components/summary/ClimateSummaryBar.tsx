@@ -73,7 +73,7 @@ export function ClimateSummaryBar({
   return (
     <div
       ref={scrollRef}
-      className="summary-scroll -mb-1 flex min-w-0 flex-1 overflow-x-auto pb-1 lg:mb-0 lg:grid lg:grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] lg:gap-y-4 lg:overflow-x-visible lg:pb-0"
+      className="summary-scroll relative -mb-1 flex min-w-0 flex-1 overflow-x-auto pb-1 [contain:paint] lg:mb-0 lg:grid lg:grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] lg:gap-y-4 lg:overflow-x-visible lg:pb-0"
       data-fade-end={fade.end ? "true" : undefined}
       data-fade-start={fade.start ? "true" : undefined}
     >
