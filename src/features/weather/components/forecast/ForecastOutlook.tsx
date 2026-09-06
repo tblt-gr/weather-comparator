@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { OpenMeteoArchiveResponse } from "@/features/weather/api/openMeteo";
 import { addForecastDays, buildForecastOutlook } from "@/features/weather/logic/forecastOutlook";
@@ -31,6 +31,33 @@ export function ForecastOutlook({ period, response, showForecast }: ForecastOutl
   const days7 = days15.filter((day) => day.date <= addForecastDays(today, 6));
   const days = horizonDays === 15 ? days15 : days7;
   const showHorizonToggle = days15.length > days7.length;
+  const scrollRef = useRef<HTMLOListElement | null>(null);
+  const [fade, setFade] = useState({ start: false, end: false });
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) {
+      return;
+    }
+
+    const update = () => {
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      setFade({
+        start: el.scrollLeft > 1,
+        end: el.scrollLeft < maxScroll - 1,
+      });
+    };
+
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    const resizeObserver = new ResizeObserver(update);
+    resizeObserver.observe(el);
+
+    return () => {
+      el.removeEventListener("scroll", update);
+      resizeObserver.disconnect();
+    };
+  }, [days.length, showForecast]);
 
   if (!showForecast || days.length === 0) {
     return null;
@@ -51,7 +78,12 @@ export function ForecastOutlook({ period, response, showForecast }: ForecastOutl
         ) : null}
       </div>
 
-      <ol className="summary-scroll grid min-w-0 grid-flow-col overflow-x-auto [grid-auto-columns:calc(100%/7)]">
+      <ol
+        className="summary-scroll flex w-full min-w-0 overflow-x-auto overscroll-x-contain"
+        data-fade-end={fade.end ? "true" : undefined}
+        data-fade-start={fade.start ? "true" : undefined}
+        ref={scrollRef}
+      >
         {days.map((day) => (
           <ForecastDayCell day={day} key={day.date} locale={locale} t={t} today={today} />
         ))}

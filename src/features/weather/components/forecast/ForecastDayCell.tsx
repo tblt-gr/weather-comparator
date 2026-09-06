@@ -26,7 +26,7 @@ export function ForecastDayCell({ day, locale, t, today }: ForecastDayCellProps)
 
   return (
     <li
-      className={`flex min-w-0 flex-col gap-1.5 border-r border-border/50 px-2 py-1 last:border-r-0 ${
+      className={`flex w-[calc(100%/7)] min-w-[8.5rem] shrink-0 flex-col gap-1.5 border-r border-border/50 px-2 py-1 last:border-r-0 ${
         isToday ? "bg-muted/40" : ""
       }`}
     >

@@ -26,7 +26,8 @@ One-page weather analytics app for comparing daily temperatures across years. Se
 ## Screenshots
 
 <p align="center">
-  <img src=".github/assets/screenshots/main.png" width="100%" alt="Weather comparison dashboard screenshot">
+  <img src=".github/assets/screenshots/main.png" width="48%" alt="Weather comparison chart for Paris">
+  <img src=".github/assets/screenshots/forecast.png" width="48%" alt="Daily forecast outlook above the comparison chart">
 </p>
 
 ## Features
