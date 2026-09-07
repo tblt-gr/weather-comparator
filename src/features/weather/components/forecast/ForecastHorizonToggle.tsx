@@ -5,14 +5,14 @@ import type { ForecastHorizonDays } from "@/features/weather/types";
 import type { Translations } from "@/lib/i18n/types";
 
 type ForecastHorizonToggleProps = {
-  availableDays: number;
+  hasExtendedForecast: boolean;
   horizonDays: ForecastHorizonDays;
   onHorizonChange: (horizonDays: ForecastHorizonDays) => void;
   t: Translations;
 };
 
 export function ForecastHorizonToggle({
-  availableDays,
+  hasExtendedForecast,
   horizonDays,
   onHorizonChange,
   t,
@@ -24,14 +24,14 @@ export function ForecastHorizonToggle({
       role="group"
     >
       <HorizonButton
-        active={horizonDays === 7 && availableDays >= 7}
-        disabled={availableDays < 7}
+        active={horizonDays === 7}
+        disabled={false}
         label={t["forecast.horizon7"]}
         onSelect={() => onHorizonChange(7)}
       />
       <HorizonButton
-        active={horizonDays === 15 && availableDays >= 15}
-        disabled={availableDays < 15}
+        active={horizonDays === 15 && hasExtendedForecast}
+        disabled={!hasExtendedForecast}
         label={t["forecast.horizon15"]}
         onSelect={() => onHorizonChange(15)}
       />

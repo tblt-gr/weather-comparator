@@ -7,12 +7,12 @@ import { getTranslations } from "@/lib/i18n/getTranslations";
 
 import { ForecastHorizonToggle } from "./ForecastHorizonToggle";
 
-for (const availableDays of [3, 6, 7, 10, 14, 15]) {
+for (const hasExtendedForecast of [false, true]) {
   for (const horizonDays of [7, 15] satisfies ForecastHorizonDays[]) {
-    test(`${availableDays} available days with ${horizonDays} selected disables unsupported horizons`, () => {
+    test(`${hasExtendedForecast ? "extended" : "short"} forecast with ${horizonDays} selected disables unsupported horizons`, () => {
       const markup = renderToStaticMarkup(
         <ForecastHorizonToggle
-          availableDays={availableDays}
+          hasExtendedForecast={hasExtendedForecast}
           horizonDays={horizonDays}
           onHorizonChange={() => {}}
           t={getTranslations("fr")}
@@ -21,15 +21,19 @@ for (const availableDays of [3, 6, 7, 10, 14, 15]) {
       const buttons = [...markup.matchAll(/<button\b([^>]*)>/g)];
 
       assert.equal(buttons.length, 2);
-      for (const [index, horizon] of [7, 15].entries()) {
-        const attributes = buttons[index][1];
-        const disabled = availableDays < horizon;
-        assert.equal(attributes.includes('disabled=""'), disabled);
-        assert.equal(
-          attributes.includes('aria-pressed="true"'),
-          !disabled && horizonDays === horizon
-        );
-      }
+      const sevenDayAttributes = buttons[0][1];
+      const fifteenDayAttributes = buttons[1][1];
+
+      assert.equal(sevenDayAttributes.includes('disabled=""'), false);
+      assert.equal(
+        sevenDayAttributes.includes('aria-pressed="true"'),
+        horizonDays === 7
+      );
+      assert.equal(fifteenDayAttributes.includes('disabled=""'), !hasExtendedForecast);
+      assert.equal(
+        fifteenDayAttributes.includes('aria-pressed="true"'),
+        hasExtendedForecast && horizonDays === 15
+      );
     });
   }
 }
