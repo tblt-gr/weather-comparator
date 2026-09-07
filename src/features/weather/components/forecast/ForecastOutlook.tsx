@@ -29,8 +29,8 @@ export function ForecastOutlook({ period, response, showForecast }: ForecastOutl
     [period, response, today]
   );
   const days7 = days15.filter((day) => day.date <= addForecastDays(today, 6));
-  const days = horizonDays === 15 ? days15 : days7;
-  const showHorizonToggle = days15.length > days7.length;
+  const availableHorizonDays = horizonDays === 15 && days15.length >= 15 ? 15 : 7;
+  const days = availableHorizonDays === 15 ? days15 : days7;
   const scrollRef = useRef<HTMLOListElement | null>(null);
   const [fade, setFade] = useState({ start: false, end: false });
 
@@ -73,9 +73,12 @@ export function ForecastOutlook({ period, response, showForecast }: ForecastOutl
           <h2 className="text-sm font-semibold tracking-tight">{t["forecast.outlookTitle"]}</h2>
           <UvScaleInfo t={t} />
         </div>
-        {showHorizonToggle ? (
-          <ForecastHorizonToggle horizonDays={horizonDays} onHorizonChange={setHorizonDays} t={t} />
-        ) : null}
+        <ForecastHorizonToggle
+          availableDays={days15.length}
+          horizonDays={availableHorizonDays}
+          onHorizonChange={setHorizonDays}
+          t={t}
+        />
       </div>
 
       <ol

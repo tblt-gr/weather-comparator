@@ -1,4 +1,7 @@
-import type { OpenMeteoArchiveResponse } from "@/features/weather/api/openMeteo";
+import {
+  FORECAST_DAILY_VARIABLES,
+  type OpenMeteoArchiveResponse,
+} from "@/features/weather/api/openMeteo";
 import type { DatePeriod } from "@/features/weather/logic/dates";
 import type {
   ForecastHorizonDays,
@@ -133,6 +136,10 @@ export function buildForecastOutlook({
 
   return dates.flatMap((date, index) => {
     if (date < startDate || date > endDate) {
+      return [];
+    }
+
+    if (!FORECAST_DAILY_VARIABLES.some((variable) => Number.isFinite(daily[variable]?.[index]))) {
       return [];
     }
 

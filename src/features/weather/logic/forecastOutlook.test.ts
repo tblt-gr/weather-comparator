@@ -4,11 +4,55 @@ import test from "node:test";
 import type { OpenMeteoArchiveResponse } from "@/features/weather/api/openMeteo";
 
 import {
+  addForecastDays,
   buildForecastOutlook,
   formatWindCardinal,
   getUvRiskLevel,
   getWeatherCondition,
 } from "./forecastOutlook";
+
+for (const availableDays of [0, 3, 7, 10, 14, 15]) {
+  test(`buildForecastOutlook omits empty dates after ${availableDays} forecast days`, () => {
+    const today = "2026-09-05";
+    const time = Array.from({ length: 15 }, (_, index) => addForecastDays(today, index));
+    const days = buildForecastOutlook({
+      response: {
+        daily: {
+          time,
+          temperature_2m_max: time.map((_, index) => (index < availableDays ? 20 : null)),
+          temperature_2m_min: time.map((_, index) => (index < availableDays ? 10 : null)),
+          weather_code: time.map((_, index) => (index < availableDays ? 0 : null)),
+        },
+      },
+      period: { startDate: today, endDate: time[14] },
+      today,
+      horizonDays: 15,
+    });
+
+    assert.deepEqual(days.map((day) => day.date), time.slice(0, availableDays));
+  });
+}
+
+test("buildForecastOutlook keeps partial forecasts and zero values, but drops missing values", () => {
+  const days = buildForecastOutlook({
+    response: {
+      daily: {
+        time: ["2026-09-05", "2026-09-06", "2026-09-07", "2026-09-08", "2026-09-09"],
+        temperature_2m_max: [0, null, null, Number.NaN],
+        weather_code: [null, 0],
+        precipitation_sum: [null, null, 0],
+      },
+    },
+    period: { startDate: "2026-09-05", endDate: "2026-09-19" },
+    today: "2026-09-05",
+    horizonDays: 15,
+  });
+
+  assert.deepEqual(days.map((day) => day.date), ["2026-09-05", "2026-09-06", "2026-09-07"]);
+  assert.equal(days[0].tmax, 0);
+  assert.equal(days[1].condition.kind, "clear");
+  assert.equal(days[2].precipitationSum, 0);
+});
 
 test("getWeatherCondition maps WMO codes to the matching weather kind", () => {
   assert.equal(getWeatherCondition(0).kind, "clear");
