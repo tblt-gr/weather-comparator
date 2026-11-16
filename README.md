@@ -3,10 +3,10 @@
 
 <p align="center">
 <a href="https://github.com/tblt-gr/weather-comparator/actions/workflows/ci.yaml"><img src="https://github.com/tblt-gr/weather-comparator/actions/workflows/ci.yaml/badge.svg?branch=main" alt="CI"></a>
-<a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white" alt="Next.js 16"></a>
-<a href="https://react.dev/"><img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=111111" alt="React 19"></a>
-<a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" alt="TypeScript 5"></a>
-<a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4"></a>
+<a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-16.4-000000?logo=nextdotjs&logoColor=white" alt="Next.js 16.4"></a>
+<a href="https://react.dev/"><img src="https://img.shields.io/badge/React-19.3-61DAFB?logo=react&logoColor=111111" alt="React 19.3"></a>
+<a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white" alt="TypeScript 6.0"></a>
+<a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind_CSS-4.3-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4.3"></a>
 <a href="https://open-meteo.com/"><img src="https://img.shields.io/badge/Open--Meteo-API-2563EB?logoColor=white" alt="Open-Meteo API"></a>
 </p>
 
@@ -53,16 +53,18 @@ One-page weather analytics app for comparing daily temperatures across years. Se
 
 | Layer      | Technology                                           |
 | ---------- | ---------------------------------------------------- |
-| Framework  | Next.js 16.2 (App Router)                            |
-| Language   | TypeScript 5.9                                       |
-| UI         | React 19.2, Tailwind CSS 4.3, shadcn/ui, Radix UI    |
-| Charts     | Recharts 3.8                                         |
+| Framework  | Next.js 16.4 (App Router)                            |
+| Language   | TypeScript 6.0                                       |
+| UI         | React 19.3, Tailwind CSS 4.3, shadcn/ui, Radix UI    |
+| Charts     | Recharts 3.10                                        |
 | Data       | TanStack Query 5, Open-Meteo APIs                    |
 | State      | Zustand 5, localStorage persistence                  |
 | Export     | html-to-image, PapaParse                             |
-| Tooling    | pnpm 10, ESLint 9, Prettier 3                        |
+| Tooling    | pnpm 11, ESLint 9, Prettier 3                        |
 
 ## Quick Start
+
+Use Node.js 24 LTS and pnpm 11, as in CI.
 
 ```bash
 pnpm install
